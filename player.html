@@ -1,0 +1,977 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta charset="UTF-8">
+  <title>Color Chase - Your Collection</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; }
+    
+    body {
+      margin: 0;
+      font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f0f23 100%);
+      color: #fff;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    
+    nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      width: 100%;
+      padding: 15px 25px;
+      background: rgba(0, 0, 0, 0.2);
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    
+    nav .header-button {
+      width: 44px;
+      height: 44px;
+      background: rgba(255, 255, 255, 0.1);
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.2s ease, transform 0.2s ease;
+    }
+    
+    nav .header-button:hover {
+      background: rgba(255, 255, 255, 0.2);
+      transform: scale(1.05);
+    }
+    
+    nav .header-button svg {
+      width: 22px;
+      height: 22px;
+    }
+    
+    nav #player-name {
+      font-size: 1.5em;
+      font-weight: 700;
+      text-align: center;
+      cursor: pointer;
+      padding: 8px 16px;
+      border-radius: 8px;
+      transition: background 0.2s ease;
+    }
+    
+    nav #player-name:hover {
+      background: rgba(255, 255, 255, 0.1);
+    }
+    
+    .stats-bar {
+      display: flex;
+      justify-content: center;
+      gap: 30px;
+      padding: 15px 20px;
+      background: rgba(0, 0, 0, 0.1);
+      flex-wrap: wrap;
+    }
+    
+    .stat {
+      text-align: center;
+    }
+    
+    .stat-value {
+      font-size: 1.8em;
+      font-weight: 700;
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    
+    .stat-label {
+      font-size: 0.85em;
+      color: #a0a0c0;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+    
+    .filter-bar {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 15px;
+      padding: 15px 20px;
+      flex-wrap: wrap;
+    }
+    
+    .filter-btn {
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      color: #a0a0c0;
+      padding: 10px 20px;
+      border-radius: 25px;
+      font-size: 0.9em;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .filter-btn:hover {
+      background: rgba(255, 255, 255, 0.15);
+      color: #fff;
+    }
+    
+    .filter-btn.active {
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      border-color: transparent;
+      color: #fff;
+    }
+    
+    .filter-btn svg {
+      width: 16px;
+      height: 16px;
+    }
+    
+    #palette-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+      gap: 20px;
+      padding: 20px;
+      flex: 1;
+      overflow-y: auto;
+      align-content: start;
+    }
+    
+    .palette-card {
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 16px;
+      overflow: hidden;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    
+    .palette-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    }
+    
+    .palette-colors {
+      display: flex;
+      height: 100px;
+    }
+    
+    .palette-colors .swatch {
+      flex: 1;
+      position: relative;
+      cursor: pointer;
+      transition: flex 0.2s ease;
+    }
+    
+    .palette-colors .swatch:hover {
+      flex: 1.3;
+    }
+    
+    .palette-colors .swatch .hex-tooltip {
+      position: absolute;
+      bottom: 8px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(0, 0, 0, 0.8);
+      color: #fff;
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 0.7em;
+      font-family: monospace;
+      opacity: 0;
+      transition: opacity 0.2s ease;
+      pointer-events: none;
+      white-space: nowrap;
+    }
+    
+    .palette-colors .swatch:hover .hex-tooltip {
+      opacity: 1;
+    }
+    
+    .palette-info {
+      padding: 15px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    .palette-date {
+      color: #a0a0c0;
+      font-size: 0.9em;
+    }
+    
+    .palette-scheme {
+      color: #667eea;
+      font-size: 0.8em;
+      text-transform: capitalize;
+    }
+    
+    .palette-actions {
+      display: flex;
+      gap: 10px;
+    }
+    
+    .action-btn {
+      background: rgba(255, 255, 255, 0.1);
+      border: none;
+      width: 36px;
+      height: 36px;
+      border-radius: 8px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.2s ease, transform 0.2s ease;
+    }
+    
+    .action-btn:hover {
+      background: rgba(255, 255, 255, 0.2);
+      transform: scale(1.1);
+    }
+    
+    .action-btn svg {
+      width: 18px;
+      height: 18px;
+    }
+    
+    .action-btn.favorite svg {
+      fill: none;
+      stroke: white;
+      stroke-width: 2;
+    }
+    
+    .action-btn.favorite.favorited svg {
+      fill: #ffd700;
+      stroke: #ffd700;
+    }
+    
+    .hex-codes {
+      display: flex;
+      gap: 4px;
+      padding: 0 12px 12px;
+      flex-wrap: nowrap;
+      justify-content: space-between;
+    }
+    
+    .hex-code {
+      font-family: monospace;
+      font-size: 0.65em;
+      background: rgba(0, 0, 0, 0.3);
+      padding: 4px 6px;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: background 0.2s ease;
+      white-space: nowrap;
+    }
+    
+    .hex-code:hover {
+      background: rgba(102, 126, 234, 0.3);
+    }
+    
+    .hex-code.copied {
+      background: rgba(74, 222, 128, 0.3);
+    }
+    
+    #profile-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.85);
+      backdrop-filter: blur(8px);
+      display: none;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      z-index: 10;
+    }
+    
+    .profile-content {
+      background: linear-gradient(135deg, #1e1e2e, #2a2a40);
+      padding: 30px;
+      border-radius: 20px;
+      max-width: 380px;
+      width: 90%;
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    
+    .profile-content h2 {
+      margin: 0 0 10px;
+      background: linear-gradient(135deg, #ffd700, #ffaa00);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      text-align: center;
+    }
+    
+    .profile-content input {
+      padding: 14px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 10px;
+      font-size: 1em;
+      background: rgba(255, 255, 255, 0.05);
+      color: #fff;
+      outline: none;
+      transition: border-color 0.2s ease;
+    }
+    
+    .profile-content input:focus {
+      border-color: #667eea;
+    }
+    
+    .profile-stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      text-align: center;
+      padding: 15px 0;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    
+    .profile-stat-value {
+      font-size: 1.5em;
+      font-weight: 700;
+      color: #667eea;
+    }
+    
+    .profile-stat-label {
+      font-size: 0.75em;
+      color: #a0a0c0;
+      text-transform: uppercase;
+    }
+    
+    .profile-actions {
+      display: flex;
+      gap: 10px;
+    }
+    
+    .profile-content button {
+      flex: 1;
+      padding: 12px;
+      border: none;
+      border-radius: 10px;
+      font-size: 1em;
+      font-weight: 600;
+      cursor: pointer;
+      transition: transform 0.2s ease;
+    }
+    
+    .profile-content button:hover {
+      transform: translateY(-2px);
+    }
+    
+    #save-profile {
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      color: #fff;
+    }
+    
+    #close-profile {
+      background: rgba(255, 255, 255, 0.1);
+      color: #a0a0c0;
+    }
+    
+    .empty-state {
+      text-align: center;
+      padding: 60px 20px;
+      color: #a0a0c0;
+    }
+    
+    .empty-state h3 {
+      font-size: 1.5em;
+      margin-bottom: 10px;
+      color: #fff;
+    }
+    
+    .empty-state p {
+      max-width: 300px;
+      margin: 0 auto;
+      line-height: 1.6;
+    }
+    
+    .toast {
+      position: fixed;
+      bottom: 80px;
+      left: 50%;
+      transform: translateX(-50%) translateY(100px);
+      background: rgba(74, 222, 128, 0.9);
+      color: #000;
+      padding: 12px 24px;
+      border-radius: 8px;
+      font-weight: 600;
+      opacity: 0;
+      transition: all 0.3s ease;
+      z-index: 100;
+    }
+    
+    .toast.show {
+      transform: translateX(-50%) translateY(0);
+      opacity: 1;
+    }
+    
+    #theory-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.85);
+      backdrop-filter: blur(8px);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 100;
+    }
+
+    .theory-content {
+      background: linear-gradient(135deg, #1e1e2e, #2a2a40);
+      padding: 30px;
+      border-radius: 20px;
+      max-width: 450px;
+      width: 90%;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .theory-content h2 {
+      margin: 0 0 15px;
+      text-transform: capitalize;
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .theory-content p {
+      color: #a0a0c0;
+      line-height: 1.7;
+      margin: 0 0 20px;
+    }
+
+    .theory-content button {
+      width: 100%;
+      padding: 12px;
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      border: none;
+      border-radius: 10px;
+      color: #fff;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    
+    @media (max-width: 768px) {
+      nav #player-name {
+        font-size: 1.2em;
+      }
+      
+      .stats-bar {
+        gap: 20px;
+      }
+      
+      .stat-value {
+        font-size: 1.5em;
+      }
+      
+      #palette-grid {
+        grid-template-columns: 1fr;
+        padding: 15px;
+      }
+      
+      .palette-colors {
+        height: 80px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <nav>
+    <button class="header-button" id="back-home" aria-label="Back to game">
+      <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+        <polyline points="9 22 9 12 15 12 15 22"/>
+      </svg>
+    </button>
+    <h1 id="player-name">My Collection</h1>
+    <button class="header-button" id="logout-button" aria-label="Log out">
+      <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+        <polyline points="16 17 21 12 16 7"/>
+        <line x1="21" y1="12" x2="9" y2="12"/>
+      </svg>
+    </button>
+  </nav>
+  
+  <div class="stats-bar">
+    <div class="stat">
+      <div class="stat-value" id="streak-count">0</div>
+      <div class="stat-label">Current Streak</div>
+    </div>
+    <div class="stat">
+      <div class="stat-value" id="palettes-count">0</div>
+      <div class="stat-label">Palettes</div>
+    </div>
+    <div class="stat">
+      <div class="stat-value" id="longest-streak">0</div>
+      <div class="stat-label">Best Streak</div>
+    </div>
+  </div>
+  
+  <div class="filter-bar">
+    <button class="filter-btn active" id="filter-all">
+      All Palettes
+    </button>
+    <button class="filter-btn" id="filter-favorites">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+      </svg>
+      Favorites
+    </button>
+  </div>
+  
+  <div id="palette-grid"></div>
+  
+  <div id="profile-overlay">
+    <div class="profile-content">
+      <h2>Edit Profile</h2>
+      <input type="text" id="profile-player-name" placeholder="Display name (optional)" />
+      <div class="profile-stats">
+        <div>
+          <div class="profile-stat-value" id="profile-longest-streak">0</div>
+          <div class="profile-stat-label">Best Streak</div>
+        </div>
+        <div>
+          <div class="profile-stat-value" id="profile-palettes">0</div>
+          <div class="profile-stat-label">Palettes</div>
+        </div>
+        <div>
+          <div class="profile-stat-value" id="profile-games-won">0</div>
+          <div class="profile-stat-label">Games Won</div>
+        </div>
+      </div>
+      <div class="profile-actions">
+        <button id="close-profile">Cancel</button>
+        <button id="save-profile">Save</button>
+      </div>
+    </div>
+  </div>
+  
+  <div class="toast" id="toast">Copied to clipboard!</div>
+
+  <div id="theory-overlay">
+    <div class="theory-content">
+      <h2 id="theory-title">Color Theory</h2>
+      <p id="theory-description"></p>
+      <button id="close-theory">Got It!</button>
+    </div>
+  </div>
+
+  <script>
+    const paletteGrid = document.getElementById("palette-grid");
+    const filterAllBtn = document.getElementById("filter-all");
+    const filterFavoritesBtn = document.getElementById("filter-favorites");
+    const backHomeBtn = document.getElementById("back-home");
+    const logoutButton = document.getElementById("logout-button");
+    const playerName = document.getElementById("player-name");
+    const profileOverlay = document.getElementById("profile-overlay");
+    const profilePlayerName = document.getElementById("profile-player-name");
+    const saveProfileBtn = document.getElementById("save-profile");
+    const closeProfileBtn = document.getElementById("close-profile");
+    const toast = document.getElementById("toast");
+    
+    let showingFavorites = false;
+    let allPalettes = [];
+    let userEmail = "";
+
+    const colorTheory = {
+      "complementary": {
+        title: "Complementary",
+        description: "Complementary colors sit directly opposite each other on the color wheel. This creates maximum contrast and visual tension, making each color appear more vibrant. Think of red and green, or blue and orange. This palette uses two opposite colors as anchors, with supporting colors to balance the composition."
+      },
+      "triadic": {
+        title: "Triadic", 
+        description: "Triadic harmony uses three colors equally spaced around the color wheel, forming a triangle. This creates a vibrant, balanced palette with strong visual contrast while maintaining color harmony. Each color is 120 degrees apart, ensuring variety without clashing."
+      },
+      "analogous": {
+        title: "Analogous",
+        description: "Analogous colors are neighbors on the color wheel, sitting side by side. This creates a serene, comfortable palette that's pleasing to the eye. Found often in nature, like autumn leaves or ocean sunsets, these colors blend smoothly and create a cohesive, unified feel."
+      },
+      "split-complementary": {
+        title: "Split-Complementary",
+        description: "A variation of complementary colors: instead of using the direct opposite, this scheme uses the two colors adjacent to the complement. This provides high contrast like complementary colors, but with less tension and more nuance. It's easier to balance while still being visually striking."
+      },
+      "tetradic": {
+        title: "Tetradic",
+        description: "Also called rectangular or double-complementary, tetradic harmony uses four colors arranged into two complementary pairs. This rich palette offers the most variety but requires careful balance. The colors form a rectangle on the wheel, creating dynamic tension and visual interest."
+      }
+    };
+
+    function showTheory(scheme) {
+      const theory = colorTheory[scheme] || { title: scheme, description: "A beautiful color combination." };
+      document.getElementById("theory-title").textContent = theory.title;
+      document.getElementById("theory-description").textContent = theory.description;
+      document.getElementById("theory-overlay").style.display = "flex";
+    }
+
+    async function checkAuth() {
+      try {
+        const response = await fetch('/api/auth/status');
+        const data = await response.json();
+        if (!data.loggedIn) {
+          window.location.href = "index.html";
+          return false;
+        }
+        userEmail = data.email;
+        loadProfile();
+        fetchPalettes();
+        return true;
+      } catch (e) {
+        window.location.href = "index.html";
+        return false;
+      }
+    }
+
+    async function loadProfile() {
+      try {
+        const response = await fetch('/api/profile');
+        const data = await response.json();
+        const displayName = data.playerName || userEmail.split("@")[0];
+        playerName.textContent = displayName;
+        profilePlayerName.value = data.playerName || "";
+      } catch (e) {
+        playerName.textContent = userEmail.split("@")[0];
+      }
+    }
+
+    async function fetchPalettes() {
+      try {
+        const response = await fetch('/api/palettes');
+        if (response.status === 401) {
+          window.location.href = "index.html";
+          return;
+        }
+        allPalettes = await response.json();
+        renderPalettes(allPalettes);
+        updateStats(allPalettes);
+        updateProfileStats(allPalettes);
+      } catch (e) {
+        console.error("Error fetching palettes:", e);
+        renderEmptyState();
+      }
+    }
+
+    function updateStats(palettes) {
+      document.getElementById("palettes-count").textContent = palettes.length;
+      
+      if (palettes.length === 0) {
+        document.getElementById("streak-count").textContent = 0;
+        document.getElementById("longest-streak").textContent = 0;
+        return;
+      }
+      
+      const sortedPalettes = [...palettes].sort((a, b) => new Date(a.date) - new Date(b.date));
+      let currentStreak = 0;
+      let longestStreak = 0;
+      
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      
+      for (let i = sortedPalettes.length - 1; i >= 0; i--) {
+        const paletteDate = new Date(sortedPalettes[i].date);
+        paletteDate.setHours(0, 0, 0, 0);
+        
+        if (i === sortedPalettes.length - 1) {
+          const daysDiff = Math.floor((today - paletteDate) / (1000 * 60 * 60 * 24));
+          if (daysDiff <= 1) {
+            currentStreak = 1;
+          }
+        } else if (currentStreak > 0) {
+          const prevDate = new Date(sortedPalettes[i + 1].date);
+          prevDate.setHours(0, 0, 0, 0);
+          const daysDiff = Math.floor((prevDate - paletteDate) / (1000 * 60 * 60 * 24));
+          if (daysDiff === 1) {
+            currentStreak++;
+          } else {
+            break;
+          }
+        }
+      }
+      
+      let tempStreak = 0;
+      for (let i = 0; i < sortedPalettes.length; i++) {
+        if (i === 0) {
+          tempStreak = 1;
+        } else {
+          const curr = new Date(sortedPalettes[i].date);
+          const prev = new Date(sortedPalettes[i - 1].date);
+          curr.setHours(0, 0, 0, 0);
+          prev.setHours(0, 0, 0, 0);
+          const daysDiff = Math.floor((curr - prev) / (1000 * 60 * 60 * 24));
+          tempStreak = daysDiff === 1 ? tempStreak + 1 : 1;
+        }
+        longestStreak = Math.max(longestStreak, tempStreak);
+      }
+      
+      document.getElementById("streak-count").textContent = currentStreak;
+      document.getElementById("longest-streak").textContent = longestStreak;
+    }
+
+    function updateProfileStats(palettes) {
+      const sortedPalettes = [...palettes].sort((a, b) => new Date(a.date) - new Date(b.date));
+      let longestStreak = 0;
+      let tempStreak = 0;
+      let gamesWon = 0;
+      
+      for (let i = 0; i < sortedPalettes.length; i++) {
+        if (i === 0) {
+          tempStreak = 1;
+        } else {
+          const curr = new Date(sortedPalettes[i].date);
+          const prev = new Date(sortedPalettes[i - 1].date);
+          curr.setHours(0, 0, 0, 0);
+          prev.setHours(0, 0, 0, 0);
+          const daysDiff = Math.floor((curr - prev) / (1000 * 60 * 60 * 24));
+          tempStreak = daysDiff === 1 ? tempStreak + 1 : 1;
+        }
+        longestStreak = Math.max(longestStreak, tempStreak);
+        if (sortedPalettes[i].won) gamesWon++;
+      }
+      
+      document.getElementById("profile-longest-streak").textContent = longestStreak;
+      document.getElementById("profile-palettes").textContent = palettes.length;
+      document.getElementById("profile-games-won").textContent = gamesWon;
+    }
+
+    function renderEmptyState() {
+      paletteGrid.innerHTML = `
+        <div class="empty-state">
+          <h3>No palettes yet!</h3>
+          <p>Play Color Chase to start collecting beautiful color palettes.</p>
+        </div>
+      `;
+    }
+
+    function renderPalettes(palettes) {
+      const filtered = showingFavorites ? palettes.filter(p => p.isFavorite) : palettes;
+      
+      if (filtered.length === 0) {
+        if (showingFavorites) {
+          paletteGrid.innerHTML = `
+            <div class="empty-state">
+              <h3>No favorites yet!</h3>
+              <p>Star your favorite palettes to see them here.</p>
+            </div>
+          `;
+        } else {
+          renderEmptyState();
+        }
+        return;
+      }
+      
+      paletteGrid.innerHTML = "";
+      
+      filtered.forEach(palette => {
+        const card = document.createElement("div");
+        card.className = "palette-card";
+        
+        const colorsDiv = document.createElement("div");
+        colorsDiv.className = "palette-colors";
+        palette.colors.forEach(color => {
+          const swatch = document.createElement("div");
+          swatch.className = "swatch";
+          swatch.style.backgroundColor = color;
+          swatch.innerHTML = `<span class="hex-tooltip">${color}</span>`;
+          swatch.addEventListener("click", () => copyToClipboard(color));
+          colorsDiv.appendChild(swatch);
+        });
+        
+        const infoDiv = document.createElement("div");
+        infoDiv.className = "palette-info";
+        
+        const dateText = document.createElement("div");
+        const dateObj = new Date(palette.date + 'T12:00:00');
+        dateText.className = "palette-date";
+        dateText.innerHTML = `<span>${dateObj.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</span>
+          <span class="palette-scheme">${palette.scheme || ''}</span>`;
+        
+        const actionsDiv = document.createElement("div");
+        actionsDiv.className = "palette-actions";
+        
+        const infoBtn = document.createElement("button");
+        infoBtn.className = "action-btn";
+        infoBtn.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>`;
+        infoBtn.addEventListener("click", () => showTheory(palette.scheme));
+        
+        const downloadBtn = document.createElement("button");
+        downloadBtn.className = "action-btn";
+        downloadBtn.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>`;
+        downloadBtn.addEventListener("click", () => downloadSVG(palette));
+        
+        const favoriteBtn = document.createElement("button");
+        favoriteBtn.className = `action-btn favorite ${palette.isFavorite ? 'favorited' : ''}`;
+        favoriteBtn.innerHTML = `<svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>`;
+        favoriteBtn.addEventListener("click", () => toggleFavorite(palette.date, favoriteBtn));
+        
+        actionsDiv.appendChild(infoBtn);
+        actionsDiv.appendChild(downloadBtn);
+        actionsDiv.appendChild(favoriteBtn);
+        
+        infoDiv.appendChild(dateText);
+        infoDiv.appendChild(actionsDiv);
+        
+        const hexCodes = document.createElement("div");
+        hexCodes.className = "hex-codes";
+        palette.colors.forEach(color => {
+          const hex = document.createElement("span");
+          hex.className = "hex-code";
+          hex.textContent = color;
+          hex.addEventListener("click", () => copyToClipboard(color, hex));
+          hexCodes.appendChild(hex);
+        });
+        
+        card.appendChild(colorsDiv);
+        card.appendChild(infoDiv);
+        card.appendChild(hexCodes);
+        paletteGrid.appendChild(card);
+      });
+    }
+
+    function copyToClipboard(text, element) {
+      navigator.clipboard.writeText(text).then(() => {
+        if (element) {
+          element.classList.add("copied");
+          setTimeout(() => element.classList.remove("copied"), 1000);
+        }
+        showToast("Copied to clipboard!");
+      });
+    }
+
+    function showToast(message) {
+      toast.textContent = message;
+      toast.classList.add("show");
+      setTimeout(() => toast.classList.remove("show"), 2000);
+    }
+
+    async function toggleFavorite(date, btn) {
+      try {
+        const response = await fetch(`/api/palettes/${date}/favorite`, { method: 'POST' });
+        const data = await response.json();
+        if (data.success) {
+          btn.classList.toggle("favorited", data.isFavorite);
+          const palette = allPalettes.find(p => p.date === date);
+          if (palette) palette.isFavorite = data.isFavorite;
+          if (showingFavorites) renderPalettes(allPalettes);
+        }
+      } catch (e) {
+        console.error("Toggle favorite error:", e);
+      }
+    }
+
+    function generateSVG(palette) {
+      const svgNS = "http://www.w3.org/2000/svg";
+      const svg = document.createElementNS(svgNS, "svg");
+      svg.setAttribute("width", "500");
+      svg.setAttribute("height", "100");
+      svg.setAttribute("xmlns", svgNS);
+      
+      palette.colors.forEach((color, index) => {
+        const rect = document.createElementNS(svgNS, "rect");
+        rect.setAttribute("x", `${index * 100}`);
+        rect.setAttribute("y", "0");
+        rect.setAttribute("width", "100");
+        rect.setAttribute("height", "100");
+        rect.setAttribute("fill", color);
+        svg.appendChild(rect);
+      });
+      
+      return svg;
+    }
+
+    function downloadSVG(palette) {
+      const svg = generateSVG(palette);
+      const serializer = new XMLSerializer();
+      const svgString = serializer.serializeToString(svg);
+      const blob = new Blob([svgString], { type: "image/svg+xml" });
+      const url = URL.createObjectURL(blob);
+      
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `color-chase-${palette.date}.svg`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+    }
+
+    async function saveProfile() {
+      const newName = profilePlayerName.value.trim() || null;
+      try {
+        await fetch('/api/profile', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ playerName: newName })
+        });
+        playerName.textContent = newName || userEmail.split("@")[0];
+        profileOverlay.style.display = "none";
+      } catch (e) {
+        console.error("Save profile error:", e);
+      }
+    }
+
+    backHomeBtn.addEventListener("click", () => window.location.href = "index.html");
+    
+    logoutButton.addEventListener("click", async () => {
+      await fetch('/api/auth/logout', { method: 'POST' });
+      window.location.href = "index.html";
+    });
+    
+    playerName.addEventListener("click", () => {
+      profileOverlay.style.display = "flex";
+    });
+    
+    profileOverlay.addEventListener("click", (e) => {
+      if (e.target === profileOverlay) profileOverlay.style.display = "none";
+    });
+    
+    closeProfileBtn.addEventListener("click", () => profileOverlay.style.display = "none");
+    saveProfileBtn.addEventListener("click", saveProfile);
+    
+    document.getElementById("close-theory").addEventListener("click", () => {
+      document.getElementById("theory-overlay").style.display = "none";
+    });
+    document.getElementById("theory-overlay").addEventListener("click", (e) => {
+      if (e.target.id === "theory-overlay") {
+        document.getElementById("theory-overlay").style.display = "none";
+      }
+    });
+    
+    filterAllBtn.addEventListener("click", () => {
+      showingFavorites = false;
+      filterAllBtn.classList.add("active");
+      filterFavoritesBtn.classList.remove("active");
+      renderPalettes(allPalettes);
+    });
+    
+    filterFavoritesBtn.addEventListener("click", () => {
+      showingFavorites = true;
+      filterFavoritesBtn.classList.add("active");
+      filterAllBtn.classList.remove("active");
+      renderPalettes(allPalettes);
+    });
+
+    checkAuth();
+  </script>
+</body>
+</html>
