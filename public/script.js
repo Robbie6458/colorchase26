@@ -718,7 +718,7 @@ function main() {
     if (saveButtonLose) saveButtonLose.textContent = text;
   }
 
-  if (grid) {
+  if (grid && grid.children.length === 0) {
     for (let i = 0; i < 5; i++) {
       const row = document.createElement("div");
       row.classList.add("row");
