@@ -185,6 +185,7 @@ export default function useGame() {
 
     if (correctCount === 5) {
       try { playAddSound(); } catch (e) {}
+      try { launchConfetti(); } catch (e) {}
       setGameComplete(true);
       return { result: "win", results };
     }
@@ -207,6 +208,31 @@ export default function useGame() {
       if (ctx && ctx.state === 'suspended') ctx.resume();
     } catch (e) {}
   }, []);
+
+  const launchConfetti = useCallback(() => {
+    try {
+      const confettiContainer = document.getElementById('confetti-container');
+      if (!confettiContainer) return;
+      confettiContainer.innerHTML = '';
+
+      const paletteColors = hiddenPattern.length > 0 ? hiddenPattern : colors.slice(0, 5);
+      for (let i = 0; i < 100; i++) {
+        const confetti = document.createElement('div');
+        confetti.className = 'confetti';
+        confetti.style.backgroundColor = paletteColors[i % paletteColors.length];
+        confetti.style.left = Math.random() * 100 + '%';
+        confetti.style.animationDelay = Math.random() * 0.5 + 's';
+        confetti.style.animationDuration = (2 + Math.random() * 2) + 's';
+        confettiContainer.appendChild(confetti);
+      }
+
+      setTimeout(() => {
+        if (confettiContainer) confettiContainer.innerHTML = '';
+      }, 4000);
+    } catch (e) {
+      // ignore
+    }
+  }, [hiddenPattern, colors]);
 
   const openInfo = useCallback(() => setShowInfo(true), []);
   const closeInfo = useCallback(() => setShowInfo(false), []);
@@ -235,6 +261,7 @@ export default function useGame() {
     generatePuzzle,
     duplicate,
     resumeAudio,
+    launchConfetti,
     showInfo,
     openInfo,
     closeInfo,
