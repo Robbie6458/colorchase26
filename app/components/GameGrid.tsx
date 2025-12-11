@@ -11,14 +11,7 @@ type Props = {
   onCheckRow?: () => void;
 };
 
-export default function GameGrid({ rows = [], currentRow = 0, rowResults = [], onClearTile, onCheckRow }: Props) {
-  useEffect(() => {
-    if (!rows[currentRow]) return;
-    const rowFull = rows[currentRow].every(tile => tile !== null);
-    if (rowFull && onCheckRow) {
-      onCheckRow();
-    }
-  }, [rows, currentRow, onCheckRow]);
+export default function GameGrid({ rows = [], currentRow = 0, rowResults = [], onClearTile }: Props) {
 
   return (
     <div id="game-grid">

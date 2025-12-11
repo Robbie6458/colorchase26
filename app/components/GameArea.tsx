@@ -40,7 +40,7 @@ export default function GameArea() {
       </div>
       <div className="game-container">
         <ColorWheel colors={game.colors} onSelect={game.addColorToRow} eliminated={game.eliminated} />
-        <GameGrid rows={game.rows} rowResults={game.rowResults} currentRow={game.currentRow} onClearTile={game.clearTile} onCheckRow={game.checkRow} />
+        <GameGrid rows={game.rows} rowResults={game.rowResults} currentRow={game.currentRow} onClearTile={game.clearTile} />
       </div>
 
       <div id="confetti-container"></div>

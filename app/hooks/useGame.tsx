@@ -42,19 +42,73 @@ export default function useGame() {
 
   function addColorToRow(color: string) {
     if (gameComplete) return;
-    // prevent duplicate color within the current guess
+
     setRows(prev => {
       const next = prev.map(r => [...r]);
       const row = next[currentRow];
+      // duplicate check
       if (row.includes(color)) {
         setDuplicate(true);
         setTimeout(() => setDuplicate(false), 1500);
         return next;
       }
+
       const idx = row.findIndex(c => !c);
       if (idx !== -1) {
         row[idx] = color;
       }
+
+      const rowFull = row.every(c => c !== null);
+      if (rowFull) {
+        // evaluate row immediately to avoid race with effects
+        const patternCopy = [...hiddenPattern];
+        const results: TileResult[] = new Array(5).fill(null);
+        let correctCount = 0;
+        const toEliminate: string[] = [];
+
+        row.forEach((col, index) => {
+          if (col === patternCopy[index]) {
+            results[index] = "correct";
+            patternCopy[index] = null as any;
+            correctCount++;
+          }
+        });
+
+        row.forEach((col, index) => {
+          if (results[index]) return;
+          const colorIndex = patternCopy.indexOf(col as string);
+          if (colorIndex !== -1) {
+            results[index] = "misplaced";
+            patternCopy[colorIndex] = null as any;
+          } else {
+            results[index] = "wrong";
+            if (!hiddenPattern.includes(col as string)) toEliminate.push(col as string);
+          }
+        });
+
+        if (toEliminate.length) {
+          setEliminated(prev => {
+            const nextSet = new Set(prev);
+            toEliminate.forEach(c => nextSet.add(c));
+            return nextSet;
+          });
+        }
+
+        setRowResults(prevRes => {
+          const nextRes = prevRes.map(r => [...r]);
+          nextRes[currentRow] = results;
+          return nextRes;
+        });
+
+        if (correctCount === 5) {
+          setGameComplete(true);
+        } else if (currentRow === 4) {
+          setGameComplete(true);
+        } else {
+          setCurrentRow(r => r + 1);
+        }
+      }
+
       return next;
     });
   }
