@@ -23,7 +23,9 @@ export default function ColorWheel({ colors = [], eliminated = new Set(), onSele
             key={color + index}
             className="wedge"
             style={style}
-            onClick={() => onSelect && onSelect(color)}
+            onClick={() => {
+              onSelect && onSelect(color);
+            }}
           />
         );
       })}

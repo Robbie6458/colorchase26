@@ -1,9 +1,5 @@
 import Head from "next/head";
-import Script from "next/script";
-import Header from "./components/Header";
-import GameArea from "./components/GameArea";
-import Overlays from "./components/Overlays";
-import DailyStats from "./components/DailyStats";
+import GamePageClient from "./components/GamePageClient";
 
 export default function Home() {
   return (
@@ -18,14 +14,9 @@ export default function Home() {
         <style>{`body { font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }`}</style>
       </Head>
 
-      <div>
-        <Header />
-        <GameArea />
-        <Overlays />
-        <DailyStats />
-      </div>
+      <GamePageClient />
 
-      <Script src="/script.js" strategy="afterInteractive" />
+      {/* legacy script.js removed to avoid direct DOM manipulation that conflicts with React components */}
     </>
   );
 }

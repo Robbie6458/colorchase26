@@ -1,12 +1,34 @@
 "use client";
 
-import { useMemo } from "react";
+import { useMemo, useEffect } from "react";
 import useGame from "../hooks/useGame";
 import ColorWheel from "./ColorWheel";
 import GameGrid from "./GameGrid";
 
-export default function GameArea() {
-  const game = useGame();
+type GameAny = any;
+
+export default function GameArea({ game }: { game: GameAny }) {
+
+  // auto-evaluate row when it becomes full
+  useEffect(() => {
+    if (!game.rows[game.currentRow]) return;
+    const rowFull = game.rows[game.currentRow].every(tile => tile !== null);
+    if (rowFull) {
+      game.checkRow();
+    }
+  }, [game.rows, game.currentRow, game.checkRow]);
+
+  // ensure audio can play after a user gesture: resume audio context on first pointerdown
+  useEffect(() => {
+    function handleFirstInteraction() {
+      try {
+        if ((game as any).resumeAudio) (game as any).resumeAudio();
+      } catch (e) {}
+      window.removeEventListener('pointerdown', handleFirstInteraction);
+    }
+    window.addEventListener('pointerdown', handleFirstInteraction, { once: true });
+    return () => window.removeEventListener('pointerdown', handleFirstInteraction);
+  }, [game]);
 
   const titleColors = useMemo(() => {
     const titleText = "COLOR CHASE";
@@ -40,7 +62,7 @@ export default function GameArea() {
       </div>
       <div className="game-container">
         <ColorWheel colors={game.colors} onSelect={game.addColorToRow} eliminated={game.eliminated} />
-        <GameGrid rows={game.rows} rowResults={game.rowResults} currentRow={game.currentRow} onClearTile={game.clearTile} onCheckRow={game.checkRow} />
+        <GameGrid rows={game.rows} rowResults={game.rowResults} currentRow={game.currentRow} onClearTile={game.clearTile} />
       </div>
 
       <div id="confetti-container"></div>

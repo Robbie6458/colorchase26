@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { getTodaySeed, generateDailyColorWheel, generatePaletteByScheme } from "../lib/palette";
 
 export type Tile = string | null;
@@ -16,6 +16,9 @@ export default function useGame() {
   const [duplicate, setDuplicate] = useState(false);
   const [currentScheme, setCurrentScheme] = useState<string>("");
   const [gameComplete, setGameComplete] = useState(false);
+  const [showInfo, setShowInfo] = useState(false);
+  const [showLogin, setShowLogin] = useState(false);
+  const [showStats, setShowStats] = useState(false);
 
   const generatePuzzle = useCallback(() => {
     const today = getTodaySeed();
@@ -40,21 +43,94 @@ export default function useGame() {
     generatePuzzle();
   }, [generatePuzzle]);
 
+  // Audio for add/remove feedback
+  const audioRef = useRef<AudioContext | null>(null);
+  useEffect(() => {
+    try {
+      audioRef.current = new (window.AudioContext || (window as any).webkitAudioContext)();
+    } catch (e) {
+      audioRef.current = null;
+    }
+    return () => {
+      // do not close context; let browser manage it
+    };
+  }, []);
+
+  const playAddSound = useCallback(() => {
+    const audioContext = audioRef.current;
+    if (!audioContext) return;
+    try { if (audioContext.state === 'suspended') audioContext.resume(); } catch (e) {}
+    const t = audioContext.currentTime;
+    const bufferSize = audioContext.sampleRate * 0.12;
+    const noiseBuffer = audioContext.createBuffer(1, bufferSize, audioContext.sampleRate);
+    const output = noiseBuffer.getChannelData(0);
+    for (let i = 0; i < bufferSize; i++) output[i] = Math.random() * 2 - 1;
+    const noise = audioContext.createBufferSource();
+    noise.buffer = noiseBuffer;
+    const filter = audioContext.createBiquadFilter();
+    filter.type = 'bandpass';
+    filter.frequency.setValueAtTime(3000, t);
+    filter.frequency.exponentialRampToValueAtTime(800, t + 0.12);
+    filter.Q.setValueAtTime(1, t);
+    const gainNode = audioContext.createGain();
+    gainNode.gain.setValueAtTime(0.12, t);
+    gainNode.gain.exponentialRampToValueAtTime(0.001, t + 0.12);
+    noise.connect(filter);
+    filter.connect(gainNode);
+    gainNode.connect(audioContext.destination);
+    noise.start(t);
+    noise.stop(t + 0.12);
+  }, []);
+
+  const playRemoveSound = useCallback(() => {
+    const audioContext = audioRef.current;
+    if (!audioContext) return;
+    try { if (audioContext.state === 'suspended') audioContext.resume(); } catch (e) {}
+    const t = audioContext.currentTime;
+    const osc1 = audioContext.createOscillator();
+    const osc2 = audioContext.createOscillator();
+    const gainNode = audioContext.createGain();
+    const filter = audioContext.createBiquadFilter();
+    osc1.connect(filter);
+    osc2.connect(filter);
+    filter.connect(gainNode);
+    gainNode.connect(audioContext.destination);
+    filter.type = 'highpass';
+    filter.frequency.setValueAtTime(2000, t);
+    filter.frequency.exponentialRampToValueAtTime(800, t + 0.05);
+    osc1.type = 'square';
+    osc1.frequency.setValueAtTime(1800, t);
+    osc1.frequency.exponentialRampToValueAtTime(600, t + 0.03);
+    osc2.type = 'triangle';
+    osc2.frequency.setValueAtTime(3200, t);
+    osc2.frequency.exponentialRampToValueAtTime(1200, t + 0.02);
+    gainNode.gain.setValueAtTime(0.22, t);
+    gainNode.gain.exponentialRampToValueAtTime(0.001, t + 0.08);
+    osc1.start(t);
+    osc2.start(t);
+    osc1.stop(t + 0.08);
+    osc2.stop(t + 0.08);
+  }, []);
   const addColorToRow = useCallback((color: string) => {
     if (gameComplete) return;
-    // prevent duplicate color within the current guess
+
     setRows(prev => {
       const next = prev.map(r => [...r]);
       const row = next[currentRow];
+
+      // duplicate check
       if (row.includes(color)) {
         setDuplicate(true);
         setTimeout(() => setDuplicate(false), 1500);
         return next;
       }
+
       const idx = row.findIndex(c => !c);
       if (idx !== -1) {
         row[idx] = color;
+        try { playAddSound(); } catch (e) {}
       }
+
       return next;
     });
   }, [currentRow, gameComplete]);
@@ -62,11 +138,12 @@ export default function useGame() {
   const clearTile = useCallback((rowIndex: number, colIndex: number) => {
     if (gameComplete) return;
     if (rowIndex !== currentRow) return;
-    setRows(prev => {
-      const next = prev.map(r => [...r]);
-      next[rowIndex][colIndex] = null;
-      return next;
-    });
+      setRows(prev => {
+        const next = prev.map(r => [...r]);
+        next[rowIndex][colIndex] = null;
+        try { playRemoveSound(); } catch (e) {}
+        return next;
+      });
   }, [currentRow, gameComplete]);
 
   const checkRow = useCallback(() => {
@@ -107,18 +184,36 @@ export default function useGame() {
     });
 
     if (correctCount === 5) {
+      try { playAddSound(); } catch (e) {}
       setGameComplete(true);
       return { result: "win", results };
     }
 
     if (currentRow === 4) {
+      try { playAddSound(); } catch (e) {}
       setGameComplete(true);
       return { result: "lose", results };
     }
 
+    // move to next row
     setCurrentRow(r => r + 1);
+    try { playAddSound(); } catch (e) {}
     return { result: "continue", results };
-  }, [currentRow, rows, hiddenPattern]);
+  }, [currentRow, rows, hiddenPattern, playAddSound]);
+
+  const resumeAudio = useCallback(() => {
+    try {
+      const ctx = audioRef.current;
+      if (ctx && ctx.state === 'suspended') ctx.resume();
+    } catch (e) {}
+  }, []);
+
+  const openInfo = useCallback(() => setShowInfo(true), []);
+  const closeInfo = useCallback(() => setShowInfo(false), []);
+  const openLogin = useCallback(() => setShowLogin(true), []);
+  const closeLogin = useCallback(() => setShowLogin(false), []);
+  const openStats = useCallback(() => setShowStats(true), []);
+  const closeStats = useCallback(() => setShowStats(false), []);
 
   function resetGameForReplay() {
     generatePuzzle();
@@ -139,5 +234,15 @@ export default function useGame() {
     resetGameForReplay,
     generatePuzzle,
     duplicate,
+    resumeAudio,
+    showInfo,
+    openInfo,
+    closeInfo,
+    showLogin,
+    openLogin,
+    closeLogin,
+    showStats,
+    openStats,
+    closeStats,
   };
 }

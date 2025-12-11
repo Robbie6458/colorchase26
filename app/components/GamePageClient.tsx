@@ -1,0 +1,19 @@
+"use client";
+
+import useGame from "../hooks/useGame";
+import Header from "./Header";
+import GameArea from "./GameArea";
+import Overlays from "./Overlays";
+import DailyStats from "./DailyStats";
+
+export default function GamePageClient() {
+  const game = useGame();
+  return (
+    <div>
+      <Header game={game} />
+      <GameArea game={game} />
+      <Overlays game={game} />
+      <DailyStats />
+    </div>
+  );
+}
