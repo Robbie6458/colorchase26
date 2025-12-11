@@ -1,4 +1,4 @@
-function main() {
+document.addEventListener("DOMContentLoaded", () => {
   const grid = document.getElementById("game-grid");
   const hint = document.getElementById("hint");
   const wheel = document.getElementById("color-wheel");
@@ -718,7 +718,7 @@ function main() {
     if (saveButtonLose) saveButtonLose.textContent = text;
   }
 
-  if (grid && grid.children.length === 0) {
+  if (grid) {
     for (let i = 0; i < 5; i++) {
       const row = document.createElement("div");
       row.classList.add("row");
@@ -750,17 +750,17 @@ function main() {
 
   function addColorToRow(color) {
     if (gameComplete) return;
-
+    
     const row = document.getElementsByClassName("row")[currentRow];
     if (!row) return;
     const tiles = Array.from(row.getElementsByClassName("tile"));
-
+    
     const colorAlreadyInRow = tiles.some(tile => tile.dataset.color === color);
     if (colorAlreadyInRow) {
       showDuplicateMessage();
       return;
     }
-
+    
     for (let tile of tiles) {
       if (!tile.style.backgroundColor) {
         tile.style.backgroundColor = color;
@@ -771,16 +771,16 @@ function main() {
     }
     if (tiles.every(tile => tile.style.backgroundColor)) checkRow();
   }
-
+  
   function showDuplicateMessage() {
     const existingMsg = document.querySelector('.duplicate-msg');
     if (existingMsg) existingMsg.remove();
-
+    
     const msg = document.createElement('div');
     msg.className = 'duplicate-msg';
     msg.textContent = 'Already in this guess';
     document.body.appendChild(msg);
-
+    
     setTimeout(() => msg.remove(), 1500);
   }
 
@@ -1107,10 +1107,4 @@ function main() {
   checkGoogleAuthAvailable();
   updateStreakDisplay();
   checkFirstTimeVisitor();
-}
-
-if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', main);
-} else {
-  main();
-}
+});

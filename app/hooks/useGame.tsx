@@ -13,6 +13,7 @@ export default function useGame() {
   const [rowResults, setRowResults] = useState<TileResult[][]>(() => Array.from({ length: 5 }, () => Array(5).fill(null)));
   const [currentRow, setCurrentRow] = useState(0);
   const [eliminated, setEliminated] = useState<Set<string>>(new Set());
+  const [duplicate, setDuplicate] = useState(false);
   const [currentScheme, setCurrentScheme] = useState<string>("");
   const [gameComplete, setGameComplete] = useState(false);
 
@@ -41,9 +42,15 @@ export default function useGame() {
 
   function addColorToRow(color: string) {
     if (gameComplete) return;
+    // prevent duplicate color within the current guess
     setRows(prev => {
       const next = prev.map(r => [...r]);
       const row = next[currentRow];
+      if (row.includes(color)) {
+        setDuplicate(true);
+        setTimeout(() => setDuplicate(false), 1500);
+        return next;
+      }
       const idx = row.findIndex(c => !c);
       if (idx !== -1) {
         row[idx] = color;
@@ -86,7 +93,10 @@ export default function useGame() {
         patternCopy[colorIndex] = null as any;
       } else {
         results[index] = "wrong";
-        setEliminated(prev => new Set([...prev, color as string]));
+        // Only mark eliminated if the color is not part of the hidden pattern
+        if (!hiddenPattern.includes(color as string)) {
+          setEliminated(prev => new Set([...prev, color as string]));
+        }
       }
     });
 
@@ -128,5 +138,6 @@ export default function useGame() {
     checkRow,
     resetGameForReplay,
     generatePuzzle,
+    duplicate,
   };
 }

@@ -44,6 +44,11 @@ export default function GameArea() {
       </div>
 
       <div id="confetti-container"></div>
+      {game.duplicate && (
+        <div className="duplicate-msg" style={{ position: 'fixed', bottom: 24, left: '50%', transform: 'translateX(-50%)', background: 'rgba(0,0,0,0.8)', color: '#fff', padding: '8px 12px', borderRadius: 6, zIndex: 9999 }}>
+          Already in this guess
+        </div>
+      )}
     </div>
   );
 }
