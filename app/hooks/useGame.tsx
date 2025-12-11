@@ -40,7 +40,7 @@ export default function useGame() {
     generatePuzzle();
   }, [generatePuzzle]);
 
-  function addColorToRow(color: string) {
+  const addColorToRow = useCallback((color: string) => {
     if (gameComplete) return;
     // prevent duplicate color within the current guess
     setRows(prev => {
@@ -57,9 +57,9 @@ export default function useGame() {
       }
       return next;
     });
-  }
+  }, [currentRow, gameComplete]);
 
-  function clearTile(rowIndex: number, colIndex: number) {
+  const clearTile = useCallback((rowIndex: number, colIndex: number) => {
     if (gameComplete) return;
     if (rowIndex !== currentRow) return;
     setRows(prev => {
@@ -67,9 +67,9 @@ export default function useGame() {
       next[rowIndex][colIndex] = null;
       return next;
     });
-  }
+  }, [currentRow, gameComplete]);
 
-  function checkRow() {
+  const checkRow = useCallback(() => {
     const row = rows[currentRow];
     if (row.some(c => !c)) return; // not full
 
@@ -118,7 +118,7 @@ export default function useGame() {
 
     setCurrentRow(r => r + 1);
     return { result: "continue", results };
-  }
+  }, [currentRow, rows, hiddenPattern]);
 
   function resetGameForReplay() {
     generatePuzzle();
