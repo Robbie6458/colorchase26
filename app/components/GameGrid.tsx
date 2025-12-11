@@ -22,13 +22,9 @@ export default function GameGrid({ rows = [], currentRow = 0, rowResults = [], o
             return (
               <div
                 key={colIndex}
-                className={`tile ${result ? result : ""} ${rowIndex === currentRow && tile ? 'clickable' : ''}`}
+                className={`tile ${result ? result : ""}`}
                 style={{ backgroundColor: (tile as string) || undefined }}
-                onClick={() => {
-                  if (rowIndex === currentRow && tile) {
-                    onClearTile(rowIndex, colIndex);
-                  }
-                }}
+                onClick={() => onClearTile(rowIndex, colIndex)}
               />
             );
           })}

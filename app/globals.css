@@ -801,33 +801,6 @@ h1 {
   }
 }
 
-/* Duplicate message toast */
-.duplicate-msg {
-  position: fixed;
-  bottom: 24px;
-  left: 50%;
-  transform: translateX(-50%);
-  background: rgba(0,0,0,0.85);
-  color: #fff;
-  padding: 8px 12px;
-  border-radius: 8px;
-  z-index: 9999;
-  font-weight: 700;
-  box-shadow: 0 6px 20px rgba(0,0,0,0.6);
-  animation: toast-in 0.18s ease-out;
-}
-
-@keyframes toast-in {
-  from { transform: translateX(-50%) translateY(6px); opacity: 0; }
-  to { transform: translateX(-50%) translateY(0); opacity: 1; }
-}
-
-/* Make filled tiles in the current row clearer that they are removable */
-.tile.clickable {
-  box-shadow: 0 6px 18px rgba(0,0,0,0.35);
-  border-color: rgba(255,255,255,0.35);
-}
-
 @media (max-width: 768px) {
   h1 {
     font-size: 2em;
