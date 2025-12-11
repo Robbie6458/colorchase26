@@ -19,12 +19,15 @@ export default function GameGrid({ rows = [], currentRow = 0, rowResults = [], o
         <div key={rowIndex} className="row">
           {row.map((tile, colIndex) => {
             const result = rowResults[rowIndex]?.[colIndex];
+            const isClickable = rowIndex === currentRow && tile;
             return (
               <div
                 key={colIndex}
-                className={`tile ${result ? result : ""}`}
+                className={`tile ${result ? result : ""} ${isClickable ? 'clickable' : ''}`}
                 style={{ backgroundColor: (tile as string) || undefined }}
-                onClick={() => onClearTile(rowIndex, colIndex)}
+                onClick={() => {
+                  if (isClickable) onClearTile(rowIndex, colIndex);
+                }}
               />
             );
           })}
