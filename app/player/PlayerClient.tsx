@@ -1,6 +1,8 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
+import Header from "../components/Header";
+import Overlays from "../components/Overlays";
 
 type Palette = {
   date: string;
@@ -13,6 +15,9 @@ type Palette = {
 export default function PlayerClient() {
   const [palettes, setPalettes] = useState<Palette[]>([]);
   const [showFavorites, setShowFavorites] = useState(false);
+  const [showInfo, setShowInfo] = useState(false);
+  const [showLogin, setShowLogin] = useState(false);
+  const [showStats, setShowStats] = useState(false);
 
   useEffect(() => {
     let mounted = true;
@@ -109,32 +114,28 @@ export default function PlayerClient() {
 
   const streaks = computeStreaks();
 
+  // minimal stub 'game' object so Header buttons and Overlays work on player page
+  const stubGame: any = {
+    showInfo,
+    showLogin,
+    showStats,
+    openInfo: () => setShowInfo(true),
+    closeInfo: () => setShowInfo(false),
+    openLogin: () => setShowLogin(true),
+    closeLogin: () => setShowLogin(false),
+    openStats: () => setShowStats(true),
+    closeStats: () => setShowStats(false),
+    rowResults: [],
+    gameComplete: false,
+    hiddenPattern: palettes && palettes[0] ? palettes[0].colors : ['#fff','#fff','#fff','#fff','#fff'],
+    resetGameForReplay: () => {}
+  };
+
   return (
     <div className="player-container">
-      <nav className="player-nav">
-        <div className="player-nav-left">
-          <a href="/" className="player-home-btn" aria-label="Home">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M3 9.5L12 3l9 6.5"/><path d="M9 22V12h6v10"/></svg>
-          </a>
-        </div>
-
-        <h1 className="player-title">My Collection</h1>
-
-        <div className="player-stats">
-          <div className="player-stat">
-            <div className="player-stat-value">{streaks.current}</div>
-            <div className="player-stat-label">CURRENT STREAK</div>
-          </div>
-          <div className="player-stat">
-            <div className="player-stat-value" id="palettes-count">{palettes.length}</div>
-            <div className="player-stat-label">PALETTES</div>
-          </div>
-          <div className="player-stat">
-            <div className="player-stat-value">{streaks.best}</div>
-            <div className="player-stat-label">BEST STREAK</div>
-          </div>
-        </div>
-      </nav>
+      {/* Use shared header for consistency */}
+      <Header game={stubGame} title="Rbrt" isPlayerPage={true} />
+      <Overlays game={stubGame} />
 
       <div className="player-filters-container">
         <div className="player-filter-buttons">
