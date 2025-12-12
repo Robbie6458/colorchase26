@@ -88,8 +88,8 @@ export default function Overlays({ game }: { game: GameAny }) {
             ))}
           </div>
           <div className="overlay-buttons" style={{ marginTop: 16 }}>
-            <button onClick={() => { /* TODO: save */ }}>Save Today's Palette</button>
-            <button className="secondary-btn" onClick={() => { /* TODO: share */ }}>Share Results</button>
+            <button onClick={() => { /* Future: integrate with login/auth to save palette */ }}>Save Today's Palette</button>
+            <button className="secondary-btn" onClick={() => { /* Future: implement social sharing */ }}>Share Results</button>
             <button className="secondary-btn" onClick={() => game.resetGameForReplay()}>Play Again</button>
           </div>
         </div>
