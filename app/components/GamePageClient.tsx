@@ -9,7 +9,7 @@ import DailyStats from "./DailyStats";
 export default function GamePageClient() {
   const game = useGame();
   return (
-    <div>
+    <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
       <Header game={game} />
       <GameArea game={game} />
       <Overlays game={game} />

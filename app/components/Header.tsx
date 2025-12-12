@@ -59,11 +59,7 @@ export default function Header({ game, title, isPlayerPage }: { game?: GameAny, 
           <button onClick={() => { if (game?.openLogin) game.openLogin(); else window.location.href = '/?open=login'; }} id="header-login-btn" className="auth-btn">Log In</button>
         </div>
         <button onClick={() => { if (game?.openInfo) game.openInfo(); else window.location.href = '/?open=info'; }} id="info-btn" aria-label="How to play" className="header-icon-btn">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round">
-            <circle cx="12" cy="12" r="10" />
-            <line x1="12" y1="16" x2="12" y2="12" />
-            <line x1="12" y1="8" x2="12.01" y2="8" />
-          </svg>
+          <span className="material-symbols-outlined" aria-hidden="true">info</span>
         </button>
       </div>
     </header>
