@@ -19,6 +19,7 @@ export default function PlayerClient() {
   const [showInfo, setShowInfo] = useState(false);
   const [showLogin, setShowLogin] = useState(false);
   const [showStats, setShowStats] = useState(false);
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
 
   useEffect(() => {
     let mounted = true;
@@ -50,6 +51,8 @@ export default function PlayerClient() {
 
   function copyHex(hex: string, el?: HTMLElement | null) {
     navigator.clipboard?.writeText(hex).then(() => {
+      setToastMessage(`Copied ${hex} to clipboard!`);
+      setTimeout(() => setToastMessage(null), 2000);
       if (el) {
         el.classList.add("copied");
         setTimeout(() => el.classList.remove("copied"), 1000);
@@ -276,6 +279,11 @@ export default function PlayerClient() {
         )}
       </main>
       <DailyStats />
+      {toastMessage && (
+        <div className="copy-toast">
+          {toastMessage}
+        </div>
+      )}
     </div>
   );
 }
