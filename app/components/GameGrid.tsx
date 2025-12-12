@@ -11,25 +11,27 @@ type Props = {
   onCheckRow?: () => void;
 };
 
-export default function GameGrid({ rows = [], currentRow = 0, rowResults = [], onClearTile }: Props) {
+export default function GameGrid({ rows = [], currentRow = 0, rowResults = [], onClearTile, onCheckRow }: Props) {
+  useEffect(() => {
+    if (!rows[currentRow]) return;
+    const rowFull = rows[currentRow].every(tile => tile !== null);
+    if (rowFull && onCheckRow) {
+      onCheckRow();
+    }
+  }, [rows, currentRow, onCheckRow]);
+
   return (
     <div id="game-grid">
       {rows.map((row, rowIndex) => (
         <div key={rowIndex} className="row">
           {row.map((tile, colIndex) => {
             const result = rowResults[rowIndex]?.[colIndex];
-            
             return (
               <div
                 key={colIndex}
-                data-row={rowIndex}
-                data-col={colIndex}
                 className={`tile ${result ? result : ""}`}
-                style={{ backgroundColor: (tile as string) || undefined, pointerEvents: 'auto' }}
-                onClick={() => {
-                  if (!tile) return;
-                  onClearTile(rowIndex, colIndex);
-                }}
+                style={{ backgroundColor: (tile as string) || undefined }}
+                onClick={() => onClearTile(rowIndex, colIndex)}
               />
             );
           })}

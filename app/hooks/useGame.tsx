@@ -117,8 +117,6 @@ export default function useGame() {
     setRows(prev => {
       const next = prev.map(r => [...r]);
       const row = next[currentRow];
-
-      // duplicate check
       if (row.includes(color)) {
         setDuplicate(true);
         setTimeout(() => setDuplicate(false), 1500);
@@ -130,7 +128,6 @@ export default function useGame() {
         row[idx] = color;
         try { playAddSound(); } catch (e) {}
       }
-
       return next;
     });
   }, [currentRow, gameComplete]);
