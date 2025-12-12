@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from "react";
 import Header from "../components/Header";
 import Overlays from "../components/Overlays";
+import DailyStats from "../components/DailyStats";
 
 type Palette = {
   date: string;
@@ -132,7 +133,7 @@ export default function PlayerClient() {
   };
 
   return (
-    <div className="player-container">
+    <div className="player-container" style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
       {/* Use shared header for consistency */}
       <Header game={stubGame} title="Rbrt" isPlayerPage={true} />
       <Overlays game={stubGame} />
@@ -274,6 +275,7 @@ export default function PlayerClient() {
           </div>
         )}
       </main>
+      <DailyStats />
     </div>
   );
 }

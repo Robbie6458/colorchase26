@@ -45,6 +45,7 @@ body {
   width: 100%;
   box-sizing: border-box;
   min-height: 60px;
+  gap: 20px;
 }
 
 .nav-link {
@@ -52,6 +53,9 @@ body {
   text-decoration: none;
   font-weight: 600;
   transition: color 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .nav-link:hover {
@@ -83,6 +87,7 @@ body {
   display: flex;
   align-items: center;
   gap: 12px;
+  flex-shrink: 0;
 }
 
 .header-icon-btn {

@@ -10,7 +10,7 @@ export default function GamePageClient() {
   const game = useGame();
   return (
     <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
-      <Header game={game} />
+      <Header game={game} title="COLOR CHASE" />
       <GameArea game={game} />
       <Overlays game={game} />
       <DailyStats />
