@@ -110,45 +110,56 @@ export default function PlayerClient() {
   const streaks = computeStreaks();
 
   return (
-    <div style={{color: 'white', minHeight: '100vh', display: 'flex', flexDirection: 'column', background: 'linear-gradient(180deg,#0f1220 0%, #111428 100%)'}}>
-      <nav style={{display:'flex',alignItems:'center',justifyContent:'space-between',padding:'18px 28px',borderBottom:'1px solid rgba(255,255,255,0.03)'}}>
-        <div style={{display:'flex',alignItems:'center',gap:12}}>
-          <a href="/" aria-label="Home" style={{display:'inline-flex',alignItems:'center',justifyContent:'center',width:44,height:44,borderRadius:12,background:'rgba(255,255,255,0.04)',textDecoration:'none'}}>
+    <div className="player-container">
+      <nav className="player-nav">
+        <div className="player-nav-left">
+          <a href="/" className="player-home-btn" aria-label="Home">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M3 9.5L12 3l9 6.5"/><path d="M9 22V12h6v10"/></svg>
           </a>
         </div>
 
-        <h1 style={{margin:0,fontSize:44,letterSpacing:2,fontWeight:800,textAlign:'center'}}>My Collection</h1>
+        <h1 className="player-title">My Collection</h1>
 
-        <div style={{display:'flex',alignItems:'center',gap:24}}>
-          <div style={{textAlign:'center'}}>
-            <div style={{fontSize:20,fontWeight:700,color:'#9aa0ff'}}>{streaks.current}</div>
-            <div style={{fontSize:11,color:'#a0a0c0',letterSpacing:1}}>CURRENT STREAK</div>
+        <div className="player-stats">
+          <div className="player-stat">
+            <div className="player-stat-value">{streaks.current}</div>
+            <div className="player-stat-label">CURRENT STREAK</div>
           </div>
-          <div style={{textAlign:'center'}}>
-            <div style={{fontSize:20,fontWeight:700,color:'#9aa0ff'}} id="palettes-count">{palettes.length}</div>
-            <div style={{fontSize:11,color:'#a0a0c0',letterSpacing:1}}>PALETTES</div>
+          <div className="player-stat">
+            <div className="player-stat-value" id="palettes-count">{palettes.length}</div>
+            <div className="player-stat-label">PALETTES</div>
           </div>
-          <div style={{textAlign:'center'}}>
-            <div style={{fontSize:20,fontWeight:700,color:'#9aa0ff'}}>{streaks.best}</div>
-            <div style={{fontSize:11,color:'#a0a0c0',letterSpacing:1}}>BEST STREAK</div>
+          <div className="player-stat">
+            <div className="player-stat-value">{streaks.best}</div>
+            <div className="player-stat-label">BEST STREAK</div>
           </div>
         </div>
       </nav>
 
-      <div style={{display:'flex',justifyContent:'center',padding:18}}>
-        <div style={{display:'flex',gap:12,alignItems:'center'}}>
-          <button onClick={() => setShowFavorites(false)} style={{padding:'10px 18px',borderRadius:24,background: showFavorites? 'transparent' : 'linear-gradient(90deg,#667eea,#764ba2)',color:'white',border:'none',boxShadow: showFavorites? 'none' : '0 6px 20px rgba(102,126,234,0.18)'}}>All Palettes</button>
-          <button onClick={() => setShowFavorites(true)} style={{padding:'10px 18px',borderRadius:24,background: showFavorites? 'linear-gradient(90deg,#667eea,#764ba2)' : 'transparent',color:'white',border:'1px solid rgba(255,255,255,0.06)'}}>Favorites</button>
+      <div className="player-filters-container">
+        <div className="player-filter-buttons">
+          <button 
+            className={`player-filter-btn ${!showFavorites ? 'active' : ''}`}
+            onClick={() => setShowFavorites(false)}
+          >
+            All Palettes
+          </button>
+          <button 
+            className={`player-filter-btn ${showFavorites ? 'active' : ''}`}
+            onClick={() => setShowFavorites(true)}
+          >
+            Favorites
+          </button>
         </div>
       </div>
 
-      <main style={{padding:24,flex:1,overflowY:'auto'}}>
+      <main className="player-main">
         {filtered.length === 0 ? (
-          <div style={{textAlign:'center',color:'#a0a0c0',padding:40}}>
-            <div style={{marginBottom:12}}>No palettes yet.</div>
-            <div style={{display:'flex',gap:8,justifyContent:'center'}}>
+          <div className="player-empty">
+            <div className="player-empty-text">No palettes yet.</div>
+            <div className="player-empty-actions">
               <button
+                className="player-seed-btn"
                 onClick={() => {
                   // seed a couple of example palettes into localStorage
                   const today = new Date();
@@ -183,43 +194,79 @@ export default function PlayerClient() {
                     console.error('seed error', e);
                   }
                 }}
-                style={{padding:'8px 14px',borderRadius:8,background:'#667eea',color:'white',border:'none',cursor:'pointer'}}
-              >Seed example palettes</button>
-              <button onClick={() => {
-                try {
-                  localStorage.removeItem('colorChasePalettes');
-                  setPalettes([]);
-                } catch(e){}
-              }} style={{padding:'8px 14px',borderRadius:8,background:'rgba(255,255,255,0.06)',color:'white',border:'none',cursor:'pointer'}}>Clear</button>
+              >
+                Seed example palettes
+              </button>
+              <button 
+                className="player-clear-btn"
+                onClick={() => {
+                  try {
+                    localStorage.removeItem('colorChasePalettes');
+                    setPalettes([]);
+                  } catch(e){}
+                }}
+              >
+                Clear
+              </button>
             </div>
           </div>
         ) : (
-          <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(340px,1fr))',gap:24}}>
+          <div id="palette-grid" className="palette-grid">
             {filtered.map(p => (
-              <div key={p.date} style={{background:'rgba(18,22,35,0.6)',borderRadius:10,overflow:'hidden',border:'1px solid rgba(255,255,255,0.04)',boxShadow:'0 8px 20px rgba(2,6,23,0.6)'}}>
-                <div style={{display:'flex',height:110}}>
+              <div key={p.date} className="palette-card">
+                <div className="palette-colors">
                   {p.colors.map((c, i) => (
-                    <div key={i} onClick={() => copyHex(c)} style={{flex:1,background:c,position:'relative',cursor:'pointer',minHeight:110}}>
-                      <div style={{position:'absolute',left:8,bottom:10,background:'rgba(0,0,0,0.6)',padding:'4px 8px',borderRadius:6,fontFamily:'monospace',fontSize:12,color:'#fff'}}>{c}</div>
+                    <div 
+                      key={i} 
+                      className="swatch" 
+                      style={{background:c}}
+                      onClick={() => copyHex(c)}
+                      title="Click to copy hex code"
+                    >
+                      <div className="hex-tooltip">{c}</div>
                     </div>
                   ))}
                 </div>
-                <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',padding:14}}>
+                <div className="palette-info">
                   <div>
-                    <div style={{color:'#a0a0c0',fontSize:13}}>{new Date(p.date).toLocaleDateString()}</div>
-                    <div style={{color:'#9aa7ff',fontSize:12,textTransform:'capitalize'}}>{p.scheme || ''}</div>
+                    <div className="palette-date">{new Date(p.date).toLocaleDateString()}</div>
+                    <div className="palette-scheme">{p.scheme || ''}</div>
                   </div>
-                  <div style={{display:'flex',gap:10,alignItems:'center'}}>
-                    <button title="Copy" onClick={() => { if (p.colors[0]) copyHex(p.colors[0]); }} style={{width:38,height:38,borderRadius:10,background:'rgba(255,255,255,0.03)',border:'1px solid rgba(255,255,255,0.04)',cursor:'pointer',display:'flex',alignItems:'center',justifyContent:'center'}}>
-                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                  <div className="palette-actions">
+                    <button 
+                      className="action-btn copy" 
+                      title="Copy first hex" 
+                      onClick={() => { if (p.colors[0]) copyHex(p.colors[0]); }}
+                    >
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
                     </button>
-                    <button title="Download" onClick={() => downloadSVG(p)} style={{width:38,height:38,borderRadius:10,background:'rgba(255,255,255,0.03)',border:'1px solid rgba(255,255,255,0.04)',cursor:'pointer',display:'flex',alignItems:'center',justifyContent:'center'}}>
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                    <button 
+                      className="action-btn download" 
+                      title="Download SVG" 
+                      onClick={() => downloadSVG(p)}
+                    >
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
                     </button>
-                    <button title="Favorite" onClick={(e) => toggleFavorite(p.date, e.currentTarget as HTMLButtonElement)} style={{width:38,height:38,borderRadius:10,background:p.isFavorite? '#ffd700':'rgba(255,255,255,0.03)',border:'1px solid rgba(255,255,255,0.04)',cursor:'pointer',display:'flex',alignItems:'center',justifyContent:'center'}}>
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill={p.isFavorite? '#222' : 'none'} stroke={p.isFavorite? '#fff' : '#fff'} strokeWidth="1.2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                    <button 
+                      className={`action-btn favorite ${p.isFavorite ? 'favorited' : ''}`}
+                      title={p.isFavorite ? 'Remove from favorites' : 'Add to favorites'}
+                      onClick={(e) => toggleFavorite(p.date, e.currentTarget as HTMLButtonElement)}
+                    >
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill={p.isFavorite? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="1.2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
                     </button>
                   </div>
+                </div>
+                <div className="hex-codes">
+                  {p.colors.map((c, i) => (
+                    <div 
+                      key={i}
+                      className="hex-code"
+                      onClick={() => copyHex(c)}
+                      title="Click to copy"
+                    >
+                      {c}
+                    </div>
+                  ))}
                 </div>
               </div>
             ))}
