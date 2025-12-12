@@ -12,7 +12,7 @@ export default function GameArea({ game }: { game: GameAny }) {
   // auto-evaluate row when it becomes full
   useEffect(() => {
     if (!game.rows[game.currentRow]) return;
-    const rowFull = game.rows[game.currentRow].every(tile => tile !== null);
+    const rowFull = game.rows[game.currentRow].every((tile: string | null) => tile !== null);
     if (rowFull) {
       game.checkRow();
     }

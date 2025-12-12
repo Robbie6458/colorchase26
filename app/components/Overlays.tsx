@@ -83,7 +83,7 @@ export default function Overlays({ game }: { game: GameAny }) {
           <div id="victory-message">You Won!</div>
           <p className="overlay-subtitle">Today's palette is yours to collect</p>
           <div id="reveal-pattern" style={{ display: 'flex', gap: 8, marginTop: 12 }}>
-            {game.hiddenPattern.map((c, i) => (
+            {game.hiddenPattern.map((c: string, i: number) => (
               <div key={i} style={{ width: 40, height: 40, background: c || '#fff', borderRadius: 6, border: '1px solid #ccc' }} />
             ))}
           </div>
@@ -100,7 +100,7 @@ export default function Overlays({ game }: { game: GameAny }) {
           <div id="try-again-message">Better Luck Tomorrow!</div>
           <p className="overlay-subtitle">Here was today's palette</p>
           <div id="reveal-pattern-lose" style={{ display: 'flex', gap: 8, marginTop: 12 }}>
-            {game.hiddenPattern.map((c, i) => (
+            {game.hiddenPattern.map((c: string, i: number) => (
               <div key={i} style={{ width: 40, height: 40, background: c || '#fff', borderRadius: 6, border: '1px solid #ccc' }} />
             ))}
           </div>
