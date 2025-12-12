@@ -109,6 +109,19 @@ function isTooClose(newColor: string, existingColors: string[], minDistance: num
   return false;
 }
 
+// Check if a palette has sufficient visual contrast
+function hasGoodContrast(colors: string[]): boolean {
+  let minDistance = Infinity;
+  for (let i = 0; i < colors.length; i++) {
+    for (let j = i + 1; j < colors.length; j++) {
+      const dist = colorDistance(colors[i], colors[j]);
+      minDistance = Math.min(minDistance, dist);
+    }
+  }
+  // Require at least 20 units of distance between colors
+  return minDistance >= 20;
+}
+
 export function generateDailyColorWheel(seed: string) {
   const rng = createSeededRNG(seed + "wheel");
   const familyKeys = Object.keys(PALETTE_FAMILIES);
@@ -127,11 +140,11 @@ export function generateDailyColorWheel(seed: string) {
       let attempts = 0;
       let color = '#000000';
       do {
-        const satVariance = (rng() - 0.5) * 15;
+        const satVariance = (rng() - 0.5) * 20;  // Increased variance for more pop
         const lightVariance = (rng() - 0.5) * 12;
         let saturation = family.satRange[0] + rng() * (family.satRange[1] - family.satRange[0]);
         let lightness = family.lightRange[0] + rng() * (family.lightRange[1] - family.lightRange[0]);
-        saturation = Math.max(25, Math.min(95, saturation + treatment.satMod + satVariance));
+        saturation = Math.max(50, Math.min(100, saturation + treatment.satMod + satVariance));  // Higher floor: 50 instead of 25
         lightness = Math.max(25, Math.min(80, lightness + treatment.lightMod + lightVariance));
         color = hslToHex(hue, saturation, lightness);
         attempts++;
@@ -162,6 +175,8 @@ export function generateDailyColorWheel(seed: string) {
     }
     const hueStep = hueRange / 12;
     const jitter = Math.floor(rng() * hueRange * 0.1);
+    // Boost saturation for narrow-range families to avoid muddiness
+    const satBoost = isNarrowRange ? 15 : 0;
     for (let i = 0; i < 12; i++) {
       let attempts = 0;
       let color = '#000000';
@@ -169,12 +184,12 @@ export function generateDailyColorWheel(seed: string) {
         let hue = hueStart + (i * hueStep) + jitter + (rng() - 0.5) * (hueStep * 0.3);
         if (hueStart > hueEnd) hue = ((hue % 360) + 360) % 360; else hue = Math.max(hueStart, Math.min(hueEnd, hue));
         const combo = satLightCombos[i % satLightCombos.length];
-        const satVariance = (rng() - 0.5) * 8;
-        const lightVariance = (rng() - 0.5) * 6;
-        let saturation = combo.sat + satVariance;
+        const satVariance = (rng() - 0.5) * 10;  // Increased variance
+        const lightVariance = (rng() - 0.5) * 8;  // Increased for better spread
+        let saturation = combo.sat + satVariance + satBoost;
         let lightness = combo.light + lightVariance;
-        saturation = Math.max(20, Math.min(95, saturation));
-        lightness = Math.max(25, Math.min(80, lightness));
+        saturation = Math.max(45, Math.min(100, saturation));  // Higher floor: 45 instead of 20
+        lightness = Math.max(20, Math.min(85, lightness));  // Slightly wider range for more variety
         color = hslToHex(hue, saturation, lightness);
         attempts++;
       } while (isTooClose(color, wheelColors, MIN_COLOR_DISTANCE) && attempts < 15);
@@ -220,13 +235,39 @@ export function generatePaletteByScheme(scheme: string, wheelColors: string[], s
       indices = [baseIndex, (baseIndex + 3) % 12, (baseIndex + 6) % 12, (baseIndex + 9) % 12];
       indices.push((baseIndex + 1) % 12);
       break;
+    case "square":
+      indices = [baseIndex, (baseIndex + 3) % 12, (baseIndex + 6) % 12, (baseIndex + 9) % 12];
+      indices.push((baseIndex + 2) % 12);
+      break;
+    case "rectangular":
+      indices = [baseIndex, (baseIndex + 2) % 12, (baseIndex + 6) % 12, (baseIndex + 8) % 12];
+      indices.push((baseIndex + 4) % 12);
+      break;
+    case "accent":
+      indices = [baseIndex, (baseIndex + 1) % 12, (baseIndex + 2) % 12];
+      indices.push((baseIndex + 7) % 12, (baseIndex + 10) % 12);
+      break;
     default:
       indices = [0, 2, 4, 6, 8];
   }
+  
   indices = indices.slice(0, 5);
   for (let i = indices.length - 1; i > 0; i--) {
     const j = Math.floor(seededRandom(seed + "shuffle" + i) * (i + 1));
     [indices[i], indices[j]] = [indices[j], indices[i]];
   }
-  return indices.map(i => wheelColors[i]);
+  
+  let palette = indices.map(i => wheelColors[i]);
+  
+  // If contrast is poor, try different indices with better spread
+  if (!hasGoodContrast(palette)) {
+    indices = [];
+    const step = Math.floor(12 / 5);
+    for (let i = 0; i < 5; i++) {
+      indices.push((baseIndex + i * step) % 12);
+    }
+    palette = indices.map(i => wheelColors[i]);
+  }
+  
+  return palette;
 }
