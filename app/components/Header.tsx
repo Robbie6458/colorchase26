@@ -1,10 +1,14 @@
 "use client";
 
 import React, { useEffect } from "react";
+import Link from "next/link";
+import { useAuth } from "@/app/lib/auth-context";
 
 type GameAny = any;
 
 export default function Header({ game, title, isPlayerPage }: { game?: GameAny, title?: string, isPlayerPage?: boolean }) {
+  const { profile } = useAuth();
+
   useEffect(() => {
     const els = Array.from(document.querySelectorAll<HTMLElement>(".header-icon-btn, .icon-btn"));
     if (!els.length) return;
@@ -31,6 +35,7 @@ export default function Header({ game, title, isPlayerPage }: { game?: GameAny, 
     els.forEach(el => { el.addEventListener('mouseenter', enter); el.addEventListener('mouseleave', leave); });
     return () => els.forEach(el => { el.removeEventListener('mouseenter', enter); el.removeEventListener('mouseleave', leave); });
   }, []);
+
   return (
     <header className="game-header">
       {/* left: switch between game and player */}
@@ -56,7 +61,15 @@ export default function Header({ game, title, isPlayerPage }: { game?: GameAny, 
           </svg>
         </button>
         <div id="auth-status">
-          <button onClick={() => { if (game?.openLogin) game.openLogin(); else window.location.href = '/?open=login'; }} id="header-login-btn" className="auth-btn">Log In</button>
+          {profile ? (
+            <Link href="/auth/profile" id="header-login-btn" className="auth-btn">
+              {profile.player_name}
+            </Link>
+          ) : (
+            <a href="/auth/login" id="header-login-btn" className="auth-btn">
+              Log In
+            </a>
+          )}
         </div>
         <button onClick={() => { if (game?.openInfo) game.openInfo(); else window.location.href = '/?open=info'; }} id="info-btn" aria-label="How to play" className="header-icon-btn">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" style={{ width: '18px', height: '18px' }}>
@@ -67,4 +80,3 @@ export default function Header({ game, title, isPlayerPage }: { game?: GameAny, 
       </div>
     </header>
   );
-}

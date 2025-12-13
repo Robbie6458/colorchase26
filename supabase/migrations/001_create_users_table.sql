@@ -32,24 +32,9 @@ CREATE POLICY "Anyone can read player names" ON public.users
 CREATE POLICY "Service role can insert users" ON public.users
   FOR INSERT WITH CHECK (true);
 
--- Update RLS on palettes table to ensure user isolation
-ALTER TABLE public.palettes ENABLE ROW LEVEL SECURITY;
-
--- Users can see their own palettes
-CREATE POLICY IF NOT EXISTS "Users can view their own palettes" ON public.palettes
-  FOR SELECT USING (auth.uid() = user_id);
-
--- Users can create palettes
-CREATE POLICY IF NOT EXISTS "Users can create palettes" ON public.palettes
-  FOR INSERT WITH CHECK (auth.uid() = user_id);
-
--- Users can update their own palettes
-CREATE POLICY IF NOT EXISTS "Users can update their own palettes" ON public.palettes
-  FOR UPDATE USING (auth.uid() = user_id);
-
--- Users can delete their own palettes
-CREATE POLICY IF NOT EXISTS "Users can delete their own palettes" ON public.palettes
-  FOR DELETE USING (auth.uid() = user_id);
+-- Update RLS on palettes table to ensure user isolation (if it exists)
+-- Note: Skipped because existing palettes table uses bigint user_id (incompatible with UUID auth)
+-- This will be handled in a separate migration if needed
 
 -- Create function to automatically update updated_at timestamp
 CREATE OR REPLACE FUNCTION update_updated_at()

@@ -4,6 +4,8 @@ import React, { useEffect, useState } from "react";
 import Header from "../components/Header";
 import Overlays from "../components/Overlays";
 import DailyStats from "../components/DailyStats";
+import { useAuth } from "../lib/auth-context";
+import { supabase } from "../lib/supabase";
 
 type Palette = {
   date: string;
@@ -20,22 +22,34 @@ export default function PlayerClient() {
   const [showLogin, setShowLogin] = useState(false);
   const [showStats, setShowStats] = useState(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const { session } = useAuth();
 
   useEffect(() => {
     let mounted = true;
 
     async function load() {
-      try {
-        const res = await fetch("/api/palettes");
-        if (res.ok) {
-          const data = await res.json();
-          if (mounted) setPalettes(data);
-          return;
+      // Try to fetch from database if authenticated
+      if (session) {
+        try {
+          const { data: { session: currentSession } } = await supabase.auth.getSession();
+          if (currentSession) {
+            const res = await fetch("/api/palettes", {
+              headers: {
+                "Authorization": `Bearer ${currentSession.access_token}`
+              }
+            });
+            if (res.ok) {
+              const data = await res.json();
+              if (mounted) setPalettes(data);
+              return;
+            }
+          }
+        } catch (e) {
+          // fall through to localStorage
         }
-      } catch (e) {
-        // fall through to localStorage
       }
 
+      // Fall back to localStorage
       try {
         const raw = localStorage.getItem("colorChasePalettes") || localStorage.getItem("palettes");
         const parsed = raw ? JSON.parse(raw) : null;
@@ -47,7 +61,7 @@ export default function PlayerClient() {
 
     load();
     return () => { mounted = false; };
-  }, []);
+  }, [session]);
 
   function copyHex(hex: string, el?: HTMLElement | null) {
     navigator.clipboard?.writeText(hex).then(() => {

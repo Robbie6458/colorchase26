@@ -14,10 +14,11 @@ export async function GET(request: NextRequest) {
     const { error } = await supabase.auth.exchangeCodeForSession(code);
 
     if (!error) {
-      return NextResponse.redirect(new URL(next, request.url));
+      // Redirect to home page after successful verification
+      return NextResponse.redirect(new URL('/', request.url));
     }
   }
 
-  // return the user to an error page with instructions
-  return NextResponse.redirect(new URL('/auth/error', request.url));
+  // return the user to the home page on error
+  return NextResponse.redirect(new URL('/', request.url));
 }
