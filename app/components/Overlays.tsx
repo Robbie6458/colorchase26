@@ -1,11 +1,51 @@
 "use client";
 
+import { savePalette } from "../lib/server-actions";
+import { useAuth } from "../lib/auth-context";
+import { getTodaySeed } from "../lib/palette";
+import { useState } from "react";
+
 type GameAny = any;
 
 export default function Overlays({ game }: { game: GameAny }) {
+  const { user, session } = useAuth();
+  const [saving, setSaving] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
 
   const won = game.rowResults.some((r: any) => r.every((cell: any) => cell === "correct"));
   const lost = game.gameComplete && !won;
+
+  const handleSavePalette = async () => {
+    if (!session || !user) {
+      game.openLogin?.();
+      return;
+    }
+
+    setSaving(true);
+    setSaveError(null);
+
+    try {
+      const today = getTodaySeed();
+      const guessCount = game.currentRow + 1;
+      
+      const result = await savePalette(
+        today,
+        game.hiddenPattern,
+        game.currentScheme || "custom",
+        guessCount,
+        won
+      );
+
+      if (result.success) {
+        setSaveError(null);
+        // Optional: show success message or redirect to collection
+      }
+    } catch (error: any) {
+      setSaveError(error?.message || "Error saving palette");
+    } finally {
+      setSaving(false);
+    }
+  };
 
   return (
     <>
@@ -88,9 +128,59 @@ export default function Overlays({ game }: { game: GameAny }) {
             ))}
           </div>
           <div className="overlay-buttons" style={{ marginTop: 16 }}>
-            <button onClick={() => { /* Future: integrate with login/auth to save palette */ }}>Save Today's Palette</button>
-            <button className="secondary-btn" onClick={() => { /* Future: implement social sharing */ }}>Share Results</button>
-            <button className="secondary-btn" onClick={() => game.resetGameForReplay()}>Play Again</button>
+            <button 
+              onClick={handleSavePalette}
+              disabled={saving}
+              className="primary-btn"
+              style={{
+                backgroundColor: '#c97c3b',
+                border: '2px solid #c97c3b',
+                color: '#fff',
+                padding: '12px 24px',
+                fontSize: '16px',
+                fontWeight: 'bold',
+                borderRadius: '20px',
+                cursor: saving ? 'not-allowed' : 'pointer',
+                opacity: saving ? 0.7 : 1,
+              }}
+            >
+              {saving ? 'Saving...' : 'Save Today\'s Palette'}
+            </button>
+            {saveError && <p style={{ color: '#ff6b6b', marginTop: 8, fontSize: 14 }}>{saveError}</p>}
+            <button 
+              className="secondary-btn" 
+              onClick={() => { /* TODO: implement social sharing */ }}
+              style={{
+                backgroundColor: 'transparent',
+                border: '2px solid #c97c3b',
+                color: '#c97c3b',
+                padding: '12px 24px',
+                fontSize: '16px',
+                fontWeight: 'bold',
+                borderRadius: '20px',
+                cursor: 'pointer',
+                marginTop: 8,
+              }}
+            >
+              Share Results
+            </button>
+            <button 
+              className="secondary-btn" 
+              onClick={() => game.resetGameForReplay()}
+              style={{
+                backgroundColor: 'transparent',
+                border: '2px solid #c97c3b',
+                color: '#c97c3b',
+                padding: '12px 24px',
+                fontSize: '16px',
+                fontWeight: 'bold',
+                borderRadius: '20px',
+                cursor: 'pointer',
+                marginTop: 8,
+              }}
+            >
+              Play Again
+            </button>
           </div>
         </div>
       )}
@@ -105,9 +195,59 @@ export default function Overlays({ game }: { game: GameAny }) {
             ))}
           </div>
           <div className="overlay-buttons" style={{ marginTop: 16 }}>
-            <button onClick={() => { /* TODO: save */ }}>Save Today's Palette</button>
-            <button className="secondary-btn" onClick={() => { /* TODO: share */ }}>Share Results</button>
-            <button className="secondary-btn" onClick={() => game.resetGameForReplay()}>Play Again</button>
+            <button 
+              onClick={handleSavePalette}
+              disabled={saving}
+              className="primary-btn"
+              style={{
+                backgroundColor: '#c97c3b',
+                border: '2px solid #c97c3b',
+                color: '#fff',
+                padding: '12px 24px',
+                fontSize: '16px',
+                fontWeight: 'bold',
+                borderRadius: '20px',
+                cursor: saving ? 'not-allowed' : 'pointer',
+                opacity: saving ? 0.7 : 1,
+              }}
+            >
+              {saving ? 'Saving...' : 'Save Today\'s Palette'}
+            </button>
+            {saveError && <p style={{ color: '#ff6b6b', marginTop: 8, fontSize: 14 }}>{saveError}</p>}
+            <button 
+              className="secondary-btn" 
+              onClick={() => { /* TODO: implement social sharing */ }}
+              style={{
+                backgroundColor: 'transparent',
+                border: '2px solid #c97c3b',
+                color: '#c97c3b',
+                padding: '12px 24px',
+                fontSize: '16px',
+                fontWeight: 'bold',
+                borderRadius: '20px',
+                cursor: 'pointer',
+                marginTop: 8,
+              }}
+            >
+              Share Results
+            </button>
+            <button 
+              className="secondary-btn" 
+              onClick={() => game.resetGameForReplay()}
+              style={{
+                backgroundColor: 'transparent',
+                border: '2px solid #c97c3b',
+                color: '#c97c3b',
+                padding: '12px 24px',
+                fontSize: '16px',
+                fontWeight: 'bold',
+                borderRadius: '20px',
+                cursor: 'pointer',
+                marginTop: 8,
+              }}
+            >
+              Play Again
+            </button>
           </div>
         </div>
       )}
