@@ -3,20 +3,33 @@
 import { savePalette } from "../lib/server-actions";
 import { useAuth } from "../lib/auth-context";
 import { getTodaySeed } from "../lib/palette";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 
 type GameAny = any;
 
 export default function Overlays({ game }: { game: GameAny }) {
+  const router = useRouter();
   const { user, session } = useAuth();
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
+  const [pendingSave, setPendingSave] = useState(false);
 
   const won = game.rowResults.some((r: any) => r.every((cell: any) => cell === "correct"));
   const lost = game.gameComplete && !won;
 
-  const handleSavePalette = async () => {
-    if (!session || !user) {
+  // Auto-save palette after login
+  useEffect(() => {
+    if (pendingSave && user && session) {
+      handleSavePalette(true);
+      setPendingSave(false);
+    }
+  }, [user, session, pendingSave]);
+
+  const handleSavePalette = async (skipAuthCheck = false) => {
+    if (!skipAuthCheck && (!session || !user)) {
+      // Not logged in - open login dialog and mark for auto-save after
+      setPendingSave(true);
       game.openLogin?.();
       return;
     }
@@ -38,7 +51,8 @@ export default function Overlays({ game }: { game: GameAny }) {
 
       if (result.success) {
         setSaveError(null);
-        // Optional: show success message or redirect to collection
+        // Redirect to collection page
+        router.push('/player');
       }
     } catch (error: any) {
       setSaveError(error?.message || "Error saving palette");
@@ -127,60 +141,60 @@ export default function Overlays({ game }: { game: GameAny }) {
               <div key={i} style={{ width: 40, height: 40, background: c || '#fff', borderRadius: 6, border: '1px solid #ccc' }} />
             ))}
           </div>
-          <div className="overlay-buttons" style={{ marginTop: 16 }}>
+          <div className="overlay-buttons" style={{ marginTop: 16, display: 'flex', flexDirection: 'column', gap: 12, alignItems: 'center' }}>
             <button 
-              onClick={handleSavePalette}
+              onClick={() => handleSavePalette()}
               disabled={saving}
-              className="primary-btn"
               style={{
-                backgroundColor: '#c97c3b',
-                border: '2px solid #c97c3b',
+                backgroundColor: '#6366f1',
+                border: 'none',
                 color: '#fff',
-                padding: '12px 24px',
+                padding: '14px 32px',
                 fontSize: '16px',
                 fontWeight: 'bold',
-                borderRadius: '20px',
+                borderRadius: '25px',
                 cursor: saving ? 'not-allowed' : 'pointer',
                 opacity: saving ? 0.7 : 1,
+                minWidth: '200px',
               }}
             >
               {saving ? 'Saving...' : 'Save Today\'s Palette'}
             </button>
-            {saveError && <p style={{ color: '#ff6b6b', marginTop: 8, fontSize: 14 }}>{saveError}</p>}
-            <button 
-              className="secondary-btn" 
-              onClick={() => { /* TODO: implement social sharing */ }}
-              style={{
-                backgroundColor: 'transparent',
-                border: '2px solid #c97c3b',
-                color: '#c97c3b',
-                padding: '12px 24px',
-                fontSize: '16px',
-                fontWeight: 'bold',
-                borderRadius: '20px',
-                cursor: 'pointer',
-                marginTop: 8,
-              }}
-            >
-              Share Results
-            </button>
-            <button 
-              className="secondary-btn" 
-              onClick={() => game.resetGameForReplay()}
-              style={{
-                backgroundColor: 'transparent',
-                border: '2px solid #c97c3b',
-                color: '#c97c3b',
-                padding: '12px 24px',
-                fontSize: '16px',
-                fontWeight: 'bold',
-                borderRadius: '20px',
-                cursor: 'pointer',
-                marginTop: 8,
-              }}
-            >
-              Play Again
-            </button>
+            {saveError && <p style={{ color: '#ff6b6b', marginTop: 0, fontSize: 14 }}>{saveError}</p>}
+            <div style={{ display: 'flex', gap: 12 }}>
+              <button 
+                onClick={() => { /* TODO: implement social sharing */ }}
+                style={{
+                  backgroundColor: 'transparent',
+                  border: '2px solid #d97706',
+                  color: '#d97706',
+                  padding: '12px 24px',
+                  fontSize: '16px',
+                  fontWeight: 'bold',
+                  borderRadius: '25px',
+                  cursor: 'pointer',
+                  minWidth: '140px',
+                }}
+              >
+                Share Results
+              </button>
+              <button 
+                onClick={() => game.resetGameForReplay()}
+                style={{
+                  backgroundColor: 'transparent',
+                  border: '2px solid #d97706',
+                  color: '#d97706',
+                  padding: '12px 24px',
+                  fontSize: '16px',
+                  fontWeight: 'bold',
+                  borderRadius: '25px',
+                  cursor: 'pointer',
+                  minWidth: '140px',
+                }}
+              >
+                Play Again
+              </button>
+            </div>
           </div>
         </div>
       )}
@@ -194,60 +208,60 @@ export default function Overlays({ game }: { game: GameAny }) {
               <div key={i} style={{ width: 40, height: 40, background: c || '#fff', borderRadius: 6, border: '1px solid #ccc' }} />
             ))}
           </div>
-          <div className="overlay-buttons" style={{ marginTop: 16 }}>
+          <div className="overlay-buttons" style={{ marginTop: 16, display: 'flex', flexDirection: 'column', gap: 12, alignItems: 'center' }}>
             <button 
-              onClick={handleSavePalette}
+              onClick={() => handleSavePalette()}
               disabled={saving}
-              className="primary-btn"
               style={{
-                backgroundColor: '#c97c3b',
-                border: '2px solid #c97c3b',
+                backgroundColor: '#6366f1',
+                border: 'none',
                 color: '#fff',
-                padding: '12px 24px',
+                padding: '14px 32px',
                 fontSize: '16px',
                 fontWeight: 'bold',
-                borderRadius: '20px',
+                borderRadius: '25px',
                 cursor: saving ? 'not-allowed' : 'pointer',
                 opacity: saving ? 0.7 : 1,
+                minWidth: '200px',
               }}
             >
               {saving ? 'Saving...' : 'Save Today\'s Palette'}
             </button>
-            {saveError && <p style={{ color: '#ff6b6b', marginTop: 8, fontSize: 14 }}>{saveError}</p>}
-            <button 
-              className="secondary-btn" 
-              onClick={() => { /* TODO: implement social sharing */ }}
-              style={{
-                backgroundColor: 'transparent',
-                border: '2px solid #c97c3b',
-                color: '#c97c3b',
-                padding: '12px 24px',
-                fontSize: '16px',
-                fontWeight: 'bold',
-                borderRadius: '20px',
-                cursor: 'pointer',
-                marginTop: 8,
-              }}
-            >
-              Share Results
-            </button>
-            <button 
-              className="secondary-btn" 
-              onClick={() => game.resetGameForReplay()}
-              style={{
-                backgroundColor: 'transparent',
-                border: '2px solid #c97c3b',
-                color: '#c97c3b',
-                padding: '12px 24px',
-                fontSize: '16px',
-                fontWeight: 'bold',
-                borderRadius: '20px',
-                cursor: 'pointer',
-                marginTop: 8,
-              }}
-            >
-              Play Again
-            </button>
+            {saveError && <p style={{ color: '#ff6b6b', marginTop: 0, fontSize: 14 }}>{saveError}</p>}
+            <div style={{ display: 'flex', gap: 12 }}>
+              <button 
+                onClick={() => { /* TODO: implement social sharing */ }}
+                style={{
+                  backgroundColor: 'transparent',
+                  border: '2px solid #d97706',
+                  color: '#d97706',
+                  padding: '12px 24px',
+                  fontSize: '16px',
+                  fontWeight: 'bold',
+                  borderRadius: '25px',
+                  cursor: 'pointer',
+                  minWidth: '140px',
+                }}
+              >
+                Share Results
+              </button>
+              <button 
+                onClick={() => game.resetGameForReplay()}
+                style={{
+                  backgroundColor: 'transparent',
+                  border: '2px solid #d97706',
+                  color: '#d97706',
+                  padding: '12px 24px',
+                  fontSize: '16px',
+                  fontWeight: 'bold',
+                  borderRadius: '25px',
+                  cursor: 'pointer',
+                  minWidth: '140px',
+                }}
+              >
+                Play Again
+              </button>
+            </div>
           </div>
         </div>
       )}
