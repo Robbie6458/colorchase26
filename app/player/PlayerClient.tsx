@@ -28,11 +28,11 @@ export default function PlayerClient() {
     let mounted = true;
 
     async function load() {
-      // Try to fetch from database if authenticated
+      // Always try to fetch from database if authenticated
       if (session) {
         try {
           const { data: { session: currentSession } } = await supabase.auth.getSession();
-          if (currentSession) {
+          if (currentSession?.access_token) {
             const res = await fetch("/api/palettes", {
               headers: {
                 "Authorization": `Bearer ${currentSession.access_token}`
@@ -40,22 +40,31 @@ export default function PlayerClient() {
             });
             if (res.ok) {
               const data = await res.json();
-              if (mounted) setPalettes(data);
+              if (mounted) {
+                setPalettes(data);
+                // Clear localStorage after successful database fetch
+                localStorage.removeItem("colorChasePalettes");
+                localStorage.removeItem("palettes");
+              }
               return;
+            } else {
+              console.error('Failed to fetch palettes:', await res.text());
             }
           }
         } catch (e) {
-          // fall through to localStorage
+          console.error('Error loading palettes:', e);
         }
       }
 
-      // Fall back to localStorage
-      try {
-        const raw = localStorage.getItem("colorChasePalettes") || localStorage.getItem("palettes");
-        const parsed = raw ? JSON.parse(raw) : null;
-        if (parsed && Array.isArray(parsed) && mounted) setPalettes(parsed);
-      } catch (e) {
-        // ignore
+      // Only fall back to localStorage if not authenticated
+      if (!session) {
+        try {
+          const raw = localStorage.getItem("colorChasePalettes") || localStorage.getItem("palettes");
+          const parsed = raw ? JSON.parse(raw) : null;
+          if (parsed && Array.isArray(parsed) && mounted) setPalettes(parsed);
+        } catch (e) {
+          // ignore
+        }
       }
     }
 
