@@ -3,7 +3,7 @@
 import { savePalette } from "../lib/server-actions";
 import { useAuth } from "../lib/auth-context";
 import { getTodaySeed } from "../lib/palette";
-import { useState, useEffect } from "react";
+import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 
 type GameAny = any;
@@ -13,27 +13,20 @@ export default function Overlays({ game }: { game: GameAny }) {
   const { user, session } = useAuth();
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
-  const [pendingSave, setPendingSave] = useState(false);
+  const pendingSaveRef = useRef(false);
 
   const won = game.rowResults.some((r: any) => r.every((cell: any) => cell === "correct"));
   const lost = game.gameComplete && !won;
 
-  // Auto-save palette after login
-  useEffect(() => {
-    if (pendingSave && user && session) {
-      handleSavePalette(true);
-      setPendingSave(false);
-    }
-  }, [user, session, pendingSave]);
-
-  const handleSavePalette = async (skipAuthCheck = false) => {
-    if (!skipAuthCheck && (!session || !user)) {
-      // Not logged in - open login dialog and mark for auto-save after
-      setPendingSave(true);
+  const handleSavePalette = async () => {
+    // If not logged in, open login dialog
+    if (!session || !user) {
+      pendingSaveRef.current = true;
       game.openLogin?.();
       return;
     }
 
+    // User is logged in, proceed with save
     setSaving(true);
     setSaveError(null);
 
@@ -60,6 +53,14 @@ export default function Overlays({ game }: { game: GameAny }) {
       setSaving(false);
     }
   };
+
+  // When login completes and user is now authenticated, auto-save if pendingSave was set
+  if (user && session && pendingSaveRef.current) {
+    pendingSaveRef.current = false;
+    // Trigger save immediately
+    handleSavePalette();
+  }
+
 
   return (
     <>
@@ -141,9 +142,9 @@ export default function Overlays({ game }: { game: GameAny }) {
               <div key={i} style={{ width: 40, height: 40, background: c || '#fff', borderRadius: 6, border: '1px solid #ccc' }} />
             ))}
           </div>
-          <div className="overlay-buttons" style={{ marginTop: 16, display: 'flex', flexDirection: 'column', gap: 12, alignItems: 'center' }}>
+          <div style={{ marginTop: 16, display: 'flex', flexDirection: 'column', gap: 12, alignItems: 'center' }}>
             <button 
-              onClick={() => handleSavePalette()}
+              onClick={handleSavePalette}
               disabled={saving}
               style={{
                 backgroundColor: '#6366f1',
@@ -208,9 +209,9 @@ export default function Overlays({ game }: { game: GameAny }) {
               <div key={i} style={{ width: 40, height: 40, background: c || '#fff', borderRadius: 6, border: '1px solid #ccc' }} />
             ))}
           </div>
-          <div className="overlay-buttons" style={{ marginTop: 16, display: 'flex', flexDirection: 'column', gap: 12, alignItems: 'center' }}>
+          <div style={{ marginTop: 16, display: 'flex', flexDirection: 'column', gap: 12, alignItems: 'center' }}>
             <button 
-              onClick={() => handleSavePalette()}
+              onClick={handleSavePalette}
               disabled={saving}
               style={{
                 backgroundColor: '#6366f1',
