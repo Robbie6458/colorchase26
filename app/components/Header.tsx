@@ -79,4 +79,4 @@ export default function Header({ game, title, isPlayerPage }: { game?: GameAny, 
         </button>
       </div>
     </header>
-  );
+  );}
