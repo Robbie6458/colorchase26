@@ -133,7 +133,7 @@ export default function Overlays({ game }: { game: GameAny }) {
           </div>
         </div>
       )}
-      {won && (
+      {won && !game.showLogin && !game.showStats && !game.showInfo && (
         <div id="victory-overlay" className="overlay visible">
           <div id="victory-message">You Won!</div>
           <p className="overlay-subtitle">Today's palette is yours to collect</p>
@@ -200,7 +200,7 @@ export default function Overlays({ game }: { game: GameAny }) {
         </div>
       )}
 
-      {lost && (
+      {lost && !game.showLogin && !game.showStats && !game.showInfo && (
         <div id="try-again-overlay" className="overlay visible">
           <div id="try-again-message">Better Luck Tomorrow!</div>
           <p className="overlay-subtitle">Here was today's palette</p>
