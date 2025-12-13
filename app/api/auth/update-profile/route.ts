@@ -9,18 +9,17 @@ export async function POST(request: NextRequest) {
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
     const { playerName } = await request.json();
 
-    // Get auth header
+    // Get the auth header with Bearer token
     const authHeader = request.headers.get('authorization');
-    if (!authHeader) {
+    if (!authHeader?.startsWith('Bearer ')) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    // Get authenticated user
-    const { data: { user }, error: authError } = await supabase.auth.getUser(
-      authHeader.replace('Bearer ', '')
-    );
+    const token = authHeader.replace('Bearer ', '');
+    const { data: { user }, error: authError } = await supabase.auth.getUser(token);
 
     if (authError || !user) {
+      console.error('Auth error:', authError);
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
@@ -31,11 +30,13 @@ export async function POST(request: NextRequest) {
       .eq('id', user.id);
 
     if (error) {
+      console.error('Update error:', error);
       return NextResponse.json({ error: error.message }, { status: 400 });
     }
 
     return NextResponse.json({ success: true });
   } catch (error: any) {
+    console.error('API error:', error);
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }

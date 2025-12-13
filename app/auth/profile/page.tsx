@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/app/lib/auth-context';
+import { supabase } from '@/app/lib/supabase';
 
 export default function ProfilePage() {
   const { user, profile, signOut } = useAuth();
@@ -39,9 +40,17 @@ export default function ProfilePage() {
     setLoading(true);
 
     try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session?.access_token) {
+        throw new Error('Not authenticated');
+      }
+
       const response = await fetch('/api/auth/update-profile', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session.access_token}`
+        },
         body: JSON.stringify({ playerName })
       });
 
@@ -77,9 +86,17 @@ export default function ProfilePage() {
     }
 
     try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session?.access_token) {
+        throw new Error('Not authenticated');
+      }
+
       const response = await fetch('/api/auth/update-password', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session.access_token}`
+        },
         body: JSON.stringify({ currentPassword, newPassword })
       });
 
@@ -108,7 +125,12 @@ export default function ProfilePage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-600 to-pink-500 flex items-center justify-center p-4">
       <div className="bg-white rounded-lg shadow-2xl w-full max-w-2xl p-8">
-        <h1 className="text-3xl font-bold mb-6 text-gray-800">Profile</h1>
+        <div className="flex items-center justify-between mb-6">
+          <h1 className="text-3xl font-bold text-gray-800">Profile</h1>
+          <Link href="/" className="text-purple-600 hover:text-purple-700 font-semibold text-sm">
+            ← Back to Game
+          </Link>
+        </div>
 
         {error && (
           <div className="mb-4 p-3 bg-red-100 text-red-700 rounded">
