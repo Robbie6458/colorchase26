@@ -3,11 +3,22 @@
 import React, { useEffect } from "react";
 import Link from "next/link";
 import { useAuth } from "@/app/lib/auth-context";
+import { useRouter } from "next/navigation";
 
 type GameAny = any;
 
 export default function Header({ game, title, isPlayerPage }: { game?: GameAny, title?: string, isPlayerPage?: boolean }) {
-  const { profile } = useAuth();
+  const router = useRouter();
+  const { profile, session } = useAuth();
+
+  const handleCollectionClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    // If not logged in, prompt to log in instead of navigating to collection
+    if (!session && !isPlayerPage) {
+      e.preventDefault();
+      router.push('/auth/login');
+      return;
+    }
+  };
 
   useEffect(() => {
     const els = Array.from(document.querySelectorAll<HTMLElement>(".header-icon-btn, .icon-btn"));
@@ -39,7 +50,7 @@ export default function Header({ game, title, isPlayerPage }: { game?: GameAny, 
   return (
     <header className="game-header">
       {/* left: switch between game and player */}
-      <a href={isPlayerPage ? "/" : "/player"} className="nav-link" id="player-link" aria-label={isPlayerPage ? "Open game" : "Open collection"}>
+      <a href={isPlayerPage ? "/" : "/player"} onClick={handleCollectionClick} className="nav-link" id="player-link" aria-label={isPlayerPage ? "Open game" : "Open collection"}>
         {isPlayerPage ? (
           <span className="material-symbols-outlined icon-btn" aria-hidden="true">colorize</span>
         ) : (

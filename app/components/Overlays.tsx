@@ -13,6 +13,7 @@ export default function Overlays({ game }: { game: GameAny }) {
   const { user, session } = useAuth();
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
+  const [shareMessage, setShareMessage] = useState<string | null>(null);
   const pendingSaveRef = useRef(false);
 
   const won = game.rowResults.some((r: any) => r.every((cell: any) => cell === "correct"));
@@ -54,6 +55,40 @@ export default function Overlays({ game }: { game: GameAny }) {
     }
   };
 
+  const handleShareResults = () => {
+    // Create a wordle-style grid showing game progress
+    const grid: string[] = [];
+    
+    game.rowResults.forEach((row: any[], rowIndex: number) => {
+      let rowStr = '';
+      row.forEach((result: string | null) => {
+        if (result === 'correct') {
+          rowStr += '🟩'; // Green for correct
+        } else if (result === 'misplaced') {
+          rowStr += '🟧'; // Orange for wrong spot
+        } else if (result === 'wrong') {
+          rowStr += '⬜'; // White for not in palette
+        } else {
+          rowStr += '⬜'; // Default to white for empty
+        }
+      });
+      if (rowStr) grid.push(rowStr);
+    });
+
+    const result = won ? '✅ Won!' : '❌ Lost';
+    const guesses = game.currentRow + 1;
+    const text = `ColorChase ${getTodaySeed()}\n${result} in ${guesses} guesses\n\n${grid.join('\n')}\n\nPlay at colorchase.com`;
+    
+    navigator.clipboard?.writeText(text).then(() => {
+      setShareMessage('Copied to clipboard!');
+      setTimeout(() => setShareMessage(null), 2000);
+    }).catch(err => {
+      console.error('Failed to copy:', err);
+      setShareMessage('Failed to copy');
+      setTimeout(() => setShareMessage(null), 2000);
+    });
+  };
+
   // When login completes and user is now authenticated, auto-save if pendingSave was set
   if (user && session && pendingSaveRef.current) {
     pendingSaveRef.current = false;
@@ -78,28 +113,8 @@ export default function Overlays({ game }: { game: GameAny }) {
             <div className="info-icon"><span>👤</span><p>Create an account to save your collection</p></div>
             <div className="info-buttons">
               <button id="close-info" onClick={() => game.closeInfo && game.closeInfo()}>Got It!</button>
-              <button id="create-account-info" className="secondary-btn" onClick={() => { game.closeInfo && game.closeInfo(); game.openLogin && game.openLogin(); }}>Create Account</button>
+              <button id="create-account-info" className="secondary-btn" onClick={() => { game.closeInfo && game.closeInfo(); window.location.href = '/auth/signup'; }}>Create Account</button>
             </div>
-          </div>
-        </div>
-      )}
-
-      {/* Login overlay */}
-      {game.showLogin && (
-        <div id="login-overlay" className="overlay visible">
-          <div className="login-content">
-            <h2>Save Your Collection</h2>
-            <div className="palette-border" id="palette-border"></div>
-            <button id="google-login-btn" className="google-btn hidden">Continue with Google</button>
-            <div id="login-divider" className="login-divider hidden"><span>or</span></div>
-            <input id="login-email" type="email" placeholder="Email address" />
-            <input id="login-password" type="password" placeholder="Password" />
-            <div className="login-actions">
-              <button id="login-btn" onClick={() => game.closeLogin && game.closeLogin()}>Log In</button>
-              <button id="signup-btn" onClick={() => game.closeLogin && game.closeLogin()}>Sign Up</button>
-            </div>
-            <button id="close-login-overlay" onClick={() => game.closeLogin && game.closeLogin()}>Cancel</button>
-            <div id="login-error" className="error-message"></div>
           </div>
         </div>
       )}
@@ -164,7 +179,7 @@ export default function Overlays({ game }: { game: GameAny }) {
             {saveError && <p style={{ color: '#ff6b6b', marginTop: 0, fontSize: 14 }}>{saveError}</p>}
             <div style={{ display: 'flex', gap: 12 }}>
               <button 
-                onClick={() => { /* TODO: implement social sharing */ }}
+                onClick={handleShareResults}
                 style={{
                   backgroundColor: 'transparent',
                   border: '2px solid #d97706',
@@ -179,6 +194,7 @@ export default function Overlays({ game }: { game: GameAny }) {
               >
                 Share Results
               </button>
+              {shareMessage && <p style={{ color: '#fbbf24', marginTop: 0, fontSize: 12 }}>{shareMessage}</p>}
               <button 
                 onClick={() => game.resetGameForReplay()}
                 style={{
@@ -231,7 +247,7 @@ export default function Overlays({ game }: { game: GameAny }) {
             {saveError && <p style={{ color: '#ff6b6b', marginTop: 0, fontSize: 14 }}>{saveError}</p>}
             <div style={{ display: 'flex', gap: 12 }}>
               <button 
-                onClick={() => { /* TODO: implement social sharing */ }}
+                onClick={handleShareResults}
                 style={{
                   backgroundColor: 'transparent',
                   border: '2px solid #d97706',

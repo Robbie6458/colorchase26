@@ -233,7 +233,12 @@ export default function useGame() {
 
   const openInfo = useCallback(() => setShowInfo(true), []);
   const closeInfo = useCallback(() => setShowInfo(false), []);
-  const openLogin = useCallback(() => setShowLogin(true), []);
+  const openLogin = useCallback(() => {
+    // Redirect to login page instead of showing old overlay
+    if (typeof window !== 'undefined') {
+      window.location.href = '/auth/login';
+    }
+  }, []);
   const closeLogin = useCallback(() => setShowLogin(false), []);
   const openStats = useCallback(() => setShowStats(true), []);
   const closeStats = useCallback(() => setShowStats(false), []);
