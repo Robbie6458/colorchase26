@@ -107,7 +107,10 @@ export async function savePalette(
       })
       .eq('id', existing.id);
 
-    if (updateError) throw new Error('Failed to update palette');
+    if (updateError) {
+      console.error('Palette update error:', updateError);
+      throw new Error(`Failed to update palette: ${updateError.message}`);
+    }
     return { success: true, created: false };
   }
 
@@ -122,7 +125,10 @@ export async function savePalette(
     saved_at: new Date().toISOString(),
   });
 
-  if (insertError) throw new Error('Failed to save palette');
+  if (insertError) {
+    console.error('Palette insert error:', insertError);
+    throw new Error(`Failed to save palette: ${insertError.message}`);
+  }
 
   revalidatePath('/player');
   return { success: true, created: true };
