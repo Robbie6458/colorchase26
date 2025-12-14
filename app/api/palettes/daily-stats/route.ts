@@ -1,9 +1,9 @@
-import { createClient } from "@/app/lib/supabase";
+import { createServerClient } from "@/app/lib/supabase";
 import { getTodaySeed, generateDailyColorWheel, generatePaletteByScheme } from "@/app/lib/palette";
 
 export async function GET(request: Request) {
   try {
-    const supabase = createClient();
+    const supabase = createServerClient();
 
     // Get today's date string (same logic as getTodaySeed)
     const now = new Date();
