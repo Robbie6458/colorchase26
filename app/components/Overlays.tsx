@@ -2,7 +2,7 @@
 
 import { useAuth } from "../lib/auth-context";
 import { getTodaySeed } from "../lib/palette";
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
 
 type GameAny = any;
@@ -14,28 +14,16 @@ export default function Overlays({ game }: { game: GameAny }) {
   const [saveError, setSaveError] = useState<string | null>(null);
   const [shareMessage, setShareMessage] = useState<string | null>(null);
   const pendingSaveRef = useRef(false);
+  const gameDataRef = useRef<any>(null);
 
   const won = game.rowResults.some((r: any) => r.every((cell: any) => cell === "correct"));
   const lost = game.gameComplete && !won;
 
-  const handleSavePalette = async () => {
-    // If not logged in, open login dialog
-    if (!session || !user) {
-      pendingSaveRef.current = true;
-      game.openLogin?.();
-      return;
-    }
-
-    // User is logged in, proceed with save
+  const performSave = async (token: string) => {
     setSaving(true);
     setSaveError(null);
 
     try {
-      const { data: { session: currentSession } } = await (await import("@/app/lib/supabase")).supabase.auth.getSession();
-      if (!currentSession?.access_token) {
-        throw new Error('No access token available');
-      }
-
       const today = getTodaySeed();
       const guessCount = game.currentRow + 1;
 
@@ -43,7 +31,7 @@ export default function Overlays({ game }: { game: GameAny }) {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${currentSession.access_token}`
+          'Authorization': `Bearer ${token}`
         },
         body: JSON.stringify({
           date: today,
@@ -69,46 +57,44 @@ export default function Overlays({ game }: { game: GameAny }) {
     }
   };
 
-  const handleShareResults = () => {
-    // Create a wordle-style grid showing game progress
-    const grid: string[] = [];
-    
-    game.rowResults.forEach((row: any[], rowIndex: number) => {
-      let rowStr = '';
-      row.forEach((result: string | null) => {
-        if (result === 'correct') {
-          rowStr += '🟩'; // Green for correct
-        } else if (result === 'misplaced') {
-          rowStr += '🟧'; // Orange for wrong spot
-        } else if (result === 'wrong') {
-          rowStr += '⬜'; // White for not in palette
-        } else {
-          rowStr += '⬜'; // Default to white for empty
-        }
-      });
-      if (rowStr) grid.push(rowStr);
-    });
+  const handleSavePalette = async () => {
+    // If not logged in, open login dialog
+    if (!session || !user) {
+      pendingSaveRef.current = true;
+      gameDataRef.current = game;
+      game.openLogin?.();
+      return;
+    }
 
-    const result = won ? '✅ Won!' : '❌ Lost';
-    const guesses = game.currentRow + 1;
-    const text = `ColorChase ${getTodaySeed()}\n${result} in ${guesses} guesses\n\n${grid.join('\n')}\n\nPlay at colorchase.com`;
-    
-    navigator.clipboard?.writeText(text).then(() => {
-      setShareMessage('Copied to clipboard!');
-      setTimeout(() => setShareMessage(null), 2000);
-    }).catch(err => {
-      console.error('Failed to copy:', err);
-      setShareMessage('Failed to copy');
-      setTimeout(() => setShareMessage(null), 2000);
-    });
+    // User is logged in, proceed with save
+    try {
+      const { data: { session: currentSession } } = await (await import("@/app/lib/supabase")).supabase.auth.getSession();
+      if (!currentSession?.access_token) {
+        throw new Error('No access token available');
+      }
+      await performSave(currentSession.access_token);
+    } catch (error: any) {
+      setSaveError(error?.message || "Error saving palette");
+      setSaving(false);
+    }
   };
 
-  // When login completes and user is now authenticated, auto-save if pendingSave was set
-  if (user && session && pendingSaveRef.current) {
-    pendingSaveRef.current = false;
-    // Trigger save immediately
-    handleSavePalette();
-  }
+  // Auto-save after login
+  useEffect(() => {
+    if (user && session && pendingSaveRef.current) {
+      pendingSaveRef.current = false;
+      (async () => {
+        try {
+          const { data: { session: currentSession } } = await (await import("@/app/lib/supabase")).supabase.auth.getSession();
+          if (currentSession?.access_token) {
+            await performSave(currentSession.access_token);
+          }
+        } catch (error: any) {
+          setSaveError(error?.message || "Error saving palette after login");
+        }
+      })();
+    }
+  }, [user, session]);
 
 
   return (
