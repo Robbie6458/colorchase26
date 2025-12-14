@@ -106,6 +106,40 @@ export default function Overlays({ game }: { game: GameAny }) {
     }
   };
 
+  const handleShareResults = () => {
+    // Create a wordle-style grid showing game progress
+    const grid: string[] = [];
+    
+    game.rowResults.forEach((row: any[], rowIndex: number) => {
+      let rowStr = '';
+      row.forEach((result: string | null) => {
+        if (result === 'correct') {
+          rowStr += '🟩'; // Green for correct
+        } else if (result === 'misplaced') {
+          rowStr += '🟧'; // Orange for wrong spot
+        } else if (result === 'wrong') {
+          rowStr += '⬜'; // White for not in palette
+        } else {
+          rowStr += '⬜'; // Default to white for empty
+        }
+      });
+      if (rowStr) grid.push(rowStr);
+    });
+
+    const result = won ? '✅ Won!' : '❌ Lost';
+    const guesses = game.currentRow + 1;
+    const text = `ColorChase ${getTodaySeed()}\n${result} in ${guesses} guesses\n\n${grid.join('\n')}\n\nPlay at colorchase.com`;
+    
+    navigator.clipboard?.writeText(text).then(() => {
+      setShareMessage('Copied to clipboard!');
+      setTimeout(() => setShareMessage(null), 2000);
+    }).catch(err => {
+      console.error('Failed to copy:', err);
+      setShareMessage('Failed to copy');
+      setTimeout(() => setShareMessage(null), 2000);
+    });
+  };
+
   // Auto-save after login
   useEffect(() => {
     if (user && session && pendingSaveRef.current && gameDataRef.current) {
