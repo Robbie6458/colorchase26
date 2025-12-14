@@ -13,11 +13,15 @@ CREATE TABLE IF NOT EXISTS public.palettes (
   scheme TEXT NOT NULL,
   guess_count INTEGER NOT NULL,
   won BOOLEAN NOT NULL,
+  is_favorite BOOLEAN DEFAULT FALSE,
   saved_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   UNIQUE(user_id, date)
 );
+
+-- Add is_favorite column if it doesn't exist (for existing tables)
+ALTER TABLE public.palettes ADD COLUMN IF NOT EXISTS is_favorite BOOLEAN DEFAULT FALSE;
 
 -- Create indexes for better query performance
 CREATE INDEX IF NOT EXISTS idx_palettes_user_id ON public.palettes(user_id);

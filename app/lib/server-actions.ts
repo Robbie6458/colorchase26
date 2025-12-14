@@ -155,7 +155,7 @@ export async function getUserPalettes() {
 /**
  * Toggle favorite status on a palette
  */
-export async function toggleFavoritePalette(paletteId: number) {
+export async function toggleFavoritePalette(paletteId: string) {
   const {
     data: { user },
     error: authError,
@@ -171,7 +171,7 @@ export async function toggleFavoritePalette(paletteId: number) {
     .select('is_favorite')
     .eq('id', paletteId)
     .eq('user_id', user.id)
-    .single();
+    .maybeSingle();
 
   if (!palette) {
     throw new Error('Palette not found');
@@ -191,7 +191,7 @@ export async function toggleFavoritePalette(paletteId: number) {
 /**
  * Delete a palette from user's collection
  */
-export async function deletePalette(paletteId: number) {
+export async function deletePalette(paletteId: string) {
   const {
     data: { user },
     error: authError,
