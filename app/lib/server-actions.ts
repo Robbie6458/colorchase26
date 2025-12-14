@@ -92,7 +92,7 @@ export async function savePalette(
     .select('id')
     .eq('user_id', user.id)
     .eq('date', date)
-    .single();
+    .maybeSingle();
 
   if (existing) {
     // Update existing record
