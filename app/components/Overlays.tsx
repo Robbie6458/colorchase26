@@ -143,13 +143,16 @@ export default function Overlays({ game }: { game: GameAny }) {
   // Auto-save after login
   useEffect(() => {
     if (user && session && pendingSaveRef.current && gameDataRef.current) {
+      console.log('Auto-save triggered with data:', gameDataRef.current);
       (async () => {
         try {
           const { data: { session: currentSession } } = await (await import("@/app/lib/supabase")).supabase.auth.getSession();
           if (currentSession?.access_token) {
+            console.log('Auto-saving palette after login...');
             await performSave(currentSession.access_token, gameDataRef.current);
           }
         } catch (error: any) {
+          console.error('Auto-save error:', error);
           setSaveError(error?.message || "Error saving palette after login");
         }
       })();
