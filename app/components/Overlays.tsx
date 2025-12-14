@@ -14,18 +14,27 @@ export default function Overlays({ game }: { game: GameAny }) {
   const [saveError, setSaveError] = useState<string | null>(null);
   const [shareMessage, setShareMessage] = useState<string | null>(null);
   const pendingSaveRef = useRef(false);
-  const gameDataRef = useRef<any>(null);
+  const gameDataRef = useRef<{
+    date: string;
+    colors: string[];
+    scheme: string;
+    guessCount: number;
+    won: boolean;
+  } | null>(null);
 
   const won = game.rowResults.some((r: any) => r.every((cell: any) => cell === "correct"));
   const lost = game.gameComplete && !won;
 
-  const performSave = async (token: string) => {
+  const performSave = async (token: string, paletteData?: any) => {
     setSaving(true);
     setSaveError(null);
 
     try {
-      const today = getTodaySeed();
-      const guessCount = game.currentRow + 1;
+      // Use provided paletteData if available, otherwise use gameDataRef
+      const data = paletteData || gameDataRef.current;
+      if (!data) {
+        throw new Error('No palette data to save');
+      }
 
       const response = await fetch('/api/palettes/create', {
         method: 'POST',
@@ -33,13 +42,7 @@ export default function Overlays({ game }: { game: GameAny }) {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`
         },
-        body: JSON.stringify({
-          date: today,
-          colors: game.hiddenPattern,
-          scheme: game.currentScheme || "custom",
-          guessCount,
-          won
-        })
+        body: JSON.stringify(data)
       });
 
       if (!response.ok) {
@@ -48,6 +51,9 @@ export default function Overlays({ game }: { game: GameAny }) {
       }
 
       setSaveError(null);
+      // Clear the pending save
+      gameDataRef.current = null;
+      pendingSaveRef.current = false;
       // Redirect to collection page
       router.push('/player');
     } catch (error: any) {
@@ -60,8 +66,17 @@ export default function Overlays({ game }: { game: GameAny }) {
   const handleSavePalette = async () => {
     // If not logged in, open login dialog
     if (!session || !user) {
+      // Store the game data for later
+      const today = getTodaySeed();
+      const guessCount = game.currentRow + 1;
+      gameDataRef.current = {
+        date: today,
+        colors: game.hiddenPattern,
+        scheme: game.currentScheme || "custom",
+        guessCount,
+        won
+      };
       pendingSaveRef.current = true;
-      gameDataRef.current = game;
       game.openLogin?.();
       return;
     }
@@ -72,7 +87,19 @@ export default function Overlays({ game }: { game: GameAny }) {
       if (!currentSession?.access_token) {
         throw new Error('No access token available');
       }
-      await performSave(currentSession.access_token);
+      
+      // Create palette data from current game state
+      const today = getTodaySeed();
+      const guessCount = game.currentRow + 1;
+      const paletteData = {
+        date: today,
+        colors: game.hiddenPattern,
+        scheme: game.currentScheme || "custom",
+        guessCount,
+        won
+      };
+      
+      await performSave(currentSession.access_token, paletteData);
     } catch (error: any) {
       setSaveError(error?.message || "Error saving palette");
       setSaving(false);
@@ -81,13 +108,12 @@ export default function Overlays({ game }: { game: GameAny }) {
 
   // Auto-save after login
   useEffect(() => {
-    if (user && session && pendingSaveRef.current) {
-      pendingSaveRef.current = false;
+    if (user && session && pendingSaveRef.current && gameDataRef.current) {
       (async () => {
         try {
           const { data: { session: currentSession } } = await (await import("@/app/lib/supabase")).supabase.auth.getSession();
           if (currentSession?.access_token) {
-            await performSave(currentSession.access_token);
+            await performSave(currentSession.access_token, gameDataRef.current);
           }
         } catch (error: any) {
           setSaveError(error?.message || "Error saving palette after login");
