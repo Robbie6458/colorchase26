@@ -74,10 +74,10 @@ export default function DailyStats() {
           <span className="stat-icon">🎨</span>
           <span className="stat-text"><span>{stats?.collectionCount || 0}</span> collected today</span>
         </div>
-        {stats?.bestGuessCount !== null && stats?.bestPlayerNames?.length > 0 && (
+        {stats && stats.bestGuessCount !== null && stats.bestPlayerNames?.length > 0 && (
           <div className="stat-item">
             <span className="stat-icon">🏆</span>
-            <span className="stat-text"><span>{currentBestPlayer || "—"}</span> got it in <span>{stats.bestGuessCount}</span></span>
+            <span className="stat-text"><span>{currentBestPlayer || "—"}</span> got it in <span>{stats?.bestGuessCount}</span></span>
           </div>
         )}
         <div className="stat-item">
