@@ -22,6 +22,44 @@ export default function Overlays({ game }: { game: GameAny }) {
     won: boolean;
   } | null>(null);
 
+  // Save game data to localStorage for persistence through login flow
+  const savePendingGameData = (data: any) => {
+    gameDataRef.current = data;
+    try {
+      localStorage.setItem('_pendingPaletteData', JSON.stringify(data));
+      pendingSaveRef.current = true;
+      console.log('Saved pending palette data to localStorage:', data);
+    } catch (e) {
+      console.error('Failed to save pending data to localStorage:', e);
+    }
+  };
+
+  // Restore game data from localStorage
+  const getPendingGameData = () => {
+    try {
+      const stored = localStorage.getItem('_pendingPaletteData');
+      if (stored) {
+        const data = JSON.parse(stored);
+        console.log('Restored pending palette data from localStorage:', data);
+        return data;
+      }
+    } catch (e) {
+      console.error('Failed to restore pending data from localStorage:', e);
+    }
+    return null;
+  };
+
+  // Clear pending data
+  const clearPendingData = () => {
+    gameDataRef.current = null;
+    pendingSaveRef.current = false;
+    try {
+      localStorage.removeItem('_pendingPaletteData');
+    } catch (e) {
+      console.error('Failed to clear pending data:', e);
+    }
+  };
+
   const won = game.rowResults.some((r: any) => r.every((cell: any) => cell === "correct"));
   const lost = game.gameComplete && !won;
 
@@ -30,8 +68,8 @@ export default function Overlays({ game }: { game: GameAny }) {
     setSaveError(null);
 
     try {
-      // Use provided paletteData if available, otherwise use gameDataRef
-      const data = paletteData || gameDataRef.current;
+      // Use provided paletteData if available, otherwise try to get from localStorage
+      const data = paletteData || getPendingGameData();
       if (!data) {
         throw new Error('No palette data to save');
       }
@@ -51,9 +89,8 @@ export default function Overlays({ game }: { game: GameAny }) {
       }
 
       setSaveError(null);
-      // Clear the pending save
-      gameDataRef.current = null;
-      pendingSaveRef.current = false;
+      // Clear the pending save data
+      clearPendingData();
       // Redirect to collection page
       router.push('/player');
     } catch (error: any) {
@@ -67,18 +104,17 @@ export default function Overlays({ game }: { game: GameAny }) {
     console.log('handleSavePalette called - session:', !!session, 'user:', !!user);
     // If not logged in, open login dialog
     if (!session || !user) {
-      // Store the game data for later
+      // Store the game data for later using localStorage
       const today = getTodaySeed();
       const guessCount = game.currentRow + 1;
-      gameDataRef.current = {
+      const data = {
         date: today,
         colors: game.hiddenPattern,
         scheme: game.currentScheme || "custom",
         guessCount,
         won
       };
-      pendingSaveRef.current = true;
-      console.log('Stored game data for later save:', gameDataRef.current);
+      savePendingGameData(data);
       game.openLogin?.();
       return;
     }
@@ -144,22 +180,30 @@ export default function Overlays({ game }: { game: GameAny }) {
 
   // Auto-save after login
   useEffect(() => {
-    console.log('Overlays useEffect triggered - user:', !!user, 'session:', !!session, 'pendingSave:', pendingSaveRef.current, 'gameData:', !!gameDataRef.current);
-    if (user && session && pendingSaveRef.current && gameDataRef.current) {
-      console.log('Auto-save triggered with data:', gameDataRef.current);
-      (async () => {
-        try {
-          const { data: { session: currentSession } } = await (await import("@/app/lib/supabase")).supabase.auth.getSession();
-          console.log('Got session for auto-save:', !!currentSession?.access_token);
-          if (currentSession?.access_token) {
-            console.log('Auto-saving palette after login...');
-            await performSave(currentSession.access_token, gameDataRef.current);
+    console.log('Overlays useEffect triggered - user:', !!user, 'session:', !!session);
+    if (user && session) {
+      // Check localStorage for pending data
+      const pendingData = getPendingGameData();
+      console.log('Retrieved pending data from localStorage:', pendingData);
+      
+      if (pendingData) {
+        console.log('Auto-save triggered with data:', pendingData);
+        (async () => {
+          try {
+            const { data: { session: currentSession } } = await (await import("@/app/lib/supabase")).supabase.auth.getSession();
+            console.log('Got session for auto-save:', !!currentSession?.access_token);
+            if (currentSession?.access_token) {
+              console.log('Auto-saving palette after login...');
+              await performSave(currentSession.access_token, pendingData);
+              // Clear the pending data after successful save
+              clearPendingData();
+            }
+          } catch (error: any) {
+            console.error('Auto-save error:', error);
+            setSaveError(error?.message || "Error saving palette after login");
           }
-        } catch (error: any) {
-          console.error('Auto-save error:', error);
-          setSaveError(error?.message || "Error saving palette after login");
-        }
-      })();
+        })();
+      }
     }
   }, [user, session]);
 
