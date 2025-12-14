@@ -64,6 +64,7 @@ export default function Overlays({ game }: { game: GameAny }) {
   };
 
   const handleSavePalette = async () => {
+    console.log('handleSavePalette called - session:', !!session, 'user:', !!user);
     // If not logged in, open login dialog
     if (!session || !user) {
       // Store the game data for later
@@ -77,6 +78,7 @@ export default function Overlays({ game }: { game: GameAny }) {
         won
       };
       pendingSaveRef.current = true;
+      console.log('Stored game data for later save:', gameDataRef.current);
       game.openLogin?.();
       return;
     }
@@ -142,11 +144,13 @@ export default function Overlays({ game }: { game: GameAny }) {
 
   // Auto-save after login
   useEffect(() => {
+    console.log('Overlays useEffect triggered - user:', !!user, 'session:', !!session, 'pendingSave:', pendingSaveRef.current, 'gameData:', !!gameDataRef.current);
     if (user && session && pendingSaveRef.current && gameDataRef.current) {
       console.log('Auto-save triggered with data:', gameDataRef.current);
       (async () => {
         try {
           const { data: { session: currentSession } } = await (await import("@/app/lib/supabase")).supabase.auth.getSession();
+          console.log('Got session for auto-save:', !!currentSession?.access_token);
           if (currentSession?.access_token) {
             console.log('Auto-saving palette after login...');
             await performSave(currentSession.access_token, gameDataRef.current);
