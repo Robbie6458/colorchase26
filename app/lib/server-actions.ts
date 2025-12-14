@@ -115,6 +115,7 @@ export async function savePalette(
   }
 
   // Create new record
+  console.log('Saving palette with:', { user_id: user.id, date, colors, scheme, guess_count: guessCount, won });
   const { error: insertError } = await supabase.from('palettes').insert({
     user_id: user.id,
     date,
