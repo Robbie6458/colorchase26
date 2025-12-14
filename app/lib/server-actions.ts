@@ -69,6 +69,7 @@ export async function updatePlayerName(newName: string) {
 
 /**
  * Save a palette to user's collection
+ * @deprecated Use POST /api/palettes/create instead
  */
 export async function savePalette(
   date: string,
@@ -77,62 +78,7 @@ export async function savePalette(
   guessCount: number,
   won: boolean
 ) {
-  const {
-    data: { user },
-    error: authError,
-  } = await supabase.auth.getUser();
-
-  if (authError || !user) {
-    throw new Error('Not authenticated');
-  }
-
-  // Check if palette for this date already exists
-  const { data: existing } = await supabase
-    .from('palettes')
-    .select('id')
-    .eq('user_id', user.id)
-    .eq('date', date)
-    .maybeSingle();
-
-  if (existing) {
-    // Update existing record
-    const { error: updateError } = await supabase
-      .from('palettes')
-      .update({
-        colors,
-        scheme,
-        guess_count: guessCount,
-        won,
-        saved_at: new Date().toISOString(),
-      })
-      .eq('id', existing.id);
-
-    if (updateError) {
-      console.error('Palette update error:', updateError);
-      throw new Error(`Failed to update palette: ${updateError.message}`);
-    }
-    return { success: true, created: false };
-  }
-
-  // Create new record
-  console.log('Saving palette with:', { user_id: user.id, date, colors, scheme, guess_count: guessCount, won });
-  const { error: insertError } = await supabase.from('palettes').insert({
-    user_id: user.id,
-    date,
-    colors,
-    scheme,
-    guess_count: guessCount,
-    won,
-    saved_at: new Date().toISOString(),
-  });
-
-  if (insertError) {
-    console.error('Palette insert error:', insertError);
-    throw new Error(`Failed to save palette: ${insertError.message}`);
-  }
-
-  revalidatePath('/player');
-  return { success: true, created: true };
+  throw new Error('Use API route /api/palettes/create instead');
 }
 
 /**

@@ -35,20 +35,15 @@ export async function GET(request: NextRequest) {
     }
 
     // Transform database format to match expected format
-    const palettes = data?.map((p: any) => {
-      // Ensure colors is an array of strings
-      const colors = Array.isArray(p.colors) ? p.colors : [];
-      console.log('Palette colors:', p.colors, 'Type:', typeof p.colors, 'IsArray:', Array.isArray(p.colors));
-      return {
-        id: p.id,
-        date: p.date,
-        colors: colors,
-        scheme: p.scheme,
-        isFavorite: p.is_favorite,
-        won: p.won,
-        guessCount: p.guess_count
-      };
-    }) || [];
+    const palettes = data?.map((p: any) => ({
+      id: p.id,
+      date: p.date,
+      colors: Array.isArray(p.colors) ? p.colors : [],
+      scheme: p.scheme,
+      isFavorite: p.is_favorite,
+      won: p.won,
+      guessCount: p.guess_count
+    })) || [];
 
     return NextResponse.json(palettes);
   } catch (error: any) {

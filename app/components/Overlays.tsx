@@ -1,6 +1,5 @@
 "use client";
 
-import { savePalette } from "../lib/server-actions";
 import { useAuth } from "../lib/auth-context";
 import { getTodaySeed } from "../lib/palette";
 import { useState, useRef } from "react";
@@ -32,22 +31,37 @@ export default function Overlays({ game }: { game: GameAny }) {
     setSaveError(null);
 
     try {
+      const { data: { session: currentSession } } = await (await import("@/app/lib/supabase")).supabase.auth.getSession();
+      if (!currentSession?.access_token) {
+        throw new Error('No access token available');
+      }
+
       const today = getTodaySeed();
       const guessCount = game.currentRow + 1;
-      
-      const result = await savePalette(
-        today,
-        game.hiddenPattern,
-        game.currentScheme || "custom",
-        guessCount,
-        won
-      );
 
-      if (result.success) {
-        setSaveError(null);
-        // Redirect to collection page
-        router.push('/player');
+      const response = await fetch('/api/palettes/create', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${currentSession.access_token}`
+        },
+        body: JSON.stringify({
+          date: today,
+          colors: game.hiddenPattern,
+          scheme: game.currentScheme || "custom",
+          guessCount,
+          won
+        })
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to save palette');
       }
+
+      setSaveError(null);
+      // Redirect to collection page
+      router.push('/player');
     } catch (error: any) {
       setSaveError(error?.message || "Error saving palette");
     } finally {
