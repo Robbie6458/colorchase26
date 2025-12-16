@@ -202,6 +202,42 @@ export default function Overlays({ game }: { game: GameAny }) {
     });
   };
 
+  const handleCopyResults = () => {
+    // Create a wordle-style grid showing game progress
+    const grid: string[] = [];
+    
+    game.rowResults.forEach((row: any[], rowIndex: number) => {
+      let rowStr = '';
+      row.forEach((result: string | null) => {
+        if (result === 'correct') {
+          rowStr += '🟩';
+        } else if (result === 'misplaced') {
+          rowStr += '🟧';
+        } else if (result === 'wrong') {
+          rowStr += '⬜';
+        } else {
+          rowStr += '⬜';
+        }
+      });
+      if (rowStr) grid.push(rowStr);
+    });
+
+    const result = won ? '✅ Won!' : '❌ Lost';
+    const guesses = game.currentRow + 1;
+    const date = getTodaySeed();
+    const url = window.location.origin;
+    const shareText = `Color Chase ${date}\n${result} in ${guesses}/5\n\n${grid.join('\n')}\n\nPlay at ${url}`;
+    
+    navigator.clipboard?.writeText(shareText).then(() => {
+      setShareMessage('📋 Copied to clipboard!');
+      setTimeout(() => setShareMessage(null), 2000);
+    }).catch(err => {
+      console.error('Failed to copy:', err);
+      setShareMessage('Failed to copy');
+      setTimeout(() => setShareMessage(null), 2000);
+    });
+  };
+
   // Auto-save after login
   useEffect(() => {
     console.log('Overlays useEffect triggered - user:', !!user, 'session:', !!session);
@@ -325,7 +361,24 @@ export default function Overlays({ game }: { game: GameAny }) {
             </button>
             {saveError && <p style={{ color: '#ff6b6b', marginTop: 0, fontSize: 14 }}>{saveError}</p>}
             {shareMessage && <p style={{ color: '#fbbf24', marginTop: 0, fontSize: 12 }}>{shareMessage}</p>}
-            <div style={{ display: 'flex', gap: 16, justifyContent: 'center', width: '100%' }}>
+            <div style={{ display: 'flex', gap: 16, justifyContent: 'center', width: '100%', flexWrap: 'wrap' }}>
+              <button 
+                onClick={handleCopyResults}
+                style={{
+                  backgroundColor: '#10b981',
+                  border: 'none',
+                  color: '#fff',
+                  padding: '12px 28px',
+                  fontSize: '15px',
+                  fontWeight: 'bold',
+                  borderRadius: '25px',
+                  cursor: 'pointer',
+                  transition: 'all 0.2s ease',
+                  flex: '0 1 auto',
+                }}
+              >
+                📋 Copy Result
+              </button>
               <button 
                 onClick={handleShareResults}
                 style={{
@@ -432,7 +485,24 @@ export default function Overlays({ game }: { game: GameAny }) {
               {saving ? 'Saving...' : 'Save Today\'s Palette'}
             </button>
             {saveError && <p style={{ color: '#ff6b6b', marginTop: 0, fontSize: 14 }}>{saveError}</p>}
-            <div style={{ display: 'flex', gap: 16, justifyContent: 'center', width: '100%' }}>
+            <div style={{ display: 'flex', gap: 16, justifyContent: 'center', width: '100%', flexWrap: 'wrap' }}>
+              <button 
+                onClick={handleCopyResults}
+                style={{
+                  backgroundColor: '#10b981',
+                  border: 'none',
+                  color: '#fff',
+                  padding: '12px 28px',
+                  fontSize: '15px',
+                  fontWeight: 'bold',
+                  borderRadius: '25px',
+                  cursor: 'pointer',
+                  transition: 'all 0.2s ease',
+                  flex: '0 1 auto',
+                }}
+              >
+                📋 Copy Result
+              </button>
               <button 
                 onClick={handleShareResults}
                 style={{

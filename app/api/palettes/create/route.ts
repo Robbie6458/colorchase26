@@ -43,31 +43,22 @@ export async function POST(request: NextRequest) {
     // Check if palette for this date already exists
     const { data: existing } = await supabase
       .from('palettes')
-      .select('id')
+      .select('id, guess_count, won')
       .eq('user_id', user.id)
       .eq('date', date)
       .maybeSingle();
 
     if (existing) {
-      // Update existing record
-      const { error: updateError } = await supabase
-        .from('palettes')
-        .update({
-          colors,
-          scheme,
-          guess_count: guessCount,
-          won,
-          saved_at: new Date().toISOString(),
-        })
-        .eq('id', existing.id);
-
-      if (updateError) {
-        return NextResponse.json(
-          { error: `Failed to update palette: ${updateError.message}` },
-          { status: 400 }
-        );
-      }
-      return NextResponse.json({ success: true, created: false });
+      // Don't update - keep the first attempt only
+      return NextResponse.json({ 
+        success: true, 
+        created: false,
+        message: 'Palette already saved. Only your first attempt counts!',
+        existingResult: {
+          guessCount: existing.guess_count,
+          won: existing.won
+        }
+      });
     }
 
     // Create new record
