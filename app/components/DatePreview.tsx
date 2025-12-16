@@ -51,7 +51,7 @@ export default function DatePreview({ onClose }: DatePreviewProps) {
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-lg shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-        <div className="sticky top-0 bg-gradient-to-r from-purple-500 to-pink-500 text-white p-4 flex justify-between items-center">
+        <div className="sticky top-0 bg-linear-to-r from-purple-500 to-pink-500 text-white p-4 flex justify-between items-center">
           <h2 className="text-xl font-bold">Date Preview</h2>
           <button
             onClick={onClose}
