@@ -550,17 +550,6 @@ function StatsOverlay({ game, session }: { game: any, session: any }) {
             <div className="stat-label">Max Streak</div>
           </div>
         </div>
-        <h3>GUESS DISTRIBUTION</h3>
-        <div className="guess-distribution">
-          {[1, 2, 3, 4, 5].map(i => (
-            <div key={i} className="distribution-row">
-              <div className="row-label">{i}</div>
-              <div className="row-bar" style={{ width: `${stats.distribution[i] ? (stats.distribution[i] / maxCount) * 100 : 0}%`, minWidth: stats.distribution[i] ? '20px' : '0' }}>
-                <span className="row-count">{stats.distribution[i] || 0}</span>
-              </div>
-            </div>
-          ))}
-        </div>
         <button id="close-stats" onClick={() => game.closeStats && game.closeStats()}>Close</button>
       </div>
     </div>
