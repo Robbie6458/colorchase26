@@ -215,19 +215,42 @@ export default function Overlays({ game }: { game: GameAny }) {
     <>
       {/* Info overlay */}
       {game.showInfo && (
-        <div id="info-overlay" className="overlay visible">
-          <div className="info-content">
-            <h2>How to Play</h2>
-            <div className="info-icon"><span>🎨</span><p>Guess the hidden 5-color palette in 5 tries</p></div>
-            <div className="info-icon"><span>🔵</span><p>Click colors on the wheel to fill each row</p></div>
-            <div className="info-icon"><span>🟢</span><p>Green border = right color, right spot</p></div>
-            <div className="info-icon"><span>🟠</span><p>Orange border = right color, wrong spot</p></div>
-            <div className="info-icon"><span>✕</span><p>X mark = color not in today's palette</p></div>
-            <div className="info-icon"><span>💾</span><p>Win or lose, collect each day's palette!</p></div>
-            <div className="info-icon"><span>👤</span><p>Create an account to save your collection</p></div>
-            <div className="info-buttons">
-              <button id="close-info" onClick={() => game.closeInfo && game.closeInfo()}>Got It!</button>
+        <div className="game-overlay">
+          <div className="overlay-card">
+            <h2 className="overlay-title">How to Play</h2>
+            <div className="info-list">
+              <div className="info-item">
+                <span className="info-emoji">🎨</span>
+                <p>Guess the hidden 5-color palette in 5 tries</p>
+              </div>
+              <div className="info-item">
+                <span className="info-emoji">🔵</span>
+                <p>Click colors on the wheel to fill each row</p>
+              </div>
+              <div className="info-item">
+                <span className="info-emoji">🟢</span>
+                <p>Green border = right color, right spot</p>
+              </div>
+              <div className="info-item">
+                <span className="info-emoji">🟠</span>
+                <p>Orange border = right color, wrong spot</p>
+              </div>
+              <div className="info-item">
+                <span className="info-emoji">✕</span>
+                <p>X mark = color not in today's palette</p>
+              </div>
+              <div className="info-item">
+                <span className="info-emoji">💾</span>
+                <p>Win or lose, collect each day's palette!</p>
+              </div>
+              <div className="info-item">
+                <span className="info-emoji">👤</span>
+                <p>Create an account to save your collection</p>
+              </div>
             </div>
+            <button className="primary-button" onClick={() => game.closeInfo && game.closeInfo()}>
+              Got It!
+            </button>
           </div>
         </div>
       )}
@@ -236,110 +259,40 @@ export default function Overlays({ game }: { game: GameAny }) {
       {game.showStats && (
         <StatsOverlay game={game} session={session} />
       )}
+
+      {/* Victory overlay */}
       {won && !game.showLogin && !game.showStats && !game.showInfo && (
-        <div id="victory-overlay" className="overlay visible">
-          <style>{`
-            @keyframes slideInDown {
-              from {
-                opacity: 0;
-                transform: translateY(-20px);
-              }
-              to {
-                opacity: 1;
-                transform: translateY(0);
-              }
-            }
-            @keyframes popIn {
-              0% {
-                opacity: 0;
-                transform: scale(0.8);
-              }
-              50% {
-                transform: scale(1.1);
-              }
-              100% {
-                opacity: 1;
-                transform: scale(1);
-              }
-            }
-            #victory-overlay #victory-message {
-              animation: slideInDown 0.6s ease-out;
-            }
-            #victory-overlay #reveal-pattern > div {
-              animation: popIn 0.6s ease-out;
-              animation-fill-mode: both;
-            }
-            #victory-overlay #reveal-pattern > div:nth-child(1) { animation-delay: 0.1s; }
-            #victory-overlay #reveal-pattern > div:nth-child(2) { animation-delay: 0.2s; }
-            #victory-overlay #reveal-pattern > div:nth-child(3) { animation-delay: 0.3s; }
-            #victory-overlay #reveal-pattern > div:nth-child(4) { animation-delay: 0.4s; }
-            #victory-overlay #reveal-pattern > div:nth-child(5) { animation-delay: 0.5s; }
-          `}</style>
-          <div id="victory-message">You Won!</div>
-          <p className="overlay-subtitle">Today's palette is yours to collect</p>
-          <div id="reveal-pattern" style={{ display: 'flex', gap: 12, marginTop: 20, justifyContent: 'center' }}>
-            {game.hiddenPattern.map((c: string, i: number) => (
-              <div key={i} style={{ width: 60, height: 60, background: c || '#fff', borderRadius: 8, border: '2px solid rgba(255,255,255,0.3)', boxShadow: '0 8px 16px rgba(0,0,0,0.3)' }} />
-            ))}
-          </div>
-          <div style={{ marginTop: 20, display: 'flex', flexDirection: 'column', gap: 16, alignItems: 'center', width: '100%' }}>
+        <div className="game-overlay">
+          <div className="overlay-card">
+            <h2 className="victory-title">You Won!</h2>
+            <p className="overlay-subtitle">Today's palette is yours to collect</p>
+            
+            <div className="color-reveal">
+              {game.hiddenPattern.map((c: string, i: number) => (
+                <div 
+                  key={i} 
+                  className="reveal-color"
+                  style={{ backgroundColor: c, animationDelay: `${i * 0.1}s` }}
+                />
+              ))}
+            </div>
+
             <button 
+              className="primary-button save-button"
               onClick={handleSavePalette}
               disabled={saving}
-              style={{
-                backgroundColor: '#6366f1',
-                border: 'none',
-                color: '#fff',
-                padding: '14px 32px',
-                fontSize: '16px',
-                fontWeight: 'bold',
-                borderRadius: '25px',
-                cursor: saving ? 'not-allowed' : 'pointer',
-                opacity: saving ? 0.7 : 1,
-                boxShadow: '0 4px 12px rgba(99, 102, 241, 0.4)',
-                transition: 'all 0.2s ease',
-              }}
             >
               {saving ? 'Saving...' : 'Save Today\'s Palette'}
             </button>
-            {saveError && <p style={{ color: '#ff6b6b', marginTop: 0, fontSize: 14 }}>{saveError}</p>}
-            {shareMessage && <p style={{ color: '#fbbf24', marginTop: 0, fontSize: 12 }}>{shareMessage}</p>}
-            <div style={{ display: 'flex', gap: 12, justifyContent: 'center', width: '100%', flexWrap: 'nowrap' }}>
-              <button 
-                onClick={handleShareResults}
-                style={{
-                  backgroundColor: '#10b981',
-                  border: 'none',
-                  color: '#fff',
-                  padding: '12px 20px',
-                  fontSize: '14px',
-                  fontWeight: 'bold',
-                  borderRadius: '25px',
-                  cursor: 'pointer',
-                  transition: 'all 0.2s ease',
-                  boxShadow: '0 4px 12px rgba(16, 185, 129, 0.3)',
-                  whiteSpace: 'nowrap',
-                  minWidth: 'auto',
-                }}
-              >
+
+            {saveError && <p className="error-message">{saveError}</p>}
+            {shareMessage && <p className="success-message">{shareMessage}</p>}
+
+            <div className="action-buttons">
+              <button className="share-button" onClick={handleShareResults}>
                 Share Results
               </button>
-              <button 
-                onClick={() => game.resetGameForReplay()}
-                style={{
-                  backgroundColor: 'transparent',
-                  border: '2px solid rgba(255, 255, 255, 0.3)',
-                  color: '#fff',
-                  padding: '12px 20px',
-                  fontSize: '14px',
-                  fontWeight: 'bold',
-                  borderRadius: '25px',
-                  cursor: 'pointer',
-                  transition: 'all 0.2s ease',
-                  whiteSpace: 'nowrap',
-                  minWidth: 'auto',
-                }}
-              >
+              <button className="secondary-button" onClick={() => game.resetGameForReplay()}>
                 Play Again
               </button>
             </div>
@@ -347,117 +300,45 @@ export default function Overlays({ game }: { game: GameAny }) {
         </div>
       )}
 
+      {/* Defeat overlay */}
       {lost && !game.showLogin && !game.showStats && !game.showInfo && (
-        <div id="try-again-overlay" className="overlay visible">
-          <style>{`
-            @keyframes slideInDown {
-              from {
-                opacity: 0;
-                transform: translateY(-20px);
-              }
-              to {
-                opacity: 1;
-                transform: translateY(0);
-              }
-            }
-            @keyframes popIn {
-              0% {
-                opacity: 0;
-                transform: scale(0.8);
-              }
-              50% {
-                transform: scale(1.1);
-              }
-              100% {
-                opacity: 1;
-                transform: scale(1);
-              }
-            }
-            #try-again-overlay #try-again-message {
-              animation: slideInDown 0.6s ease-out;
-            }
-            #try-again-overlay #reveal-pattern-lose > div {
-              animation: popIn 0.6s ease-out;
-              animation-fill-mode: both;
-            }
-            #try-again-overlay #reveal-pattern-lose > div:nth-child(1) { animation-delay: 0.1s; }
-            #try-again-overlay #reveal-pattern-lose > div:nth-child(2) { animation-delay: 0.2s; }
-            #try-again-overlay #reveal-pattern-lose > div:nth-child(3) { animation-delay: 0.3s; }
-            #try-again-overlay #reveal-pattern-lose > div:nth-child(4) { animation-delay: 0.4s; }
-            #try-again-overlay #reveal-pattern-lose > div:nth-child(5) { animation-delay: 0.5s; }
-          `}</style>
-          <div id="try-again-message">Better Luck Tomorrow!</div>
-          <p className="overlay-subtitle">Here was today's palette</p>
-          <div id="reveal-pattern-lose" style={{ display: 'flex', gap: 12, marginTop: 20, justifyContent: 'center' }}>
-            {game.hiddenPattern.map((c: string, i: number) => (
-              <div key={i} style={{ width: 60, height: 60, background: c || '#fff', borderRadius: 8, border: '2px solid rgba(255,255,255,0.3)', boxShadow: '0 8px 16px rgba(0,0,0,0.3)' }} />
-            ))}
-          </div>
-          <div style={{ marginTop: 20, display: 'flex', flexDirection: 'column', gap: 16, alignItems: 'center', width: '100%' }}>
+        <div className="game-overlay">
+          <div className="overlay-card">
+            <h2 className="defeat-title">Better Luck Tomorrow!</h2>
+            <p className="overlay-subtitle">Here was today's palette</p>
+            
+            <div className="color-reveal">
+              {game.hiddenPattern.map((c: string, i: number) => (
+                <div 
+                  key={i} 
+                  className="reveal-color"
+                  style={{ backgroundColor: c, animationDelay: `${i * 0.1}s` }}
+                />
+              ))}
+            </div>
+
             <button 
+              className="primary-button save-button"
               onClick={handleSavePalette}
               disabled={saving}
-              style={{
-                backgroundColor: '#6366f1',
-                border: 'none',
-                color: '#fff',
-                padding: '14px 32px',
-                fontSize: '16px',
-                fontWeight: 'bold',
-                borderRadius: '25px',
-                cursor: saving ? 'not-allowed' : 'pointer',
-                opacity: saving ? 0.7 : 1,
-                boxShadow: '0 4px 12px rgba(99, 102, 241, 0.4)',
-                transition: 'all 0.2s ease',
-              }}
             >
               {saving ? 'Saving...' : 'Save Today\'s Palette'}
             </button>
-            {saveError && <p style={{ color: '#ff6b6b', marginTop: 0, fontSize: 14 }}>{saveError}</p>}
-            <div style={{ display: 'flex', gap: 12, justifyContent: 'center', width: '100%', flexWrap: 'nowrap' }}>
-              <button 
-                onClick={handleShareResults}
-                style={{
-                  backgroundColor: '#10b981',
-                  border: 'none',
-                  color: '#fff',
-                  padding: '12px 20px',
-                  fontSize: '14px',
-                  fontWeight: 'bold',
-                  borderRadius: '25px',
-                  cursor: 'pointer',
-                  transition: 'all 0.2s ease',
-                  boxShadow: '0 4px 12px rgba(16, 185, 129, 0.3)',
-                  whiteSpace: 'nowrap',
-                  minWidth: 'auto',
-                }}
-              >
+
+            {saveError && <p className="error-message">{saveError}</p>}
+            {shareMessage && <p className="success-message">{shareMessage}</p>}
+
+            <div className="action-buttons">
+              <button className="share-button" onClick={handleShareResults}>
                 Share Results
               </button>
-              <button 
-                onClick={() => game.resetGameForReplay()}
-                style={{
-                  backgroundColor: 'transparent',
-                  border: '2px solid rgba(255, 255, 255, 0.3)',
-                  color: '#fff',
-                  padding: '12px 20px',
-                  fontSize: '14px',
-                  fontWeight: 'bold',
-                  borderRadius: '25px',
-                  cursor: 'pointer',
-                  transition: 'all 0.2s ease',
-                  whiteSpace: 'nowrap',
-                  minWidth: 'auto',
-                }}
-              >
+              <button className="secondary-button" onClick={() => game.resetGameForReplay()}>
                 Play Again
               </button>
             </div>
           </div>
         </div>
       )}
-
-      {/* Login / info / stats overlays remain present but hidden until wired to state */}
     </>
   );
 }
@@ -534,31 +415,31 @@ function StatsOverlay({ game, session }: { game: any, session: any }) {
 
   if (!stats) return null;
 
-  const maxCount = Math.max(...Object.values(stats.distribution).map((v: any) => v || 0), 1);
-
   return (
-    <div id="stats-overlay" className="overlay visible">
-      <div className="stats-content">
-        <h2>Your Statistics</h2>
+    <div className="game-overlay">
+      <div className="overlay-card">
+        <h2 className="overlay-title">Your Statistics</h2>
         <div className="stats-grid">
-          <div className="stat-box">
-            <div className="stat-number">{stats.played}</div>
+          <div className="stat-item">
+            <div className="stat-value">{stats.played}</div>
             <div className="stat-label">Played</div>
           </div>
-          <div className="stat-box">
-            <div className="stat-number">{stats.winPct}</div>
+          <div className="stat-item">
+            <div className="stat-value">{stats.winPct}</div>
             <div className="stat-label">Win %</div>
           </div>
-          <div className="stat-box">
-            <div className="stat-number">{stats.currentStreak}</div>
+          <div className="stat-item">
+            <div className="stat-value">{stats.currentStreak}</div>
             <div className="stat-label">Current Streak</div>
           </div>
-          <div className="stat-box">
-            <div className="stat-number">{stats.maxStreak}</div>
+          <div className="stat-item">
+            <div className="stat-value">{stats.maxStreak}</div>
             <div className="stat-label">Max Streak</div>
           </div>
         </div>
-        <button id="close-stats" onClick={() => game.closeStats && game.closeStats()}>Close</button>
+        <button className="primary-button" onClick={() => game.closeStats && game.closeStats()}>
+          Close
+        </button>
       </div>
     </div>
   );
