@@ -11,8 +11,9 @@ interface DailyStatsData {
 
 export default function DailyStats() {
   const [stats, setStats] = useState<DailyStatsData | null>(null);
-  const [countdown, setCountdown] = useState<string>("--:--");
+  const [countdown, setCountdown] = useState<string>("--:--:--");
   const [currentPlayerIndex, setCurrentPlayerIndex] = useState(0);
+  const [remainingTime, setRemainingTime] = useState<number>(0);
 
   // Fetch daily stats on mount
   useEffect(() => {
@@ -22,6 +23,7 @@ export default function DailyStats() {
         if (response.ok) {
           const data = await response.json();
           setStats(data);
+          setRemainingTime(data.timeToNextReset);
         }
       } catch (error) {
         console.error("Error fetching daily stats:", error);
@@ -29,30 +31,45 @@ export default function DailyStats() {
     };
 
     fetchStats();
+    // Refetch stats every minute to keep them fresh
+    const statsInterval = setInterval(fetchStats, 60000);
+    return () => clearInterval(statsInterval);
   }, []);
 
-  // Update countdown timer every minute
+  // Update countdown timer every second
   useEffect(() => {
     if (!stats) return;
 
     const updateCountdown = () => {
-      const timeLeft = stats.timeToNextReset;
-      if (timeLeft <= 0) {
-        setCountdown("00:00");
-        return;
-      }
-
-      const hours = Math.floor(timeLeft / 60 / 60);
-      const minutes = Math.floor((timeLeft / 60) % 60);
-      setCountdown(`${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`);
+      setRemainingTime((prev) => {
+        const newTime = Math.max(0, prev - 1);
+        
+        const hours = Math.floor(newTime / 3600);
+        const minutes = Math.floor((newTime % 3600) / 60);
+        const seconds = newTime % 60;
+        
+        setCountdown(
+          `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`
+        );
+        
+        return newTime;
+      });
     };
 
-    updateCountdown();
-    const interval = setInterval(updateCountdown, 60000); // Update every minute
+    // Set initial countdown
+    const hours = Math.floor(stats.timeToNextReset / 3600);
+    const minutes = Math.floor((stats.timeToNextReset % 3600) / 60);
+    const seconds = stats.timeToNextReset % 60;
+    setCountdown(
+      `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`
+    );
+    setRemainingTime(stats.timeToNextReset);
+
+    const interval = setInterval(updateCountdown, 1000); // Update every second
     return () => clearInterval(interval);
   }, [stats]);
 
-  // Rotate best player names every 2 seconds
+  // Rotate best player names every 3 seconds
   useEffect(() => {
     if (!stats || !stats.bestPlayerNames || stats.bestPlayerNames.length === 0) {
       return;
@@ -60,7 +77,7 @@ export default function DailyStats() {
 
     const interval = setInterval(() => {
       setCurrentPlayerIndex((prev) => (prev + 1) % stats.bestPlayerNames.length);
-    }, 2000);
+    }, 3000); // Changed from 2000 to 3000 (3 seconds)
 
     return () => clearInterval(interval);
   }, [stats]);

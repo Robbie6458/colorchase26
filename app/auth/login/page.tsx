@@ -62,19 +62,19 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-600 to-pink-500 flex items-center justify-center p-4">
-      <div className="bg-white rounded-lg shadow-2xl w-full max-w-md p-8">
-        <h1 className="text-3xl font-bold text-center mb-2 text-gray-800">Color Chase</h1>
-        <p className="text-center text-gray-600 mb-6">Sign in to your collection</p>
+    <div className="min-h-screen bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+      <div className="bg-slate-800 rounded-2xl shadow-2xl w-full max-w-md p-8 border border-slate-700">
+        <h1 className="text-3xl font-bold text-center mb-2 text-white">Color Chase</h1>
+        <p className="text-center text-slate-300 mb-6 text-sm">Sign in to continue</p>
 
         {resetMessage && (
-          <div className="mb-4 p-3 bg-green-100 text-green-700 rounded">
+          <div className="mb-4 p-3 bg-green-900/50 text-green-300 rounded-lg border border-green-700">
             {resetMessage}
           </div>
         )}
 
         {error && (
-          <div className="mb-4 p-3 bg-red-100 text-red-700 rounded">
+          <div className="mb-4 p-3 bg-red-900/50 text-red-300 rounded-lg border border-red-700">
             {error}
           </div>
         )}
@@ -83,7 +83,7 @@ export default function LoginPage() {
           <>
             <form onSubmit={handleSignIn} className="space-y-4 mb-6">
               <div>
-                <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
+                <label htmlFor="email" className="block text-sm font-medium text-slate-200 mb-2">
                   Email
                 </label>
                 <input
@@ -91,12 +91,13 @@ export default function LoginPage() {
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-white text-gray-800 placeholder-gray-400 focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                  className="w-full px-4 py-3 border border-slate-600 rounded-lg bg-slate-900 text-white placeholder-slate-500 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition"
+                  placeholder="your@email.com"
                   required
                 />
               </div>
               <div>
-                <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
+                <label htmlFor="password" className="block text-sm font-medium text-slate-200 mb-2">
                   Password
                 </label>
                 <input
@@ -104,14 +105,15 @@ export default function LoginPage() {
                   type="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-white text-gray-800 placeholder-gray-400 focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                  className="w-full px-4 py-3 border border-slate-600 rounded-lg bg-slate-900 text-white placeholder-slate-500 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition"
+                  placeholder="••••••••"
                   required
                 />
               </div>
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full bg-gradient-to-r from-purple-600 to-pink-500 text-white font-semibold py-2 rounded-lg hover:shadow-lg transition disabled:opacity-50"
+                className="w-full bg-gradient-to-r from-purple-600 to-pink-500 text-white font-semibold py-3 rounded-lg hover:shadow-lg hover:shadow-purple-500/50 transition disabled:opacity-50 mt-2"
               >
                 {loading ? 'Signing in...' : 'Sign In'}
               </button>
@@ -119,17 +121,17 @@ export default function LoginPage() {
 
             <div className="relative mb-6">
               <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-gray-300"></div>
+                <div className="w-full border-t border-slate-600"></div>
               </div>
               <div className="relative flex justify-center text-sm">
-                <span className="px-2 bg-white text-gray-700">Or continue with</span>
+                <span className="px-2 bg-slate-800 text-slate-400">or</span>
               </div>
             </div>
 
             <button
               onClick={handleGoogleSignIn}
               disabled={loading}
-              className="w-full flex items-center justify-center gap-2 px-4 py-2 border border-gray-300 rounded-lg bg-white text-gray-700 font-semibold hover:bg-gray-50 transition disabled:opacity-50"
+              className="w-full flex items-center justify-center gap-2 px-4 py-3 border border-slate-600 rounded-lg bg-slate-900 text-slate-200 font-semibold hover:bg-slate-800 hover:border-slate-500 transition disabled:opacity-50"
             >
               <svg className="w-5 h-5" viewBox="0 0 24 24">
                 <path
@@ -152,16 +154,16 @@ export default function LoginPage() {
               Continue with Google
             </button>
 
-            <div className="mt-6 space-y-2 text-center text-sm">
+            <div className="mt-6 space-y-3 text-center text-sm">
               <button
                 onClick={() => setShowResetForm(true)}
-                className="text-purple-600 hover:text-purple-700 block w-full"
+                className="text-purple-400 hover:text-purple-300 block w-full transition"
               >
                 Forgot your password?
               </button>
-              <p className="text-gray-600">
+              <p className="text-slate-400">
                 Don't have an account?{' '}
-                <Link href="/auth/signup" className="text-purple-600 hover:text-purple-700 font-semibold">
+                <Link href="/auth/signup" className="text-purple-400 hover:text-purple-300 font-semibold transition">
                   Sign up
                 </Link>
               </p>
@@ -169,11 +171,11 @@ export default function LoginPage() {
           </>
         ) : (
           <form onSubmit={handlePasswordReset} className="space-y-4">
-            <p className="text-gray-600 text-sm mb-4">
+            <p className="text-slate-300 text-sm mb-4">
               Enter your email address and we'll send you a link to reset your password.
             </p>
             <div>
-              <label htmlFor="reset-email" className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="reset-email" className="block text-sm font-medium text-slate-200 mb-2">
                 Email
               </label>
               <input
@@ -181,21 +183,22 @@ export default function LoginPage() {
                 type="email"
                 value={resetEmail}
                 onChange={(e) => setResetEmail(e.target.value)}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-white text-gray-800 placeholder-gray-400 focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                className="w-full px-4 py-3 border border-slate-600 rounded-lg bg-slate-900 text-white placeholder-slate-500 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition"
+                placeholder="your@email.com"
                 required
               />
             </div>
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-gradient-to-r from-purple-600 to-pink-500 text-white font-semibold py-2 rounded-lg hover:shadow-lg transition disabled:opacity-50"
+              className="w-full bg-gradient-to-r from-purple-600 to-pink-500 text-white font-semibold py-3 rounded-lg hover:shadow-lg hover:shadow-purple-500/50 transition disabled:opacity-50"
             >
               {loading ? 'Sending...' : 'Send Reset Link'}
             </button>
             <button
               type="button"
               onClick={() => setShowResetForm(false)}
-              className="w-full text-purple-600 hover:text-purple-700 font-semibold py-2"
+              className="w-full text-purple-400 hover:text-purple-300 font-semibold py-2 transition"
             >
               Back to Sign In
             </button>

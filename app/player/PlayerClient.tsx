@@ -22,6 +22,7 @@ export default function PlayerClient() {
   const [showLogin, setShowLogin] = useState(false);
   const [showStats, setShowStats] = useState(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
   const { session } = useAuth();
 
   useEffect(() => {
@@ -45,6 +46,7 @@ export default function PlayerClient() {
                 // Clear localStorage after successful database fetch
                 localStorage.removeItem("colorChasePalettes");
                 localStorage.removeItem("palettes");
+                setIsLoading(false);
               }
               return;
             } else {
@@ -66,6 +68,7 @@ export default function PlayerClient() {
           // ignore
         }
       }
+      if (mounted) setIsLoading(false);
     }
 
     load();
@@ -182,49 +185,34 @@ export default function PlayerClient() {
       </div>
 
       <main className="player-main">
-        {filtered.length === 0 ? (
+        {isLoading ? (
+          <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '400px' }}>
+            <style>{`
+              @keyframes colorfulSpin {
+                0% { transform: rotate(0deg); }
+                100% { transform: rotate(360deg); }
+              }
+              @keyframes colorShift {
+                0% { background: linear-gradient(45deg, #ff6b6b, #ffa94d); }
+                25% { background: linear-gradient(45deg, #ffa94d, #ffd93d); }
+                50% { background: linear-gradient(45deg, #6bcf7f, #4ecdc4); }
+                75% { background: linear-gradient(45deg, #4ecdc4, #95e1d3); }
+                100% { background: linear-gradient(45deg, #ff6b6b, #ffa94d); }
+              }
+              .loading-spinner {
+                width: 80px;
+                height: 80px;
+                border-radius: 50%;
+                animation: colorfulSpin 2s linear infinite, colorShift 4s ease-in-out infinite;
+                box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
+              }
+            `}</style>
+            <div className="loading-spinner"></div>
+          </div>
+        ) : filtered.length === 0 ? (
           <div className="player-empty">
             <div className="player-empty-text">No palettes yet.</div>
             <div className="player-empty-actions">
-              <button
-                className="player-seed-btn"
-                onClick={() => {
-                  // seed a couple of example palettes into localStorage
-                  const today = new Date();
-                  const yesterday = new Date();
-                  yesterday.setDate(yesterday.getDate() - 1);
-                  const examples: Palette[] = [
-                    {
-                      date: today.toISOString().slice(0,10),
-                      colors: ['#f5a99b','#caa0ff','#f6a8e6','#9fd6ff','#cbff96'],
-                      scheme: 'triadic',
-                      isFavorite: false,
-                      won: true
-                    },
-                    {
-                      date: yesterday.toISOString().slice(0,10),
-                      colors: ['#9fbfcf','#c8f2f2','#dff6f6','#6d93ad','#9fb8e6'],
-                      scheme: 'triadic',
-                      isFavorite: true,
-                      won: true
-                    }
-                  ];
-                  try {
-                    const existingRaw = localStorage.getItem('colorChasePalettes') || localStorage.getItem('palettes');
-                    let merged = examples;
-                    if (existingRaw) {
-                      const parsed = JSON.parse(existingRaw);
-                      if (Array.isArray(parsed)) merged = [...parsed, ...examples];
-                    }
-                    localStorage.setItem('colorChasePalettes', JSON.stringify(merged));
-                    setPalettes(merged);
-                  } catch (e) {
-                    console.error('seed error', e);
-                  }
-                }}
-              >
-                Seed example palettes
-              </button>
               <button 
                 className="player-clear-btn"
                 onClick={() => {

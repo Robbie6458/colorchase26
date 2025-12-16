@@ -261,14 +261,51 @@ export default function Overlays({ game }: { game: GameAny }) {
       )}
       {won && !game.showLogin && !game.showStats && !game.showInfo && (
         <div id="victory-overlay" className="overlay visible">
+          <style>{`
+            @keyframes slideInDown {
+              from {
+                opacity: 0;
+                transform: translateY(-20px);
+              }
+              to {
+                opacity: 1;
+                transform: translateY(0);
+              }
+            }
+            @keyframes popIn {
+              0% {
+                opacity: 0;
+                transform: scale(0.8);
+              }
+              50% {
+                transform: scale(1.1);
+              }
+              100% {
+                opacity: 1;
+                transform: scale(1);
+              }
+            }
+            #victory-overlay #victory-message {
+              animation: slideInDown 0.6s ease-out;
+            }
+            #victory-overlay #reveal-pattern > div {
+              animation: popIn 0.6s ease-out;
+              animation-fill-mode: both;
+            }
+            #victory-overlay #reveal-pattern > div:nth-child(1) { animation-delay: 0.1s; }
+            #victory-overlay #reveal-pattern > div:nth-child(2) { animation-delay: 0.2s; }
+            #victory-overlay #reveal-pattern > div:nth-child(3) { animation-delay: 0.3s; }
+            #victory-overlay #reveal-pattern > div:nth-child(4) { animation-delay: 0.4s; }
+            #victory-overlay #reveal-pattern > div:nth-child(5) { animation-delay: 0.5s; }
+          `}</style>
           <div id="victory-message">You Won!</div>
           <p className="overlay-subtitle">Today's palette is yours to collect</p>
-          <div id="reveal-pattern" style={{ display: 'flex', gap: 8, marginTop: 12 }}>
+          <div id="reveal-pattern" style={{ display: 'flex', gap: 12, marginTop: 20, justifyContent: 'center' }}>
             {game.hiddenPattern.map((c: string, i: number) => (
-              <div key={i} style={{ width: 40, height: 40, background: c || '#fff', borderRadius: 6, border: '1px solid #ccc' }} />
+              <div key={i} style={{ width: 60, height: 60, background: c || '#fff', borderRadius: 8, border: '2px solid rgba(255,255,255,0.3)', boxShadow: '0 8px 16px rgba(0,0,0,0.3)' }} />
             ))}
           </div>
-          <div style={{ marginTop: 16, display: 'flex', flexDirection: 'column', gap: 12, alignItems: 'center' }}>
+          <div style={{ marginTop: 20, display: 'flex', flexDirection: 'column', gap: 12, alignItems: 'center' }}>
             <button 
               onClick={handleSavePalette}
               disabled={saving}
@@ -283,12 +320,14 @@ export default function Overlays({ game }: { game: GameAny }) {
                 cursor: saving ? 'not-allowed' : 'pointer',
                 opacity: saving ? 0.7 : 1,
                 minWidth: '200px',
+                boxShadow: '0 4px 12px rgba(99, 102, 241, 0.4)',
+                transition: 'all 0.2s ease',
               }}
             >
               {saving ? 'Saving...' : 'Save Today\'s Palette'}
             </button>
             {saveError && <p style={{ color: '#ff6b6b', marginTop: 0, fontSize: 14 }}>{saveError}</p>}
-            <div style={{ display: 'flex', gap: 12 }}>
+            <div style={{ display: 'flex', gap: 12, justifyContent: 'center' }}>
               <button 
                 onClick={handleShareResults}
                 style={{
@@ -300,7 +339,8 @@ export default function Overlays({ game }: { game: GameAny }) {
                   fontWeight: 'bold',
                   borderRadius: '25px',
                   cursor: 'pointer',
-                  minWidth: '140px',
+                  minWidth: 'auto',
+                  transition: 'all 0.2s ease',
                 }}
               >
                 Share Results
@@ -317,7 +357,8 @@ export default function Overlays({ game }: { game: GameAny }) {
                   fontWeight: 'bold',
                   borderRadius: '25px',
                   cursor: 'pointer',
-                  minWidth: '140px',
+                  minWidth: 'auto',
+                  transition: 'all 0.2s ease',
                 }}
               >
                 Play Again
@@ -329,14 +370,51 @@ export default function Overlays({ game }: { game: GameAny }) {
 
       {lost && !game.showLogin && !game.showStats && !game.showInfo && (
         <div id="try-again-overlay" className="overlay visible">
+          <style>{`
+            @keyframes slideInDown {
+              from {
+                opacity: 0;
+                transform: translateY(-20px);
+              }
+              to {
+                opacity: 1;
+                transform: translateY(0);
+              }
+            }
+            @keyframes popIn {
+              0% {
+                opacity: 0;
+                transform: scale(0.8);
+              }
+              50% {
+                transform: scale(1.1);
+              }
+              100% {
+                opacity: 1;
+                transform: scale(1);
+              }
+            }
+            #try-again-overlay #try-again-message {
+              animation: slideInDown 0.6s ease-out;
+            }
+            #try-again-overlay #reveal-pattern-lose > div {
+              animation: popIn 0.6s ease-out;
+              animation-fill-mode: both;
+            }
+            #try-again-overlay #reveal-pattern-lose > div:nth-child(1) { animation-delay: 0.1s; }
+            #try-again-overlay #reveal-pattern-lose > div:nth-child(2) { animation-delay: 0.2s; }
+            #try-again-overlay #reveal-pattern-lose > div:nth-child(3) { animation-delay: 0.3s; }
+            #try-again-overlay #reveal-pattern-lose > div:nth-child(4) { animation-delay: 0.4s; }
+            #try-again-overlay #reveal-pattern-lose > div:nth-child(5) { animation-delay: 0.5s; }
+          `}</style>
           <div id="try-again-message">Better Luck Tomorrow!</div>
           <p className="overlay-subtitle">Here was today's palette</p>
-          <div id="reveal-pattern-lose" style={{ display: 'flex', gap: 8, marginTop: 12 }}>
+          <div id="reveal-pattern-lose" style={{ display: 'flex', gap: 12, marginTop: 20, justifyContent: 'center' }}>
             {game.hiddenPattern.map((c: string, i: number) => (
-              <div key={i} style={{ width: 40, height: 40, background: c || '#fff', borderRadius: 6, border: '1px solid #ccc' }} />
+              <div key={i} style={{ width: 60, height: 60, background: c || '#fff', borderRadius: 8, border: '2px solid rgba(255,255,255,0.3)', boxShadow: '0 8px 16px rgba(0,0,0,0.3)' }} />
             ))}
           </div>
-          <div style={{ marginTop: 16, display: 'flex', flexDirection: 'column', gap: 12, alignItems: 'center' }}>
+          <div style={{ marginTop: 20, display: 'flex', flexDirection: 'column', gap: 12, alignItems: 'center' }}>
             <button 
               onClick={handleSavePalette}
               disabled={saving}
@@ -351,12 +429,14 @@ export default function Overlays({ game }: { game: GameAny }) {
                 cursor: saving ? 'not-allowed' : 'pointer',
                 opacity: saving ? 0.7 : 1,
                 minWidth: '200px',
+                boxShadow: '0 4px 12px rgba(99, 102, 241, 0.4)',
+                transition: 'all 0.2s ease',
               }}
             >
               {saving ? 'Saving...' : 'Save Today\'s Palette'}
             </button>
             {saveError && <p style={{ color: '#ff6b6b', marginTop: 0, fontSize: 14 }}>{saveError}</p>}
-            <div style={{ display: 'flex', gap: 12 }}>
+            <div style={{ display: 'flex', gap: 12, justifyContent: 'center' }}>
               <button 
                 onClick={handleShareResults}
                 style={{
@@ -368,7 +448,8 @@ export default function Overlays({ game }: { game: GameAny }) {
                   fontWeight: 'bold',
                   borderRadius: '25px',
                   cursor: 'pointer',
-                  minWidth: '140px',
+                  minWidth: 'auto',
+                  transition: 'all 0.2s ease',
                 }}
               >
                 Share Results
@@ -384,7 +465,8 @@ export default function Overlays({ game }: { game: GameAny }) {
                   fontWeight: 'bold',
                   borderRadius: '25px',
                   cursor: 'pointer',
-                  minWidth: '140px',
+                  minWidth: 'auto',
+                  transition: 'all 0.2s ease',
                 }}
               >
                 Play Again
