@@ -145,7 +145,7 @@ export default function Overlays({ game }: { game: GameAny }) {
     }
   };
 
-  const handleShareResults = () => {
+  const handleShareResults = async () => {
     // Create a wordle-style grid showing game progress
     const grid: string[] = [];
     
@@ -167,10 +167,33 @@ export default function Overlays({ game }: { game: GameAny }) {
 
     const result = won ? '✅ Won!' : '❌ Lost';
     const guesses = game.currentRow + 1;
-    const text = `ColorChase ${getTodaySeed()}\n${result} in ${guesses} guesses\n\n${grid.join('\n')}\n\nPlay at colorchase.com`;
+    const date = getTodaySeed();
+    const text = `Color Chase ${date}\n${result} in ${guesses}/5\n\n${grid.join('\n')}`;
+    const url = window.location.origin;
     
-    navigator.clipboard?.writeText(text).then(() => {
-      setShareMessage('Copied to clipboard!');
+    // Try Web Share API first (mobile)
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: 'Color Chase',
+          text: text,
+          url: url
+        });
+        setShareMessage('Shared successfully!');
+        setTimeout(() => setShareMessage(null), 2000);
+        return;
+      } catch (err) {
+        // User cancelled or share failed, fall back to clipboard
+        if ((err as Error).name === 'AbortError') {
+          return; // User cancelled, don't show error
+        }
+      }
+    }
+    
+    // Fallback to clipboard
+    const shareText = `${text}\n\nPlay at ${url}`;
+    navigator.clipboard?.writeText(shareText).then(() => {
+      setShareMessage('📋 Copied to clipboard!');
       setTimeout(() => setShareMessage(null), 2000);
     }).catch(err => {
       console.error('Failed to copy:', err);

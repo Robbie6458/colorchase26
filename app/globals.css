@@ -148,7 +148,57 @@ body {
   }
 }
 
+/* Streak Display */
+.streak-display {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: linear-gradient(135deg, rgba(251, 146, 60, 0.15), rgba(249, 115, 22, 0.15));
+  padding: 6px 12px;
+  border-radius: 20px;
+  border: 1px solid rgba(251, 146, 60, 0.3);
+  cursor: default;
+  transition: all 0.2s ease;
+}
 
+.streak-display:hover {
+  background: linear-gradient(135deg, rgba(251, 146, 60, 0.25), rgba(249, 115, 22, 0.25));
+  border-color: rgba(251, 146, 60, 0.5);
+  transform: scale(1.05);
+}
+
+.streak-fire {
+  font-size: 18px;
+  line-height: 1;
+  animation: flicker 2s ease-in-out infinite;
+}
+
+@keyframes flicker {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.8; transform: scale(1.1); }
+}
+
+.streak-count {
+  font-weight: 700;
+  font-size: 16px;
+  color: #fb923c;
+  text-shadow: 0 0 10px rgba(251, 146, 60, 0.3);
+}
+
+@media (max-width: 768px) {
+  .streak-display {
+    padding: 4px 10px;
+    gap: 4px;
+  }
+  
+  .streak-fire {
+    font-size: 16px;
+  }
+  
+  .streak-count {
+    font-size: 14px;
+  }
+}
 
 .game-wrapper {
   flex: 1;
