@@ -1,65 +1,46 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServerClient } from '@/app/lib/supabase';
-import { getTodaySeed, generateDailyColorWheel, generatePaletteByScheme } from '@/app/lib/palette';
+import { getTodaySeed } from '@/app/lib/palette';
 
 /**
  * GET /api/today-palette
- * Returns today's color wheel and hidden palette
- * Only accessible to authenticated users
+ * Returns today's color wheel and hidden palette from the database
  */
 export async function GET(request: NextRequest) {
   try {
-    // Verify authentication
-    const authHeader = request.headers.get('authorization');
-    if (!authHeader?.startsWith('Bearer ')) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-
-    const token = authHeader.slice(7);
     const supabase = createServerClient();
 
-    // Verify the token
-    const {
-      data: { user },
-      error: authError,
-    } = await supabase.auth.getUser(token);
+    // Get today's date
+    const today = getTodaySeed();
 
-    if (authError || !user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    // Fetch from database instead of generating
+    const { data: dailyPalette, error } = await supabase
+      .from('daily_palettes')
+      .select('*')
+      .eq('date', today)
+      .single();
+
+    if (error || !dailyPalette) {
+      return NextResponse.json(
+        { error: 'Palette not found for today' },
+        { status: 404 }
+      );
     }
 
-    // Generate today's palette
-    const today = getTodaySeed();
-    const wheelData = generateDailyColorWheel(today);
-
-    // Select a harmony scheme based on the seed
-    const schemeNames = [
-      'complementary',
-      'triadic',
-      'analogous',
-      'split-complementary',
-      'tetradic',
-      'square',
-      'rectangular',
-      'accent',
-    ];
-
-    // Deterministic scheme selection from seed
-    const schemeIndex = parseInt(today.replace(/-/g, '')) % schemeNames.length;
-    const scheme = schemeNames[schemeIndex];
-
-    const palette = generatePaletteByScheme(scheme, wheelData.colors, today);
-
+    // Return the palette
     return NextResponse.json({
       date: today,
-      wheelColors: wheelData.colors,
-      hiddenPalette: palette,
-      family: wheelData.familyName,
-      treatment: wheelData.treatmentName,
-      scheme,
+      wheelColors: dailyPalette.wheel_colors,
+      hiddenPalette: dailyPalette.hidden_palette,
+      family: dailyPalette.family_name,
+      treatment: dailyPalette.treatment_name,
+      scheme: dailyPalette.scheme,
     });
   } catch (error) {
-    console.error('Error generating palette:', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    console.error('Error fetching palette:', error);
+    return NextResponse.json(
+      { error: 'Internal server error' },
+      { status: 500 }
+    );
   }
 }
