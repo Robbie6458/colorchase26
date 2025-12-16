@@ -145,64 +145,7 @@ export default function Overlays({ game }: { game: GameAny }) {
     }
   };
 
-  const handleShareResults = async () => {
-    // Create a wordle-style grid showing game progress
-    const grid: string[] = [];
-    
-    game.rowResults.forEach((row: any[], rowIndex: number) => {
-      let rowStr = '';
-      row.forEach((result: string | null) => {
-        if (result === 'correct') {
-          rowStr += '🟩'; // Green for correct
-        } else if (result === 'misplaced') {
-          rowStr += '🟧'; // Orange for wrong spot
-        } else if (result === 'wrong') {
-          rowStr += '⬜'; // White for not in palette
-        } else {
-          rowStr += '⬜'; // Default to white for empty
-        }
-      });
-      if (rowStr) grid.push(rowStr);
-    });
-
-    const result = won ? '✅ Won!' : '❌ Lost';
-    const guesses = game.currentRow + 1;
-    const date = getTodaySeed();
-    const text = `Color Chase ${date}\n${result} in ${guesses}/5\n\n${grid.join('\n')}`;
-    const url = window.location.origin;
-    
-    // Try Web Share API first (mobile)
-    if (navigator.share) {
-      try {
-        await navigator.share({
-          title: 'Color Chase',
-          text: text,
-          url: url
-        });
-        setShareMessage('Shared successfully!');
-        setTimeout(() => setShareMessage(null), 2000);
-        return;
-      } catch (err) {
-        // User cancelled or share failed, fall back to clipboard
-        if ((err as Error).name === 'AbortError') {
-          return; // User cancelled, don't show error
-        }
-      }
-    }
-    
-    // Fallback to clipboard
-    const shareText = `${text}\n\nPlay at ${url}`;
-    navigator.clipboard?.writeText(shareText).then(() => {
-      setShareMessage('📋 Copied to clipboard!');
-      setTimeout(() => setShareMessage(null), 2000);
-    }).catch(err => {
-      console.error('Failed to copy:', err);
-      setShareMessage('Failed to copy');
-      setTimeout(() => setShareMessage(null), 2000);
-    });
-  };
-
-  const handleCopyResults = () => {
+  const handleShareResults = () => {
     // Create a wordle-style grid showing game progress
     const grid: string[] = [];
     
@@ -363,52 +306,34 @@ export default function Overlays({ game }: { game: GameAny }) {
             {shareMessage && <p style={{ color: '#fbbf24', marginTop: 0, fontSize: 12 }}>{shareMessage}</p>}
             <div style={{ display: 'flex', gap: 16, justifyContent: 'center', width: '100%', flexWrap: 'wrap' }}>
               <button 
-                onClick={handleCopyResults}
+                onClick={handleShareResults}
                 style={{
                   backgroundColor: '#10b981',
                   border: 'none',
                   color: '#fff',
-                  padding: '12px 28px',
+                  padding: '12px 32px',
                   fontSize: '15px',
                   fontWeight: 'bold',
                   borderRadius: '25px',
                   cursor: 'pointer',
                   transition: 'all 0.2s ease',
-                  flex: '0 1 auto',
+                  boxShadow: '0 4px 12px rgba(16, 185, 129, 0.3)',
                 }}
               >
-                📋 Copy Result
-              </button>
-              <button 
-                onClick={handleShareResults}
-                style={{
-                  backgroundColor: 'transparent',
-                  border: '2px solid #d97706',
-                  color: '#d97706',
-                  padding: '12px 28px',
-                  fontSize: '15px',
-                  fontWeight: 'bold',
-                  borderRadius: '25px',
-                  cursor: 'pointer',
-                  transition: 'all 0.2s ease',
-                  flex: '0 1 auto',
-                }}
-              >
-                Share
+                Share Results
               </button>
               <button 
                 onClick={() => game.resetGameForReplay()}
                 style={{
                   backgroundColor: 'transparent',
-                  border: '2px solid #d97706',
-                  color: '#d97706',
-                  padding: '12px 28px',
+                  border: '2px solid rgba(255, 255, 255, 0.3)',
+                  color: '#fff',
+                  padding: '12px 32px',
                   fontSize: '15px',
                   fontWeight: 'bold',
                   borderRadius: '25px',
                   cursor: 'pointer',
                   transition: 'all 0.2s ease',
-                  flex: '0 1 auto',
                 }}
               >
                 Play Again
@@ -487,52 +412,34 @@ export default function Overlays({ game }: { game: GameAny }) {
             {saveError && <p style={{ color: '#ff6b6b', marginTop: 0, fontSize: 14 }}>{saveError}</p>}
             <div style={{ display: 'flex', gap: 16, justifyContent: 'center', width: '100%', flexWrap: 'wrap' }}>
               <button 
-                onClick={handleCopyResults}
+                onClick={handleShareResults}
                 style={{
                   backgroundColor: '#10b981',
                   border: 'none',
                   color: '#fff',
-                  padding: '12px 28px',
+                  padding: '12px 32px',
                   fontSize: '15px',
                   fontWeight: 'bold',
                   borderRadius: '25px',
                   cursor: 'pointer',
                   transition: 'all 0.2s ease',
-                  flex: '0 1 auto',
+                  boxShadow: '0 4px 12px rgba(16, 185, 129, 0.3)',
                 }}
               >
-                📋 Copy Result
-              </button>
-              <button 
-                onClick={handleShareResults}
-                style={{
-                  backgroundColor: 'transparent',
-                  border: '2px solid #d97706',
-                  color: '#d97706',
-                  padding: '12px 28px',
-                  fontSize: '15px',
-                  fontWeight: 'bold',
-                  borderRadius: '25px',
-                  cursor: 'pointer',
-                  transition: 'all 0.2s ease',
-                  flex: '0 1 auto',
-                }}
-              >
-                Share
+                Share Results
               </button>
               <button 
                 onClick={() => game.resetGameForReplay()}
                 style={{
                   backgroundColor: 'transparent',
-                  border: '2px solid #d97706',
-                  color: '#d97706',
-                  padding: '12px 28px',
+                  border: '2px solid rgba(255, 255, 255, 0.3)',
+                  color: '#fff',
+                  padding: '12px 32px',
                   fontSize: '15px',
                   fontWeight: 'bold',
                   borderRadius: '25px',
                   cursor: 'pointer',
                   transition: 'all 0.2s ease',
-                  flex: '0 1 auto',
                 }}
               >
                 Play Again
