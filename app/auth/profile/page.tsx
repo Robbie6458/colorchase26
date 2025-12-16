@@ -10,7 +10,7 @@ export default function ProfilePage() {
   const { user, profile, signOut } = useAuth();
   const router = useRouter();
   
-  const [playerName, setPlayerName] = useState(profile?.player_name || '');
+  const [playerName, setPlayerName] = useState(profile?.username || '');
   const [showPasswordForm, setShowPasswordForm] = useState(false);
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
@@ -175,7 +175,7 @@ export default function ProfilePage() {
 
               <button
                 type="submit"
-                disabled={loading || playerName === profile.player_name}
+                disabled={loading || playerName === profile.username}
                 className="bg-gradient-to-r from-purple-600 to-pink-500 text-white font-semibold py-2 px-6 rounded-lg hover:shadow-lg transition disabled:opacity-50"
               >
                 {loading ? 'Updating...' : 'Update Player Name'}

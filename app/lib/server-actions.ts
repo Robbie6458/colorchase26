@@ -21,7 +21,7 @@ export async function getCurrentUser() {
   }
 
   const { data: profile } = await supabase
-    .from('users')
+    .from('profiles')
     .select('*')
     .eq('id', user.id)
     .single();
@@ -44,9 +44,9 @@ export async function updatePlayerName(newName: string) {
 
   // Check if name already exists
   const { data: existing } = await supabase
-    .from('users')
+    .from('profiles')
     .select('id')
-    .eq('player_name', newName)
+    .eq('username', newName)
     .neq('id', user.id)
     .single();
 
@@ -55,8 +55,8 @@ export async function updatePlayerName(newName: string) {
   }
 
   const { error: updateError } = await supabase
-    .from('users')
-    .update({ player_name: newName })
+    .from('profiles')
+    .update({ username: newName })
     .eq('id', user.id);
 
   if (updateError) {

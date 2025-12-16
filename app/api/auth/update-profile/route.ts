@@ -25,8 +25,8 @@ export async function POST(request: NextRequest) {
 
     // Update player name
     const { error } = await supabase
-      .from('users')
-      .update({ player_name: playerName })
+      .from('profiles')
+      .update({ username: playerName })
       .eq('id', user.id);
 
     if (error) {

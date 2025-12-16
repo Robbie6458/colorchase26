@@ -7,7 +7,7 @@ import { supabase } from './supabase';
 interface UserProfile {
   id: string;
   email: string;
-  player_name: string;
+  username: string;
   created_at: string;
   updated_at: string;
 }

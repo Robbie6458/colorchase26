@@ -38,7 +38,7 @@ export async function GET(request: NextRequest) {
     const palettes = data?.map((p: any) => ({
       id: p.id,
       date: p.date,
-      colors: Array.isArray(p.colors) ? p.colors : [],
+      colors: p.colors || [],
       scheme: p.scheme,
       isFavorite: p.is_favorite,
       won: p.won,

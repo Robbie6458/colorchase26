@@ -74,7 +74,7 @@ export default function Header({ game, title, isPlayerPage }: { game?: GameAny, 
         <div id="auth-status">
           {profile ? (
             <Link href="/auth/profile" id="header-login-btn" className="auth-btn">
-              {profile.player_name}
+              {profile.username}
             </Link>
           ) : (
             <a href="/auth/login" id="header-login-btn" className="auth-btn">
