@@ -1,0 +1,19 @@
+name: Generate Daily Palette
+
+on:
+  schedule:
+    # Run at 9:00 AM UTC every day
+    - cron: '0 9 * * *'
+  workflow_dispatch: # Allow manual triggering
+
+jobs:
+  generate-palette:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Call Supabase Edge Function
+        run: |
+          curl -X POST \
+            https://iczkzoupdzkakgzvwdye.supabase.co/functions/v1/generate-daily-palette \
+            -H "Content-Type: application/json" \
+            -H "apikey: ${{ secrets.SUPABASE_ANON_KEY }}" \
+            -d '{}'
