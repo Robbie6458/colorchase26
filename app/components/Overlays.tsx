@@ -304,21 +304,22 @@ export default function Overlays({ game }: { game: GameAny }) {
             </button>
             {saveError && <p style={{ color: '#ff6b6b', marginTop: 0, fontSize: 14 }}>{saveError}</p>}
             {shareMessage && <p style={{ color: '#fbbf24', marginTop: 0, fontSize: 12 }}>{shareMessage}</p>}
-            <div style={{ display: 'flex', gap: 12, justifyContent: 'center', width: '100%' }}>
+            <div style={{ display: 'flex', gap: 12, justifyContent: 'center', width: '100%', flexWrap: 'nowrap' }}>
               <button 
                 onClick={handleShareResults}
                 style={{
                   backgroundColor: '#10b981',
                   border: 'none',
                   color: '#fff',
-                  padding: '12px 24px',
-                  fontSize: '15px',
+                  padding: '12px 20px',
+                  fontSize: '14px',
                   fontWeight: 'bold',
                   borderRadius: '25px',
                   cursor: 'pointer',
                   transition: 'all 0.2s ease',
                   boxShadow: '0 4px 12px rgba(16, 185, 129, 0.3)',
                   whiteSpace: 'nowrap',
+                  minWidth: 'auto',
                 }}
               >
                 Share Results
@@ -329,13 +330,14 @@ export default function Overlays({ game }: { game: GameAny }) {
                   backgroundColor: 'transparent',
                   border: '2px solid rgba(255, 255, 255, 0.3)',
                   color: '#fff',
-                  padding: '12px 24px',
-                  fontSize: '15px',
+                  padding: '12px 20px',
+                  fontSize: '14px',
                   fontWeight: 'bold',
                   borderRadius: '25px',
                   cursor: 'pointer',
                   transition: 'all 0.2s ease',
                   whiteSpace: 'nowrap',
+                  minWidth: 'auto',
                 }}
               >
                 Play Again
@@ -412,21 +414,22 @@ export default function Overlays({ game }: { game: GameAny }) {
               {saving ? 'Saving...' : 'Save Today\'s Palette'}
             </button>
             {saveError && <p style={{ color: '#ff6b6b', marginTop: 0, fontSize: 14 }}>{saveError}</p>}
-            <div style={{ display: 'flex', gap: 12, justifyContent: 'center', width: '100%' }}>
+            <div style={{ display: 'flex', gap: 12, justifyContent: 'center', width: '100%', flexWrap: 'nowrap' }}>
               <button 
                 onClick={handleShareResults}
                 style={{
                   backgroundColor: '#10b981',
                   border: 'none',
                   color: '#fff',
-                  padding: '12px 24px',
-                  fontSize: '15px',
+                  padding: '12px 20px',
+                  fontSize: '14px',
                   fontWeight: 'bold',
                   borderRadius: '25px',
                   cursor: 'pointer',
                   transition: 'all 0.2s ease',
                   boxShadow: '0 4px 12px rgba(16, 185, 129, 0.3)',
                   whiteSpace: 'nowrap',
+                  minWidth: 'auto',
                 }}
               >
                 Share Results
@@ -437,13 +440,14 @@ export default function Overlays({ game }: { game: GameAny }) {
                   backgroundColor: 'transparent',
                   border: '2px solid rgba(255, 255, 255, 0.3)',
                   color: '#fff',
-                  padding: '12px 24px',
-                  fontSize: '15px',
+                  padding: '12px 20px',
+                  fontSize: '14px',
                   fontWeight: 'bold',
                   borderRadius: '25px',
                   cursor: 'pointer',
                   transition: 'all 0.2s ease',
                   whiteSpace: 'nowrap',
+                  minWidth: 'auto',
                 }}
               >
                 Play Again
