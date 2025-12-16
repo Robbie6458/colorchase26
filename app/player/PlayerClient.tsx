@@ -127,12 +127,25 @@ export default function PlayerClient() {
     // optimistic UI
     setPalettes(prev => prev.map(p => p.date === date ? { ...p, isFavorite: !p.isFavorite } : p));
     try {
-      const res = await fetch(`/api/palettes/${date}/favorite`, { method: 'POST' });
+      const { data: { session: currentSession } } = await supabase.auth.getSession();
+      if (!currentSession?.access_token) {
+        console.error('No session found');
+        return;
+      }
+      
+      const res = await fetch(`/api/palettes/${date}/favorite`, { 
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${currentSession.access_token}`
+        }
+      });
       if (!res.ok) throw new Error('not ok');
       const data = await res.json();
       setPalettes(prev => prev.map(p => p.date === date ? { ...p, isFavorite: data.isFavorite } : p));
     } catch (e) {
-      // keep optimistic or revert — keep optimistic to avoid noise
+      console.error('Error toggling favorite:', e);
+      // Revert optimistic update on error
+      setPalettes(prev => prev.map(p => p.date === date ? { ...p, isFavorite: !p.isFavorite } : p));
     }
   }
 
