@@ -61,7 +61,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const loadProfile = async (userId: string) => {
     const { data, error } = await supabase
-      .from('users')
+      .from('profiles')
       .select('*')
       .eq('id', userId)
       .single();
