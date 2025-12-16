@@ -4,6 +4,7 @@ import { useAuth } from "../lib/auth-context";
 import { getTodaySeed } from "../lib/palette";
 import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import React from "react";
 
 type GameAny = any;
 
@@ -224,7 +225,6 @@ export default function Overlays({ game }: { game: GameAny }) {
             <div className="info-icon"><span>👤</span><p>Create an account to save your collection</p></div>
             <div className="info-buttons">
               <button id="close-info" onClick={() => game.closeInfo && game.closeInfo()}>Got It!</button>
-              <button id="create-account-info" className="secondary-btn" onClick={() => { game.closeInfo && game.closeInfo(); window.location.href = '/auth/signup'; }}>Create Account</button>
             </div>
           </div>
         </div>
@@ -232,32 +232,7 @@ export default function Overlays({ game }: { game: GameAny }) {
 
       {/* Stats overlay */}
       {game.showStats && (
-        <div id="stats-overlay" className="overlay visible">
-          <div className="stats-content">
-            <h2>Your Statistics</h2>
-            <div className="stats-grid">
-              <div className="stat-box">
-                <div className="stat-number" id="stat-played">0</div>
-                <div className="stat-label">Played</div>
-              </div>
-              <div className="stat-box">
-                <div className="stat-number" id="stat-win-pct">0</div>
-                <div className="stat-label">Win %</div>
-              </div>
-              <div className="stat-box">
-                <div className="stat-number" id="stat-streak">0</div>
-                <div className="stat-label">Current Streak</div>
-              </div>
-              <div className="stat-box">
-                <div className="stat-number" id="stat-max-streak">0</div>
-                <div className="stat-label">Max Streak</div>
-              </div>
-            </div>
-            <h3>Guess Distribution</h3>
-            <div className="guess-distribution" id="guess-distribution"></div>
-            <button id="close-stats" onClick={() => game.closeStats && game.closeStats()}>Close</button>
-          </div>
-        </div>
+        <StatsOverlay game={game} session={session} />
       )}
       {won && !game.showLogin && !game.showStats && !game.showInfo && (
         <div id="victory-overlay" className="overlay visible">
@@ -476,5 +451,118 @@ export default function Overlays({ game }: { game: GameAny }) {
 
       {/* Login / info / stats overlays remain present but hidden until wired to state */}
     </>
+  );
+}
+
+function StatsOverlay({ game, session }: { game: any, session: any }) {
+  const [stats, setStats] = useState<any>(null);
+
+  useEffect(() => {
+    async function loadStats() {
+      if (!session?.access_token) {
+        // Show zeros for non-logged in users
+        setStats({ played: 0, winPct: 0, currentStreak: 0, maxStreak: 0, distribution: {} });
+        return;
+      }
+
+      try {
+        const res = await fetch('/api/palettes', {
+          headers: { 'Authorization': `Bearer ${session.access_token}` }
+        });
+        if (!res.ok) throw new Error('Failed to fetch palettes');
+        const palettes = await res.json();
+
+        const played = palettes.length;
+        const won = palettes.filter((p: any) => p.won).length;
+        const winPct = played > 0 ? Math.round((won / played) * 100) : 0;
+
+        // Calculate streaks
+        const sorted = [...palettes].sort((a: any, b: any) => +new Date(b.date) - +new Date(a.date));
+        let currentStreak = 0;
+        let maxStreak = 0;
+        let tempStreak = 0;
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+
+        for (let i = 0; i < sorted.length; i++) {
+          const d = new Date(sorted[i].date);
+          d.setHours(0, 0, 0, 0);
+          const daysDiff = Math.floor((+today - +d) / (1000 * 60 * 60 * 24));
+          
+          if (i === 0 && daysDiff <= 1) {
+            currentStreak = 1;
+            tempStreak = 1;
+          } else if (i > 0) {
+            const prevDate = new Date(sorted[i - 1].date);
+            prevDate.setHours(0, 0, 0, 0);
+            const diff = Math.floor((+prevDate - +d) / (1000 * 60 * 60 * 24));
+            if (diff === 1) {
+              tempStreak++;
+              if (i === currentStreak) currentStreak++;
+            } else {
+              tempStreak = 1;
+            }
+          }
+          maxStreak = Math.max(maxStreak, tempStreak);
+        }
+
+        // Guess distribution
+        const distribution: any = {};
+        palettes.forEach((p: any) => {
+          if (p.won && p.guessCount) {
+            distribution[p.guessCount] = (distribution[p.guessCount] || 0) + 1;
+          }
+        });
+
+        setStats({ played, winPct, currentStreak, maxStreak, distribution });
+      } catch (error) {
+        console.error('Error loading stats:', error);
+        setStats({ played: 0, winPct: 0, currentStreak: 0, maxStreak: 0, distribution: {} });
+      }
+    }
+
+    loadStats();
+  }, [session]);
+
+  if (!stats) return null;
+
+  const maxCount = Math.max(...Object.values(stats.distribution).map((v: any) => v || 0), 1);
+
+  return (
+    <div id="stats-overlay" className="overlay visible">
+      <div className="stats-content">
+        <h2>Your Statistics</h2>
+        <div className="stats-grid">
+          <div className="stat-box">
+            <div className="stat-number">{stats.played}</div>
+            <div className="stat-label">Played</div>
+          </div>
+          <div className="stat-box">
+            <div className="stat-number">{stats.winPct}</div>
+            <div className="stat-label">Win %</div>
+          </div>
+          <div className="stat-box">
+            <div className="stat-number">{stats.currentStreak}</div>
+            <div className="stat-label">Current Streak</div>
+          </div>
+          <div className="stat-box">
+            <div className="stat-number">{stats.maxStreak}</div>
+            <div className="stat-label">Max Streak</div>
+          </div>
+        </div>
+        <h3>GUESS DISTRIBUTION</h3>
+        <div className="guess-distribution">
+          {[1, 2, 3, 4, 5].map(i => (
+            <div key={i} className="distribution-row">
+              <div className="row-label">{i}</div>
+              <div className="row-bar" style={{ width: `${stats.distribution[i] ? (stats.distribution[i] / maxCount) * 100 : 0}%`, minWidth: stats.distribution[i] ? '20px' : '0' }}>
+                <span className="row-count">{stats.distribution[i] || 0}</span>
+              </div>
+            </div>
+          ))}
+        </div>
+        <button id="close-stats" onClick={() => game.closeStats && game.closeStats()}>Close</button>
+      </div>
+    </div>
   );
 }

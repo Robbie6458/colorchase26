@@ -57,7 +57,10 @@ export default function Header({ game, title, isPlayerPage }: { game?: GameAny, 
           <span className="material-symbols-outlined icon-btn" aria-hidden="true">palette</span>
         )}
       </a>
-      {/* center title (optional) - rendered visually centered via CSS */}
+      {/* center username display */}
+      {profile?.username && (
+        <div className="header-username">/{profile.username}</div>
+      )}
       {title ? <h1 className="player-title">{title}</h1> : null}
       <div className="header-right">
         <div id="streak-display" className="streak-badge hidden">
@@ -71,21 +74,28 @@ export default function Header({ game, title, isPlayerPage }: { game?: GameAny, 
             <line x1="6" y1="20" x2="6" y2="14" />
           </svg>
         </button>
-        <div id="auth-status">
-          {profile ? (
-            <Link href="/auth/profile" id="header-login-btn" className="auth-btn">
-              {profile.username}
-            </Link>
-          ) : (
-            <a href="/auth/login" id="header-login-btn" className="auth-btn">
-              Log In
-            </a>
-          )}
-        </div>
+        {profile ? (
+          <button onClick={() => router.push('/auth/profile')} id="logout-btn" className="header-icon-btn" aria-label="Logout">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+              <polyline points="16 17 21 12 16 7" />
+              <line x1="21" y1="12" x2="9" y2="12" />
+            </svg>
+          </button>
+        ) : (
+          <button onClick={() => router.push('/auth/login')} id="login-btn" className="header-icon-btn" aria-label="Login">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+              <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4" />
+              <polyline points="10 17 15 12 10 7" />
+              <line x1="15" y1="12" x2="3" y2="12" />
+            </svg>
+          </button>
+        )}
         <button onClick={() => { if (game?.openInfo) game.openInfo(); else window.location.href = '/?open=info'; }} id="info-btn" aria-label="How to play" className="header-icon-btn">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" style={{ width: '18px', height: '18px' }}>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
             <circle cx="12" cy="12" r="10" />
-            <text x="12" y="16" textAnchor="middle" fontSize="10" fill="currentColor" dominantBaseline="middle">i</text>
+            <line x1="12" y1="16" x2="12" y2="12" />
+            <line x1="12" y1="8" x2="12.01" y2="8" />
           </svg>
         </button>
       </div>

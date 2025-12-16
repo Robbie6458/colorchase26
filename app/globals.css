@@ -48,6 +48,17 @@ body {
   gap: 20px;
 }
 
+.header-username {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  color: #ffffff;
+  font-size: 1.1em;
+  font-weight: 500;
+  pointer-events: none;
+  white-space: nowrap;
+}
+
 .nav-link {
   color: #a0a0c0;
   text-decoration: none;
