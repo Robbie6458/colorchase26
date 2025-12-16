@@ -20,23 +20,42 @@ export default function useGame() {
   const [showLogin, setShowLogin] = useState(false);
   const [showStats, setShowStats] = useState(false);
 
-  const generatePuzzle = useCallback(() => {
-    const today = getTodaySeed();
-    const rngSeed = today + "main";
-    const wheelData = generateDailyColorWheel(today);
-    setColors(wheelData.colors);
-    setCurrentScheme((prev) => wheelData ? (prev || "") : "");
-    const schemes = ["complementary", "triadic", "analogous", "split-complementary", "tetradic"];
-    const schemeIndex = Math.floor(Math.random() * schemes.length);
-    const scheme = schemes[schemeIndex];
-    setCurrentScheme(scheme);
-    const pattern = generatePaletteByScheme(scheme, wheelData.colors, today);
-    setHiddenPattern(pattern);
-    setRows(Array.from({ length: 5 }, () => Array(5).fill(null)));
-    setRowResults(Array.from({ length: 5 }, () => Array(5).fill(null)));
-    setCurrentRow(0);
-    setEliminated(new Set());
-    setGameComplete(false);
+  const generatePuzzle = useCallback(async () => {
+    try {
+      // Fetch today's palette from the API
+      const response = await fetch('/api/today-palette');
+      if (!response.ok) {
+        throw new Error('Failed to fetch today\'s palette');
+      }
+      
+      const data = await response.json();
+      
+      setColors(data.wheelColors);
+      setCurrentScheme(data.scheme);
+      setHiddenPattern(data.hiddenPalette);
+      setRows(Array.from({ length: 5 }, () => Array(5).fill(null)));
+      setRowResults(Array.from({ length: 5 }, () => Array(5).fill(null)));
+      setCurrentRow(0);
+      setEliminated(new Set());
+      setGameComplete(false);
+    } catch (error) {
+      console.error('Error loading puzzle:', error);
+      // Fallback to client-side generation if API fails
+      const today = getTodaySeed();
+      const wheelData = generateDailyColorWheel(today);
+      setColors(wheelData.colors);
+      const schemes = ["complementary", "triadic", "analogous", "split-complementary", "tetradic"];
+      const schemeIndex = parseInt(today.replace(/-/g, "")) % schemes.length;
+      const scheme = schemes[schemeIndex];
+      setCurrentScheme(scheme);
+      const pattern = generatePaletteByScheme(scheme, wheelData.colors, today);
+      setHiddenPattern(pattern);
+      setRows(Array.from({ length: 5 }, () => Array(5).fill(null)));
+      setRowResults(Array.from({ length: 5 }, () => Array(5).fill(null)));
+      setCurrentRow(0);
+      setEliminated(new Set());
+      setGameComplete(false);
+    }
   }, []);
 
   useEffect(() => {
