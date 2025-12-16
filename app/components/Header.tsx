@@ -92,11 +92,7 @@ export default function Header({ game, title, isPlayerPage }: { game?: GameAny, 
           </button>
         )}
         <button onClick={() => { if (game?.openInfo) game.openInfo(); else window.location.href = '/?open=info'; }} id="info-btn" aria-label="How to play" className="header-icon-btn">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
-            <circle cx="12" cy="12" r="10" />
-            <path d="M12 17h.01" stroke="currentColor" strokeWidth={3} strokeLinecap="round" />
-            <path d="M12 13.5v-.5c0-1 .5-2 2-2.5c1.5-.5 2-1 2-2c0-1.5-1.3-2.5-3-2.5c-1.5 0-2.7.8-3 2" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
-          </svg>
+          <span className="material-symbols-outlined">help</span>
         </button>
       </div>
     </header>
