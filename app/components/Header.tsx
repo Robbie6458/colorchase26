@@ -41,6 +41,8 @@ export default function Header({ game, title, isPlayerPage }: { game?: GameAny, 
         .eq('won', true)
         .order('date', { ascending: false });
 
+      console.log('Palettes for streak calculation:', palettes);
+
       if (!palettes || palettes.length === 0) {
         setCurrentStreak(0);
         return;
@@ -49,22 +51,43 @@ export default function Header({ game, title, isPlayerPage }: { game?: GameAny, 
       let streak = 0;
       const today = new Date();
       today.setHours(0, 0, 0, 0);
-
+      
+      // Check if the most recent palette is today or yesterday
+      const mostRecentDate = new Date(palettes[0].date);
+      mostRecentDate.setHours(0, 0, 0, 0);
+      
+      const yesterday = new Date(today);
+      yesterday.setDate(yesterday.getDate() - 1);
+      
+      // If most recent is not today or yesterday, streak is broken
+      if (mostRecentDate.getTime() < yesterday.getTime()) {
+        console.log('Streak broken - most recent palette is too old');
+        setCurrentStreak(0);
+        return;
+      }
+      
+      // Calculate streak from most recent palette backwards
+      let checkDate = new Date(mostRecentDate);
+      
       for (let i = 0; i < palettes.length; i++) {
         const paletteDate = new Date(palettes[i].date);
         paletteDate.setHours(0, 0, 0, 0);
         
-        const expectedDate = new Date(today);
-        expectedDate.setDate(today.getDate() - i);
-        expectedDate.setHours(0, 0, 0, 0);
+        console.log(`Checking palette ${i}:`, {
+          paletteDate: paletteDate.toISOString().split('T')[0],
+          expectedDate: checkDate.toISOString().split('T')[0],
+          match: paletteDate.getTime() === checkDate.getTime()
+        });
 
-        if (paletteDate.getTime() === expectedDate.getTime()) {
+        if (paletteDate.getTime() === checkDate.getTime()) {
           streak++;
+          checkDate.setDate(checkDate.getDate() - 1);
         } else {
           break;
         }
       }
 
+      console.log('Calculated streak:', streak);
       setCurrentStreak(streak);
     } catch (error) {
       console.error('Error calculating streak:', error);
