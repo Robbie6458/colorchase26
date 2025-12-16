@@ -6,7 +6,7 @@ const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
 
 export async function POST(
   request: NextRequest,
-  { params }: { params: { date: string } }
+  { params }: { params: Promise<{ date: string }> }
 ) {
   try {
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
@@ -24,7 +24,7 @@ export async function POST(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const { date } = params;
+    const { date } = await params;
 
     // Get the current palette record
     const { data: palette, error: fetchError } = await supabase
