@@ -213,17 +213,6 @@ export default function PlayerClient() {
           <div className="player-empty">
             <div className="player-empty-text">No palettes yet.</div>
             <div className="player-empty-actions">
-              <button 
-                className="player-clear-btn"
-                onClick={() => {
-                  try {
-                    localStorage.removeItem('colorChasePalettes');
-                    setPalettes([]);
-                  } catch(e){}
-                }}
-              >
-                Clear
-              </button>
             </div>
           </div>
         ) : (

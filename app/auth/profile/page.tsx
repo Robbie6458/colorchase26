@@ -21,11 +21,11 @@ export default function ProfilePage() {
 
   if (!user || !profile) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-purple-600 to-pink-500 flex items-center justify-center p-4">
-        <div className="bg-white rounded-lg shadow-2xl w-full max-w-md p-8 text-center">
-          <h2 className="text-2xl font-bold text-gray-800 mb-4">Not logged in</h2>
-          <p className="text-gray-600 mb-6">Please log in to view your profile.</p>
-          <Link href="/auth/login" className="text-purple-600 hover:text-purple-700 font-semibold">
+      <div className="min-h-screen bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+        <div className="bg-slate-800 rounded-2xl shadow-2xl w-full max-w-md p-8 text-center border border-slate-700">
+          <h2 className="text-2xl font-bold text-white mb-4">Not logged in</h2>
+          <p className="text-slate-300 mb-6">Please log in to view your profile.</p>
+          <Link href="/auth/login" className="text-purple-400 hover:text-purple-300 font-semibold transition">
             Go to Login
           </Link>
         </div>
@@ -123,44 +123,44 @@ export default function ProfilePage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-600 to-pink-500 flex items-center justify-center p-4">
-      <div className="bg-white rounded-lg shadow-2xl w-full max-w-2xl p-8">
+    <div className="min-h-screen bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+      <div className="bg-slate-800 rounded-2xl shadow-2xl w-full max-w-2xl p-8 border border-slate-700">
         <div className="flex items-center justify-between mb-6">
-          <h1 className="text-3xl font-bold text-gray-800">Profile</h1>
-          <Link href="/" className="text-purple-600 hover:text-purple-700 font-semibold text-sm">
+          <h1 className="text-3xl font-bold text-white">Profile</h1>
+          <Link href="/" className="text-purple-400 hover:text-purple-300 font-semibold text-sm transition">
             ← Back to Game
           </Link>
         </div>
 
         {error && (
-          <div className="mb-4 p-3 bg-red-100 text-red-700 rounded">
+          <div className="mb-4 p-3 bg-red-900/50 text-red-300 rounded-lg border border-red-700">
             {error}
           </div>
         )}
 
         {success && (
-          <div className="mb-4 p-3 bg-green-100 text-green-700 rounded">
+          <div className="mb-4 p-3 bg-green-900/50 text-green-300 rounded-lg border border-green-700">
             {success}
           </div>
         )}
 
         {/* Account Info Section */}
-        <div className="mb-8 pb-8 border-b border-gray-200">
-          <h2 className="text-xl font-semibold text-gray-800 mb-4">Account Information</h2>
+        <div className="mb-8 pb-8 border-b border-slate-600">
+          <h2 className="text-xl font-semibold text-white mb-4">Account Information</h2>
           <div className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+              <label className="block text-sm font-medium text-slate-200 mb-1">Email</label>
               <input
                 type="email"
                 value={profile.email}
                 disabled
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-white text-gray-800"
+                className="w-full px-4 py-2 border border-slate-600 rounded-lg bg-slate-900 text-slate-300"
               />
             </div>
 
             <form onSubmit={handleUpdateProfile} className="space-y-4">
               <div>
-                <label htmlFor="playerName" className="block text-sm font-medium text-gray-700 mb-1">
+                <label htmlFor="playerName" className="block text-sm font-medium text-slate-200 mb-1">
                   Player Name
                 </label>
                 <input
@@ -168,7 +168,7 @@ export default function ProfilePage() {
                   type="text"
                   value={playerName}
                   onChange={(e) => setPlayerName(e.target.value)}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-white text-gray-800 placeholder-gray-400 focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                  className="w-full px-4 py-3 border border-slate-600 rounded-lg bg-slate-900 text-white placeholder-slate-500 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition"
                   required
                 />
               </div>
@@ -176,7 +176,7 @@ export default function ProfilePage() {
               <button
                 type="submit"
                 disabled={loading || playerName === profile.username}
-                className="bg-gradient-to-r from-purple-600 to-pink-500 text-white font-semibold py-2 px-6 rounded-lg hover:shadow-lg transition disabled:opacity-50"
+                className="bg-gradient-to-r from-purple-600 to-pink-500 text-white font-semibold py-3 px-6 rounded-lg hover:shadow-lg hover:shadow-purple-500/50 transition disabled:opacity-50"
               >
                 {loading ? 'Updating...' : 'Update Player Name'}
               </button>
@@ -185,20 +185,20 @@ export default function ProfilePage() {
         </div>
 
         {/* Password Section */}
-        <div className="mb-8 pb-8 border-b border-gray-200">
-          <h2 className="text-xl font-semibold text-gray-800 mb-4">Password</h2>
+        <div className="mb-8 pb-8 border-b border-slate-600">
+          <h2 className="text-xl font-semibold text-white mb-4">Password</h2>
           
           {!showPasswordForm ? (
             <button
               onClick={() => setShowPasswordForm(true)}
-              className="text-purple-600 hover:text-purple-700 font-semibold"
+              className="text-purple-400 hover:text-purple-300 font-semibold transition"
             >
               Change Password
             </button>
           ) : (
             <form onSubmit={handleUpdatePassword} className="space-y-4">
               <div>
-                <label htmlFor="currentPassword" className="block text-sm font-medium text-gray-700 mb-1">
+                <label htmlFor="currentPassword" className="block text-sm font-medium text-slate-200 mb-1">
                   Current Password
                 </label>
                 <input
@@ -206,13 +206,13 @@ export default function ProfilePage() {
                   type="password"
                   value={currentPassword}
                   onChange={(e) => setCurrentPassword(e.target.value)}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-white text-gray-800 placeholder-gray-400 focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                  className="w-full px-4 py-3 border border-slate-600 rounded-lg bg-slate-900 text-white placeholder-slate-500 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition"
                   required
                 />
               </div>
 
               <div>
-                <label htmlFor="newPassword" className="block text-sm font-medium text-gray-700 mb-1">
+                <label htmlFor="newPassword" className="block text-sm font-medium text-slate-200 mb-1">
                   New Password
                 </label>
                 <input
@@ -220,13 +220,13 @@ export default function ProfilePage() {
                   type="password"
                   value={newPassword}
                   onChange={(e) => setNewPassword(e.target.value)}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-white text-gray-800 placeholder-gray-400 focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                  className="w-full px-4 py-3 border border-slate-600 rounded-lg bg-slate-900 text-white placeholder-slate-500 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition"
                   required
                 />
               </div>
 
               <div>
-                <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 mb-1">
+                <label htmlFor="confirmPassword" className="block text-sm font-medium text-slate-200 mb-1">
                   Confirm New Password
                 </label>
                 <input
@@ -234,7 +234,7 @@ export default function ProfilePage() {
                   type="password"
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-white text-gray-800 placeholder-gray-400 focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                  className="w-full px-4 py-3 border border-slate-600 rounded-lg bg-slate-900 text-white placeholder-slate-500 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition"
                   required
                 />
               </div>
@@ -243,14 +243,14 @@ export default function ProfilePage() {
                 <button
                   type="submit"
                   disabled={loading}
-                  className="bg-gradient-to-r from-purple-600 to-pink-500 text-white font-semibold py-2 px-6 rounded-lg hover:shadow-lg transition disabled:opacity-50"
+                  className="bg-gradient-to-r from-purple-600 to-pink-500 text-white font-semibold py-3 px-6 rounded-lg hover:shadow-lg hover:shadow-purple-500/50 transition disabled:opacity-50"
                 >
                   {loading ? 'Updating...' : 'Update Password'}
                 </button>
                 <button
                   type="button"
                   onClick={() => setShowPasswordForm(false)}
-                  className="text-gray-600 hover:text-gray-700 font-semibold py-2 px-6"
+                  className="text-slate-400 hover:text-slate-300 font-semibold py-3 px-6 transition"
                 >
                   Cancel
                 </button>
@@ -261,8 +261,8 @@ export default function ProfilePage() {
 
         {/* Stats Section */}
         <div className="mb-8">
-          <h2 className="text-xl font-semibold text-gray-800 mb-4">Account Created</h2>
-          <p className="text-gray-600">
+          <h2 className="text-xl font-semibold text-white mb-4">Account Created</h2>
+          <p className="text-slate-300">
             {new Date(profile.created_at).toLocaleDateString('en-US', {
               year: 'numeric',
               month: 'long',
@@ -274,7 +274,7 @@ export default function ProfilePage() {
         {/* Sign Out Button */}
         <button
           onClick={handleSignOut}
-          className="w-full bg-red-600 text-white font-semibold py-2 rounded-lg hover:bg-red-700 transition"
+          className="w-full bg-red-600 text-white font-semibold py-3 rounded-lg hover:bg-red-700 hover:shadow-lg transition"
         >
           Sign Out
         </button>

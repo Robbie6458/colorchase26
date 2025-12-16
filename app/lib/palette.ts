@@ -4,10 +4,10 @@ export function getTodaySeed(): string {
   const now = new Date();
   const resetHour = 9;
   let seedDate = new Date(now);
-  if (now.getHours() < resetHour) {
-    seedDate.setDate(seedDate.getDate() - 1);
+  if (now.getUTCHours() < resetHour) {
+    seedDate.setUTCDate(seedDate.getUTCDate() - 1);
   }
-  return `${seedDate.getFullYear()}-${String(seedDate.getMonth() + 1).padStart(2, '0')}-${String(seedDate.getDate()).padStart(2, '0')}`;
+  return `${seedDate.getUTCFullYear()}-${String(seedDate.getUTCMonth() + 1).padStart(2, '0')}-${String(seedDate.getUTCDate()).padStart(2, '0')}`;
 }
 
 export function createSeededRNG(seed: string) {

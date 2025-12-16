@@ -327,35 +327,35 @@ export default function Overlays({ game }: { game: GameAny }) {
               {saving ? 'Saving...' : 'Save Today\'s Palette'}
             </button>
             {saveError && <p style={{ color: '#ff6b6b', marginTop: 0, fontSize: 14 }}>{saveError}</p>}
-            <div style={{ display: 'flex', gap: 12, justifyContent: 'center' }}>
+            {shareMessage && <p style={{ color: '#fbbf24', marginTop: 0, fontSize: 12 }}>{shareMessage}</p>}
+            <div style={{ display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap' }}>
               <button 
                 onClick={handleShareResults}
                 style={{
                   backgroundColor: 'transparent',
                   border: '2px solid #d97706',
                   color: '#d97706',
-                  padding: '12px 24px',
-                  fontSize: '16px',
+                  padding: '10px 20px',
+                  fontSize: '14px',
                   fontWeight: 'bold',
-                  borderRadius: '25px',
+                  borderRadius: '20px',
                   cursor: 'pointer',
                   minWidth: 'auto',
                   transition: 'all 0.2s ease',
                 }}
               >
-                Share Results
+                Share
               </button>
-              {shareMessage && <p style={{ color: '#fbbf24', marginTop: 0, fontSize: 12 }}>{shareMessage}</p>}
               <button 
                 onClick={() => game.resetGameForReplay()}
                 style={{
                   backgroundColor: 'transparent',
                   border: '2px solid #d97706',
                   color: '#d97706',
-                  padding: '12px 24px',
-                  fontSize: '16px',
+                  padding: '10px 20px',
+                  fontSize: '14px',
                   fontWeight: 'bold',
-                  borderRadius: '25px',
+                  borderRadius: '20px',
                   cursor: 'pointer',
                   minWidth: 'auto',
                   transition: 'all 0.2s ease',
@@ -436,23 +436,23 @@ export default function Overlays({ game }: { game: GameAny }) {
               {saving ? 'Saving...' : 'Save Today\'s Palette'}
             </button>
             {saveError && <p style={{ color: '#ff6b6b', marginTop: 0, fontSize: 14 }}>{saveError}</p>}
-            <div style={{ display: 'flex', gap: 12, justifyContent: 'center' }}>
+            <div style={{ display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap' }}>
               <button 
                 onClick={handleShareResults}
                 style={{
                   backgroundColor: 'transparent',
                   border: '2px solid #d97706',
                   color: '#d97706',
-                  padding: '12px 24px',
-                  fontSize: '16px',
+                  padding: '10px 20px',
+                  fontSize: '14px',
                   fontWeight: 'bold',
-                  borderRadius: '25px',
+                  borderRadius: '20px',
                   cursor: 'pointer',
                   minWidth: 'auto',
                   transition: 'all 0.2s ease',
                 }}
               >
-                Share Results
+                Share
               </button>
               <button 
                 onClick={() => game.resetGameForReplay()}
@@ -460,10 +460,10 @@ export default function Overlays({ game }: { game: GameAny }) {
                   backgroundColor: 'transparent',
                   border: '2px solid #d97706',
                   color: '#d97706',
-                  padding: '12px 24px',
-                  fontSize: '16px',
+                  padding: '10px 20px',
+                  fontSize: '14px',
                   fontWeight: 'bold',
-                  borderRadius: '25px',
+                  borderRadius: '20px',
                   cursor: 'pointer',
                   minWidth: 'auto',
                   transition: 'all 0.2s ease',
