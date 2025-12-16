@@ -16,4 +16,5 @@ jobs:
             https://iczkzoupdzkakgzvwdye.supabase.co/functions/v1/generate-daily-palette \
             -H "Content-Type: application/json" \
             -H "apikey: ${{ secrets.SUPABASE_ANON_KEY }}" \
+            -H "Authorization: Bearer ${{ secrets.SUPABASE_ANON_KEY }}" \
             -d '{}'
