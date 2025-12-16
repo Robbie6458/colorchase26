@@ -1,8 +1,20 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+};
+
 serve(async (req) => {
+  // Handle CORS preflight requests
+  if (req.method === 'OPTIONS') {
+    return new Response('ok', { headers: corsHeaders });
+  }
+
   try {
+    // Note: This function is intentionally publicly accessible
+    // It only generates daily palettes and doesn't expose sensitive data
     // Create a connection to Supabase
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
@@ -39,7 +51,8 @@ serve(async (req) => {
           success: true,
           message: "Palette already exists for today",
           date: today,
-        })
+        }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
@@ -499,7 +512,7 @@ serve(async (req) => {
           success: false,
           error: error.message,
         }),
-        { status: 500 }
+        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
@@ -512,7 +525,8 @@ serve(async (req) => {
         scheme: scheme,
         wheelColors: wheelData.colors,
         hiddenPalette: hiddenPalette,
-      })
+      }),
+      { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   } catch (error) {
     console.error("Error:", error);
@@ -521,7 +535,7 @@ serve(async (req) => {
         success: false,
         error: error instanceof Error ? error.message : String(error),
       }),
-      { status: 500 }
+      { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   }
 });

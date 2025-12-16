@@ -1,7 +1,6 @@
 "use client";
 
-import React, { useEffect } from "react";
-import Link from "next/link";
+import React from "react";
 import { useAuth } from "@/app/lib/auth-context";
 import { useRouter } from "next/navigation";
 
@@ -12,7 +11,6 @@ export default function Header({ game, title, isPlayerPage }: { game?: GameAny, 
   const { profile, session } = useAuth();
 
   const handleCollectionClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
-    // If not logged in, prompt to log in instead of navigating to collection
     if (!session && !isPlayerPage) {
       e.preventDefault();
       router.push('/auth/login');
@@ -20,80 +18,61 @@ export default function Header({ game, title, isPlayerPage }: { game?: GameAny, 
     }
   };
 
-  useEffect(() => {
-    const els = Array.from(document.querySelectorAll<HTMLElement>(".header-icon-btn, .icon-btn"));
-    if (!els.length) return;
-    const rand = () => `hsl(${Math.floor(Math.random()*360)}, 80%, 60%)`;
-    const enter = (e: Event) => {
-      const t = e.currentTarget as HTMLElement;
-      const c = rand();
-      t.dataset.__origColor = t.style.color || "";
-      t.style.color = c;
-      // also set -webkit-text-fill-color for font-based Material Symbols
-      try { t.style.setProperty('-webkit-text-fill-color', c); } catch (err) {}
-      // explicitly set svg stroke/fill to the same color so they always match
-      const svgs = t.querySelectorAll<SVGElement>('svg');
-      svgs.forEach(s => { s.style.stroke = c; s.style.fill = c; });
-    };
-    const leave = (e: Event) => {
-      const t = e.currentTarget as HTMLElement;
-      const orig = t.dataset.__origColor || "";
-      t.style.color = orig;
-      try { t.style.setProperty('-webkit-text-fill-color', orig); } catch (err) {}
-      const svgs = t.querySelectorAll<SVGElement>('svg');
-      svgs.forEach(s => { s.style.stroke = orig; s.style.fill = orig; });
-    };
-    els.forEach(el => { el.addEventListener('mouseenter', enter); el.addEventListener('mouseleave', leave); });
-    return () => els.forEach(el => { el.removeEventListener('mouseenter', enter); el.removeEventListener('mouseleave', leave); });
-  }, []);
-
   return (
-    <header className="game-header">
-      {/* left: switch between game and player */}
-      <a href={isPlayerPage ? "/" : "/player"} onClick={handleCollectionClick} className="nav-link" id="player-link" aria-label={isPlayerPage ? "Open game" : "Open collection"}>
-        {isPlayerPage ? (
-          <span className="material-symbols-outlined icon-btn" aria-hidden="true">colorize</span>
-        ) : (
-          <span className="material-symbols-outlined icon-btn" aria-hidden="true">palette</span>
+    <header className="site-header">
+      <div className="header-left">
+        <a 
+          href={isPlayerPage ? "/" : "/player"} 
+          onClick={handleCollectionClick} 
+          className="header-link"
+          aria-label={isPlayerPage ? "Play game" : "View collection"}
+        >
+          {isPlayerPage ? "PLAY" : "COLLECTION"}
+        </a>
+      </div>
+
+      <div className="header-center">
+        {title && <h1 className="header-title">{title}</h1>}
+        {profile?.username && !title && (
+          <div className="header-username">/{profile.username}</div>
         )}
-      </a>
-      {/* center username display */}
-      {profile?.username && (
-        <div className="header-username">/{profile.username}</div>
-      )}
-      {title ? <h1 className="player-title">{title}</h1> : null}
+      </div>
+
       <div className="header-right">
-        <div id="streak-display" className="streak-badge hidden">
-          <span className="streak-icon">🔥</span>
-          <span id="streak-count">0</span>
-        </div>
-        <button onClick={() => { if (game?.openStats) game.openStats(); else window.location.href = '/?open=stats'; }} id="stats-btn" className="header-icon-btn" aria-label="Statistics">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
-            <line x1="18" y1="20" x2="18" y2="10" />
-            <line x1="12" y1="20" x2="12" y2="4" />
-            <line x1="6" y1="20" x2="6" y2="14" />
-          </svg>
+        <button 
+          onClick={() => { if (game?.openStats) game.openStats(); else window.location.href = '/?open=stats'; }} 
+          className="header-link"
+          aria-label="Statistics"
+        >
+          STATS
         </button>
+        
         {profile ? (
-          <button onClick={() => router.push('/auth/profile')} id="logout-btn" className="header-icon-btn" aria-label="Logout">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
-              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
-              <polyline points="16 17 21 12 16 7" />
-              <line x1="21" y1="12" x2="9" y2="12" />
-            </svg>
+          <button 
+            onClick={() => router.push('/auth/profile')} 
+            className="header-link"
+            aria-label="Profile"
+          >
+            PROFILE
           </button>
         ) : (
-          <button onClick={() => router.push('/auth/login')} id="login-btn" className="header-icon-btn" aria-label="Login">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
-              <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4" />
-              <polyline points="10 17 15 12 10 7" />
-              <line x1="15" y1="12" x2="3" y2="12" />
-            </svg>
+          <button 
+            onClick={() => router.push('/auth/login')} 
+            className="header-link"
+            aria-label="Login"
+          >
+            LOGIN
           </button>
         )}
-        <button onClick={() => { if (game?.openInfo) game.openInfo(); else window.location.href = '/?open=info'; }} id="info-btn" aria-label="How to play" className="header-icon-btn">
-          <span className="material-symbols-outlined">help</span>
+        
+        <button 
+          onClick={() => { if (game?.openInfo) game.openInfo(); else window.location.href = '/?open=info'; }} 
+          className="header-link"
+          aria-label="How to play"
+        >
+          HELP
         </button>
       </div>
     </header>
-  );}
+  );
+}
