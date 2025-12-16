@@ -30,6 +30,9 @@ export default function PlayerClient() {
     let mounted = true;
 
     async function load() {
+      // Start minimum loading timer (2.5 seconds)
+      const minLoadTime = new Promise(resolve => setTimeout(resolve, 2500));
+
       // Always try to fetch from database if authenticated
       if (session) {
         try {
@@ -42,6 +45,8 @@ export default function PlayerClient() {
             });
             if (res.ok) {
               const data = await res.json();
+              // Wait for both the fetch and minimum load time to complete
+              await minLoadTime;
               if (mounted) {
                 setPalettes(data);
                 // Clear localStorage after successful database fetch
@@ -53,6 +58,7 @@ export default function PlayerClient() {
               return;
             } else {
               console.error('Failed to fetch palettes:', await res.text());
+              await minLoadTime;
               if (mounted) {
                 setIsLoading(false);
                 setLoadedOnce(true);
@@ -62,6 +68,7 @@ export default function PlayerClient() {
           }
         } catch (e) {
           console.error('Error loading palettes:', e);
+          await minLoadTime;
           if (mounted) {
             setIsLoading(false);
             setLoadedOnce(true);
@@ -79,6 +86,8 @@ export default function PlayerClient() {
         } catch (e) {
           // ignore
         }
+        // Wait for minimum load time even for localStorage
+        await minLoadTime;
         if (mounted) {
           setIsLoading(false);
           setLoadedOnce(true);
