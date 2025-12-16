@@ -51,10 +51,14 @@ export default function PlayerClient() {
               return;
             } else {
               console.error('Failed to fetch palettes:', await res.text());
+              if (mounted) setIsLoading(false);
+              return;
             }
           }
         } catch (e) {
           console.error('Error loading palettes:', e);
+          if (mounted) setIsLoading(false);
+          return;
         }
       }
 
@@ -67,8 +71,8 @@ export default function PlayerClient() {
         } catch (e) {
           // ignore
         }
+        if (mounted) setIsLoading(false);
       }
-      if (mounted) setIsLoading(false);
     }
 
     load();
