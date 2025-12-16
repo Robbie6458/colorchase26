@@ -27,7 +27,7 @@ export async function GET(request: NextRequest) {
       .from('palettes')
       .select('*')
       .eq('user_id', user.id)  // user.id is the UUID from auth
-      .order('created_at', { ascending: false });
+      .order('date', { ascending: false });
 
     if (error) {
       console.error('Query error:', error);
