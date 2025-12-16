@@ -39,3 +39,9 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+# Setup reference files (not part of build)
+EDGE_FUNCTION_CODE.ts
+SUPABASE_SETUP.sql
+SUPABASE_CRON_SETUP.sql
+ANALYSIS_ORIGINAL_VS_NEW.md
+BEGINNER_SETUP_GUIDE.md
