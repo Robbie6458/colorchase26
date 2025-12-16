@@ -815,30 +815,6 @@ h1 {
   }
 }
 
-#info-btn {
-  background: transparent;
-  border: 2px solid rgba(255, 255, 255, 0.3);
-  cursor: pointer;
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.2s ease;
-  padding: 0;
-}
-
-#info-btn:hover {
-  background: rgba(255, 255, 255, 0.1);
-  border-color: rgba(255, 255, 255, 0.5);
-}
-
-#info-btn svg {
-  width: 18px;
-  height: 18px;
-}
-
 @keyframes pop-in {
   0% {
     transform: scale(0);
@@ -899,16 +875,6 @@ h1 {
   .reveal-tile {
     width: 50px;
     height: 50px;
-  }
-  
-  #info-btn {
-    width: 32px;
-    height: 32px;
-  }
-  
-  #info-btn svg {
-    width: 16px;
-    height: 16px;
   }
 }
 
