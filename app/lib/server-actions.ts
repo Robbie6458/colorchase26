@@ -67,19 +67,7 @@ export async function updatePlayerName(newName: string) {
   return { success: true, newName };
 }
 
-/**
- * Save a palette to user's collection
- * @deprecated Use POST /api/palettes/create instead
- */
-export async function savePalette(
-  date: string,
-  colors: string[],
-  scheme: string,
-  guessCount: number,
-  won: boolean
-) {
-  throw new Error('Use API route /api/palettes/create instead');
-}
+
 
 /**
  * Get user's palette collection

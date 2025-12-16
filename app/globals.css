@@ -148,40 +148,7 @@ body {
   }
 }
 
-.nav-link {
-  color: #a0a0c0;
-  text-decoration: none;
-  font-weight: 600;
-  transition: color 0.2s ease;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-}
 
-.nav-link:hover {
-  color: #fff;
-}
-
-.auth-btn {
-  background: transparent;
-  border: 2px solid rgba(255, 255, 255, 0.3);
-  color: #fff;
-  padding: 8px 16px;
-  border-radius: 20px;
-  font-size: 0.9em;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.auth-btn:hover {
-  background: rgba(255, 255, 255, 0.1);
-  border-color: rgba(255, 255, 255, 0.5);
-}
-
-.auth-btn.logged-in {
-  background: linear-gradient(135deg, #667eea, #764ba2);
-  border: none;
-}
 
 .game-wrapper {
   flex: 1;
