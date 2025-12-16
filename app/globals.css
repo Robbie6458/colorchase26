@@ -1012,12 +1012,28 @@ h1 {
 .palette-date {
   color: #a0a0c0;
   font-size: 0.9em;
+  text-align: left;
+  margin-bottom: 4px;
 }
 
 .palette-scheme {
+  background: none;
+  border: none;
   color: #667eea;
   font-size: 0.8em;
   text-transform: capitalize;
+  text-align: left;
+  padding: 0;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-decoration: underline;
+  text-decoration-color: transparent;
+}
+
+.palette-scheme:hover {
+  color: #8b9aff;
+  text-decoration-color: #8b9aff;
+  transform: translateX(2px);
 }
 
 .palette-actions {
@@ -1059,36 +1075,69 @@ h1 {
   stroke: #ffd700;
 }
 
-.hex-codes {
+/* Color Scheme Definition Modal */
+.scheme-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.85);
+  backdrop-filter: blur(8px);
   display: flex;
-  gap: 12px;
-  padding: 0 12px 12px;
-  flex-wrap: nowrap;
-  justify-content: flex-start;
-  overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
+  align-items: center;
+  justify-content: center;
+  z-index: 10000;
+  padding: 20px;
 }
 
-/* hide webkit scrollbar */
-.hex-codes::-webkit-scrollbar { display: none; }
+.scheme-modal-content {
+  background: linear-gradient(135deg, rgba(26, 26, 46, 0.98), rgba(22, 33, 62, 0.98));
+  border-radius: 16px;
+  padding: 32px;
+  max-width: 500px;
+  width: 100%;
+  position: relative;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+}
 
-.hex-code {
-  font-family: monospace;
-  font-size: 0.65em;
-  background: rgba(0, 0, 0, 0.3);
-  padding: 4px 6px;
-  border-radius: 4px;
+.scheme-modal-close {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  background: rgba(255, 255, 255, 0.1);
+  border: none;
+  color: white;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
   cursor: pointer;
-  transition: background 0.2s ease;
-  white-space: nowrap;
+  font-size: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
 }
 
-.hex-code:hover {
-  background: rgba(102, 126, 234, 0.3);
+.scheme-modal-close:hover {
+  background: rgba(255, 255, 255, 0.2);
+  transform: rotate(90deg);
 }
 
-.hex-code.copied {
-  background: rgba(74, 222, 128, 0.3);
+.scheme-modal-title {
+  color: #667eea;
+  font-size: 24px;
+  font-weight: 700;
+  margin: 0 0 16px 0;
+  text-transform: capitalize;
+}
+
+.scheme-modal-description {
+  color: #e0e0e0;
+  font-size: 16px;
+  line-height: 1.6;
+  margin: 0;
 }
 
 /* Player Page Container Styles */

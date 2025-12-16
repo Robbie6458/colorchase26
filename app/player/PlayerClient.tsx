@@ -15,12 +15,23 @@ type Palette = {
   won?: boolean;
 };
 
+const SCHEME_DEFINITIONS: Record<string, string> = {
+  "complementary": "Colors opposite each other on the color wheel, creating high contrast and visual tension. These pairs make each other appear more vibrant.",
+  "analogous": "Colors that are adjacent to each other on the color wheel, creating harmonious and pleasing combinations with a cohesive feel.",
+  "triadic": "Three colors evenly spaced around the color wheel, offering vibrant contrast while maintaining balance and harmony.",
+  "tetradic": "Four colors arranged into two complementary pairs, providing rich color variety with multiple points of contrast.",
+  "monochromatic": "Variations of a single hue using different shades, tints, and tones, creating a unified and elegant appearance.",
+  "split-complementary": "A base color combined with the two colors adjacent to its complement, offering high contrast with less tension than complementary.",
+};
+
 export default function PlayerClient() {
   const [palettes, setPalettes] = useState<Palette[]>([]);
   const [showFavorites, setShowFavorites] = useState(false);
   const [showInfo, setShowInfo] = useState(false);
   const [showLogin, setShowLogin] = useState(false);
   const [showStats, setShowStats] = useState(false);
+  const [showSchemeModal, setShowSchemeModal] = useState(false);
+  const [selectedScheme, setSelectedScheme] = useState<string>("");
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [loadedOnce, setLoadedOnce] = useState(false);
@@ -121,6 +132,37 @@ export default function PlayerClient() {
     a.click();
     a.remove();
     URL.revokeObjectURL(url);
+  }
+
+  async function sharePalette(p: Palette) {
+    const colors = p.colors.join(', ');
+    const shareData = {
+      title: 'Color Chase Palette',
+      text: `Check out this ${p.scheme || ''} color palette from Color Chase (${new Date(p.date).toLocaleDateString()}): ${colors}`,
+      url: window.location.origin
+    };
+
+    // Use Web Share API if available (mobile)
+    if (navigator.share) {
+      try {
+        await navigator.share(shareData);
+      } catch (err) {
+        // User cancelled or error
+        console.log('Share cancelled');
+      }
+    } else {
+      // Fallback: copy to clipboard
+      const shareText = `${shareData.text}\n${shareData.url}`;
+      navigator.clipboard?.writeText(shareText).then(() => {
+        setToastMessage('Share text copied to clipboard!');
+        setTimeout(() => setToastMessage(null), 2000);
+      });
+    }
+  }
+
+  function openSchemeModal(scheme: string) {
+    setSelectedScheme(scheme);
+    setShowSchemeModal(true);
   }
 
   async function toggleFavorite(date: string, btn: HTMLButtonElement) {
@@ -272,15 +314,29 @@ export default function PlayerClient() {
                 <div className="palette-info">
                   <div>
                     <div className="palette-date">{new Date(p.date).toLocaleDateString()}</div>
-                    <div className="palette-scheme">{p.scheme || ''}</div>
+                    {p.scheme && (
+                      <button 
+                        className="palette-scheme"
+                        onClick={() => openSchemeModal(p.scheme!)}
+                        title="Learn about this color scheme"
+                      >
+                        {p.scheme}
+                      </button>
+                    )}
                   </div>
                   <div className="palette-actions">
                     <button 
-                      className="action-btn copy" 
-                      title="Copy first hex" 
-                      onClick={() => { if (p.colors[0]) copyHex(p.colors[0]); }}
+                      className="action-btn share" 
+                      title="Share palette" 
+                      onClick={() => sharePalette(p)}
                     >
-                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                        <circle cx="18" cy="5" r="3"/>
+                        <circle cx="6" cy="12" r="3"/>
+                        <circle cx="18" cy="19" r="3"/>
+                        <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/>
+                        <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/>
+                      </svg>
                     </button>
                     <button 
                       className="action-btn download" 
@@ -298,18 +354,6 @@ export default function PlayerClient() {
                     </button>
                   </div>
                 </div>
-                <div className="hex-codes">
-                  {p.colors.map((c, i) => (
-                    <div 
-                      key={i}
-                      className="hex-code"
-                      onClick={() => copyHex(c)}
-                      title="Click to copy"
-                    >
-                      {c}
-                    </div>
-                  ))}
-                </div>
               </div>
             ))}
           </div>
@@ -319,6 +363,31 @@ export default function PlayerClient() {
       {toastMessage && (
         <div className="copy-toast">
           {toastMessage}
+        </div>
+      )}
+      
+      {/* Color Scheme Definition Modal */}
+      {showSchemeModal && (
+        <div 
+          className="scheme-modal-overlay" 
+          onClick={() => setShowSchemeModal(false)}
+        >
+          <div 
+            className="scheme-modal-content" 
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button 
+              className="scheme-modal-close" 
+              onClick={() => setShowSchemeModal(false)}
+              aria-label="Close"
+            >
+              ✕
+            </button>
+            <h2 className="scheme-modal-title">{selectedScheme}</h2>
+            <p className="scheme-modal-description">
+              {SCHEME_DEFINITIONS[selectedScheme.toLowerCase()] || "A harmonious arrangement of colors."}
+            </p>
+          </div>
         </div>
       )}
     </div>
