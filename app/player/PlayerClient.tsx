@@ -23,6 +23,7 @@ export default function PlayerClient() {
   const [showStats, setShowStats] = useState(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [loadedOnce, setLoadedOnce] = useState(false);
   const { session } = useAuth();
 
   useEffect(() => {
@@ -47,17 +48,24 @@ export default function PlayerClient() {
                 localStorage.removeItem("colorChasePalettes");
                 localStorage.removeItem("palettes");
                 setIsLoading(false);
+                setLoadedOnce(true);
               }
               return;
             } else {
               console.error('Failed to fetch palettes:', await res.text());
-              if (mounted) setIsLoading(false);
+              if (mounted) {
+                setIsLoading(false);
+                setLoadedOnce(true);
+              }
               return;
             }
           }
         } catch (e) {
           console.error('Error loading palettes:', e);
-          if (mounted) setIsLoading(false);
+          if (mounted) {
+            setIsLoading(false);
+            setLoadedOnce(true);
+          }
           return;
         }
       }
@@ -71,7 +79,10 @@ export default function PlayerClient() {
         } catch (e) {
           // ignore
         }
-        if (mounted) setIsLoading(false);
+        if (mounted) {
+          setIsLoading(false);
+          setLoadedOnce(true);
+        }
       }
     }
 
@@ -189,7 +200,7 @@ export default function PlayerClient() {
       </div>
 
       <main className="player-main">
-        {isLoading ? (
+        {isLoading || !loadedOnce ? (
           <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '400px' }}>
             <style>{`
               @keyframes colorfulSpin {
