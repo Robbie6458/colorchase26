@@ -164,7 +164,7 @@ export default function PlayerClient() {
   return (
     <div className="player-container" style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
       {/* Use shared header for consistency */}
-      <Header game={stubGame} title="Rbrt" isPlayerPage={true} />
+      <Header game={stubGame} isPlayerPage={true} />
       <Overlays game={stubGame} />
 
       <div className="player-filters-container">

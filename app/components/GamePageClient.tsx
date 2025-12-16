@@ -14,7 +14,7 @@ export default function GamePageClient() {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
-      <Header game={game} title="Rbrt" />
+      <Header game={game} />
       <GameArea game={game} />
       <Overlays game={game} />
       <DailyStats />
