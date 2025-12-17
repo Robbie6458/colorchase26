@@ -12,12 +12,29 @@ export default function Header({ game, title, isPlayerPage }: { game?: GameAny, 
   const { profile, session } = useAuth();
   const [currentStreak, setCurrentStreak] = useState(0);
   const [menuOpen, setMenuOpen] = useState(false);
+  const menuRef = React.useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (session) {
       calculateStreak();
     }
   }, [session]);
+
+  // Close menu when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (menuOpen && menuRef.current && !menuRef.current.contains(event.target as Node)) {
+        setMenuOpen(false);
+      }
+    };
+
+    if (menuOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [menuOpen]);
 
   // Re-calculate streak when user returns to page (after saving palette)
   useEffect(() => {
@@ -125,7 +142,6 @@ export default function Header({ game, title, isPlayerPage }: { game?: GameAny, 
               <rect x="14" y="14" width="7" height="7" />
             </svg>
           )}
-          <span className="header-text-fallback">{isPlayerPage ? "PLAY" : "COLLECTION"}</span>
         </a>
       </div>
 
@@ -136,7 +152,7 @@ export default function Header({ game, title, isPlayerPage }: { game?: GameAny, 
         )}
       </div>
 
-      <div className="header-right">
+      <div className="header-right" ref={menuRef}>
         {profile && currentStreak > 0 && (
           <div className="streak-display" title={`${currentStreak} day streak`}>
             <span className="streak-fire">🔥</span>

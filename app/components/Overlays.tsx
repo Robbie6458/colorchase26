@@ -215,7 +215,14 @@ export default function Overlays({ game }: { game: GameAny }) {
     <>
       {/* Info overlay */}
       {game.showInfo && (
-        <div className="game-overlay">
+        <div 
+          className="game-overlay"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) {
+              game.closeInfo && game.closeInfo();
+            }
+          }}
+        >
           <div className="overlay-card">
             <h2 className="overlay-title">How to Play</h2>
             <div className="info-list">
@@ -262,7 +269,14 @@ export default function Overlays({ game }: { game: GameAny }) {
 
       {/* Victory overlay */}
       {won && !game.showLogin && !game.showStats && !game.showInfo && (
-        <div className="game-overlay">
+        <div 
+          className="game-overlay"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) {
+              // Don't close victory overlay by clicking outside
+            }
+          }}
+        >
           <div className="overlay-card">
             <h2 className="victory-title">You Won!</h2>
             <p className="overlay-subtitle">Today's palette is yours to collect</p>
@@ -302,7 +316,14 @@ export default function Overlays({ game }: { game: GameAny }) {
 
       {/* Defeat overlay */}
       {lost && !game.showLogin && !game.showStats && !game.showInfo && (
-        <div className="game-overlay">
+        <div 
+          className="game-overlay"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) {
+              // Don't close defeat overlay by clicking outside
+            }
+          }}
+        >
           <div className="overlay-card">
             <h2 className="defeat-title">Better Luck Tomorrow!</h2>
             <p className="overlay-subtitle">Here was today's palette</p>
@@ -345,6 +366,21 @@ export default function Overlays({ game }: { game: GameAny }) {
 
 function StatsOverlay({ game, session }: { game: any, session: any }) {
   const [stats, setStats] = useState<any>(null);
+  const overlayRef = React.useRef<HTMLDivElement>(null);
+
+  // Close when clicking outside the modal
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (overlayRef.current === event.target) {
+        game.closeStats && game.closeStats();
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [game]);
 
   useEffect(() => {
     async function loadStats() {
@@ -416,7 +452,7 @@ function StatsOverlay({ game, session }: { game: any, session: any }) {
   if (!stats) return null;
 
   return (
-    <div className="game-overlay">
+    <div className="game-overlay" ref={overlayRef}>
       <div className="overlay-card">
         <h2 className="overlay-title">Your Statistics</h2>
         <div className="stats-grid">
