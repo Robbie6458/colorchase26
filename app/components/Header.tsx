@@ -11,6 +11,7 @@ export default function Header({ game, title, isPlayerPage }: { game?: GameAny, 
   const router = useRouter();
   const { profile, session } = useAuth();
   const [currentStreak, setCurrentStreak] = useState(0);
+  const [menuOpen, setMenuOpen] = useState(false);
 
   useEffect(() => {
     if (session) {
@@ -108,10 +109,23 @@ export default function Header({ game, title, isPlayerPage }: { game?: GameAny, 
         <a 
           href={isPlayerPage ? "/" : "/player"} 
           onClick={handleCollectionClick} 
-          className="header-link"
+          className="header-icon-btn"
           aria-label={isPlayerPage ? "Play game" : "View collection"}
+          title={isPlayerPage ? "Play game" : "View collection"}
         >
-          {isPlayerPage ? "PLAY" : "COLLECTION"}
+          {isPlayerPage ? (
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+              <circle cx="12" cy="12" r="10" />
+            </svg>
+          ) : (
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <rect x="3" y="3" width="7" height="7" />
+              <rect x="14" y="3" width="7" height="7" />
+              <rect x="3" y="14" width="7" height="7" />
+              <rect x="14" y="14" width="7" height="7" />
+            </svg>
+          )}
+          <span className="header-text-fallback">{isPlayerPage ? "PLAY" : "COLLECTION"}</span>
         </a>
       </div>
 
@@ -130,40 +144,105 @@ export default function Header({ game, title, isPlayerPage }: { game?: GameAny, 
           </div>
         )}
         
-        <button 
-          onClick={() => { if (game?.openStats) game.openStats(); else window.location.href = '/?open=stats'; }} 
-          className="header-link"
-          aria-label="Statistics"
-        >
-          STATS
-        </button>
-        
-        {profile ? (
+        {/* Desktop navigation */}
+        <div className="header-nav-desktop">
           <button 
-            onClick={() => router.push('/auth/profile')} 
+            onClick={() => { if (game?.openStats) game.openStats(); else window.location.href = '/?open=stats'; }} 
             className="header-link"
-            aria-label="Profile"
+            aria-label="Statistics"
           >
-            PROFILE
+            STATS
           </button>
-        ) : (
+          
+          {profile ? (
+            <button 
+              onClick={() => router.push('/auth/profile')} 
+              className="header-link"
+              aria-label="Profile"
+            >
+              PROFILE
+            </button>
+          ) : (
+            <button 
+              onClick={() => router.push('/auth/login')} 
+              className="header-link"
+              aria-label="Login"
+            >
+              LOGIN
+            </button>
+          )}
+          
           <button 
-            onClick={() => router.push('/auth/login')} 
+            onClick={() => { if (game?.openInfo) game.openInfo(); else window.location.href = '/?open=info'; }} 
             className="header-link"
-            aria-label="Login"
+            aria-label="How to play"
           >
-            LOGIN
+            HELP
           </button>
-        )}
-        
+        </div>
+
+        {/* Mobile hamburger menu */}
         <button 
-          onClick={() => { if (game?.openInfo) game.openInfo(); else window.location.href = '/?open=info'; }} 
-          className="header-link"
-          aria-label="How to play"
+          className="hamburger-menu"
+          onClick={() => setMenuOpen(!menuOpen)}
+          aria-label="Menu"
         >
-          HELP
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <line x1="3" y1="6" x2="21" y2="6" />
+            <line x1="3" y1="12" x2="21" y2="12" />
+            <line x1="3" y1="18" x2="21" y2="18" />
+          </svg>
         </button>
       </div>
+
+      {/* Mobile dropdown menu */}
+      {menuOpen && (
+        <div className="mobile-dropdown">
+          <button 
+            onClick={() => { 
+              if (game?.openStats) game.openStats(); 
+              else window.location.href = '/?open=stats'; 
+              setMenuOpen(false);
+            }} 
+            className="mobile-menu-item"
+          >
+            📊 STATS
+          </button>
+          
+          {profile ? (
+            <button 
+              onClick={() => { 
+                router.push('/auth/profile'); 
+                setMenuOpen(false);
+              }} 
+              className="mobile-menu-item"
+            >
+              👤 PROFILE
+            </button>
+          ) : (
+            <button 
+              onClick={() => { 
+                router.push('/auth/login'); 
+                setMenuOpen(false);
+              }} 
+              className="mobile-menu-item"
+            >
+              🔐 LOGIN
+            </button>
+          )}
+          
+          <button 
+            onClick={() => { 
+              if (game?.openInfo) game.openInfo(); 
+              else window.location.href = '/?open=info'; 
+              setMenuOpen(false);
+            }} 
+            className="mobile-menu-item"
+          >
+            ❓ HELP
+          </button>
+        </div>
+      )}
     </header>
   );
 }
