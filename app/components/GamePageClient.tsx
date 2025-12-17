@@ -19,14 +19,16 @@ export default function GamePageClient() {
       <Overlays game={game} />
       <DailyStats />
       
-      {/* Temporary preview button for development */}
-      <button
-        onClick={() => setShowDatePreview(true)}
-        className="fixed bottom-4 right-4 px-3 py-2 bg-linear-to-r from-orange-400 to-red-500 text-white text-xs font-bold rounded-full shadow-lg hover:shadow-xl transition z-40"
-        title="Click to preview different dates and color palettes"
-      >
-        🎨 Preview
-      </button>
+      {/* Preview button - only show in development */}
+      {process.env.NODE_ENV === 'development' && (
+        <button
+          onClick={() => setShowDatePreview(true)}
+          className="fixed bottom-4 right-4 px-3 py-2 bg-linear-to-r from-orange-400 to-red-500 text-white text-xs font-bold rounded-full shadow-lg hover:shadow-xl transition z-40"
+          title="Click to preview different dates and color palettes"
+        >
+          🎨 Preview
+        </button>
+      )}
 
       {showDatePreview && <DatePreview onClose={() => setShowDatePreview(false)} />}
     </div>
