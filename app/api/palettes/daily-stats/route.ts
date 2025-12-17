@@ -7,7 +7,8 @@ export async function GET(request: Request) {
 
     // Get today's date
     const now = new Date();
-    const resetHour = 9;
+    // 9am PST = 17:00 UTC (PST is UTC-8, so 9 + 8 = 17)
+    const resetHour = 17;
     let seedDate = new Date(now);
     if (now.getUTCHours() < resetHour) {
       seedDate.setUTCDate(seedDate.getUTCDate() - 1);
