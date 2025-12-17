@@ -60,7 +60,7 @@ export default function ResetPasswordPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-600 to-pink-500 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-linear-to-br from-purple-600 to-pink-500 flex items-center justify-center p-4">
       <div className="bg-white rounded-lg shadow-2xl w-full max-w-md p-8">
         <h1 className="text-3xl font-bold text-center mb-2 text-gray-800">Color Chase</h1>
         <p className="text-center text-gray-600 mb-6">Reset your password</p>
