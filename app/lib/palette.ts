@@ -2,7 +2,10 @@
 
 export function getTodaySeed(): string {
   const now = new Date();
-  const resetHour = 9;
+  // 9am PST = 17:00 UTC (PST is UTC-8, so 9 + 8 = 17)
+  // During PDT (daylight saving), 9am PDT = 16:00 UTC
+  // Using 17 to match standard time schedule
+  const resetHour = 17;
   let seedDate = new Date(now);
   if (now.getUTCHours() < resetHour) {
     seedDate.setUTCDate(seedDate.getUTCDate() - 1);

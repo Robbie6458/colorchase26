@@ -25,7 +25,8 @@ export default function useGame() {
       // Fetch today's palette from the API
       const response = await fetch('/api/today-palette');
       if (!response.ok) {
-        throw new Error('Failed to fetch today\'s palette');
+        const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
+        throw new Error(errorData.error || 'Failed to fetch today\'s palette');
       }
       
       const data = await response.json();
@@ -40,21 +41,9 @@ export default function useGame() {
       setGameComplete(false);
     } catch (error) {
       console.error('Error loading puzzle:', error);
-      // Fallback to client-side generation if API fails
-      const today = getTodaySeed();
-      const wheelData = generateDailyColorWheel(today);
-      setColors(wheelData.colors);
-      const schemes = ["complementary", "triadic", "analogous", "split-complementary", "tetradic"];
-      const schemeIndex = parseInt(today.replace(/-/g, "")) % schemes.length;
-      const scheme = schemes[schemeIndex];
-      setCurrentScheme(scheme);
-      const pattern = generatePaletteByScheme(scheme, wheelData.colors, today);
-      setHiddenPattern(pattern);
-      setRows(Array.from({ length: 5 }, () => Array(5).fill(null)));
-      setRowResults(Array.from({ length: 5 }, () => Array(5).fill(null)));
-      setCurrentRow(0);
-      setEliminated(new Set());
-      setGameComplete(false);
+      // DO NOT fallback to client-side generation - all players must get the same palette
+      // Show error to user instead
+      alert('Today\'s puzzle is not available yet. Please check back after 9am PST when the daily palette is generated.');
     }
   }, []);
 
