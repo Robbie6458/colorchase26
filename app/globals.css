@@ -142,7 +142,7 @@ body {
   margin-top: 8px;
   margin-right: 16px;
   min-width: 160px;
-  z-index: 1000;
+  z-index: 9999;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
 }
 
