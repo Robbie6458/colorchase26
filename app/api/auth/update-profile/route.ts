@@ -7,7 +7,7 @@ const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
 export async function POST(request: NextRequest) {
   try {
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
-    const { playerName } = await request.json();
+    const { playerName, emailNotifications } = await request.json();
 
     // Get the auth header with Bearer token
     const authHeader = request.headers.get('authorization');
@@ -23,10 +23,14 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    // Update player name
+    // Update profile with both username and email notification preference
+    const updateData: any = {};
+    if (playerName !== undefined) updateData.username = playerName;
+    if (emailNotifications !== undefined) updateData.email_notifications = emailNotifications;
+
     const { error } = await supabase
       .from('profiles')
-      .update({ username: playerName })
+      .update(updateData)
       .eq('id', user.id);
 
     if (error) {

@@ -11,6 +11,7 @@ export default function ProfilePage() {
   const router = useRouter();
   
   const [playerName, setPlayerName] = useState(profile?.username || '');
+  const [emailNotifications, setEmailNotifications] = useState(profile?.email_notifications ?? true);
   const [showPasswordForm, setShowPasswordForm] = useState(false);
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
@@ -51,7 +52,7 @@ export default function ProfilePage() {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${session.access_token}`
         },
-        body: JSON.stringify({ playerName })
+        body: JSON.stringify({ playerName, emailNotifications })
       });
 
       if (!response.ok) {
@@ -175,10 +176,10 @@ export default function ProfilePage() {
 
               <button
                 type="submit"
-                disabled={loading || playerName === profile.username}
+                disabled={loading || (playerName === profile.username && emailNotifications === profile.email_notifications)}
                 className="bg-gradient-to-r from-purple-600 to-pink-500 text-white font-semibold py-3 px-6 rounded-lg hover:shadow-lg hover:shadow-purple-500/50 transition disabled:opacity-50"
               >
-                {loading ? 'Updating...' : 'Update Player Name'}
+                {loading ? 'Updating...' : 'Update Profile'}
               </button>
             </form>
           </div>
@@ -257,6 +258,28 @@ export default function ProfilePage() {
               </div>
             </form>
           )}
+        </div>
+
+        {/* Notification Settings */}
+        <div className="mb-8 pb-8 border-b border-slate-600">
+          <h2 className="text-xl font-semibold text-white mb-4">Notification Settings</h2>
+          <div className="flex items-center justify-between p-4 bg-slate-900 rounded-lg border border-slate-600">
+            <div className="flex-1">
+              <h3 className="text-white font-medium mb-1">Daily Reminder Emails</h3>
+              <p className="text-slate-400 text-sm">
+                Get notified a few hours before the daily palette expires
+              </p>
+            </div>
+            <label className="relative inline-flex items-center cursor-pointer">
+              <input
+                type="checkbox"
+                checked={emailNotifications}
+                onChange={(e) => setEmailNotifications(e.target.checked)}
+                className="sr-only peer"
+              />
+              <div className="w-11 h-6 bg-slate-700 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-purple-800 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-purple-600"></div>
+            </label>
+          </div>
         </div>
 
         {/* Stats Section */}

@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ColorChase Social Post Preview</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      padding: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .container {
+      max-width: 800px;
+      width: 100%;
+      background: white;
+      border-radius: 16px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+      overflow: hidden;
+    }
+    
+    .header {
+      background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+      padding: 30px;
+      text-align: center;
+      color: white;
+    }
+    
+    .header h1 {
+      font-size: 28px;
+      margin-bottom: 8px;
+    }
+    
+    .header p {
+      opacity: 0.8;
+      font-size: 14px;
+    }
+    
+    .content {
+      padding: 30px;
+    }
+    
+    .input-group {
+      margin-bottom: 20px;
+    }
+    
+    .input-group label {
+      display: block;
+      font-weight: 600;
+      margin-bottom: 8px;
+      color: #334155;
+    }
+    
+    .input-group input {
+      width: 100%;
+      padding: 12px;
+      border: 2px solid #e2e8f0;
+      border-radius: 8px;
+      font-size: 14px;
+      transition: border-color 0.2s;
+    }
+    
+    .input-group input:focus {
+      outline: none;
+      border-color: #8b5cf6;
+    }
+    
+    .color-inputs {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+      gap: 12px;
+    }
+    
+    .color-input-wrapper {
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .color-input-wrapper input {
+      height: 50px;
+      cursor: pointer;
+    }
+    
+    button {
+      width: 100%;
+      background: linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%);
+      color: white;
+      border: none;
+      padding: 14px;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      margin-top: 10px;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    
+    button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(139, 92, 246, 0.4);
+    }
+    
+    button:active {
+      transform: translateY(0);
+    }
+    
+    #preview {
+      margin-top: 30px;
+      border-top: 2px solid #e2e8f0;
+      padding-top: 30px;
+    }
+    
+    #svgPreview {
+      width: 100%;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      margin-bottom: 20px;
+    }
+    
+    .caption-box {
+      background: #f8fafc;
+      padding: 20px;
+      border-radius: 8px;
+      border-left: 4px solid #8b5cf6;
+      white-space: pre-wrap;
+      font-size: 14px;
+      line-height: 1.6;
+      color: #1e293b;
+    }
+    
+    .download-btn {
+      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+      margin-top: 10px;
+    }
+    
+    .hidden {
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>🎨 Social Post Preview</h1>
+      <p>Generate and preview your ColorChase social media posts</p>
+    </div>
+    
+    <div class="content">
+      <div class="input-group">
+        <label>Palette Name</label>
+        <input type="text" id="paletteName" placeholder="e.g., Sunset Vibes" value="Sunset Vibes">
+      </div>
+      
+      <div class="input-group">
+        <label>Date</label>
+        <input type="date" id="date" value="">
+      </div>
+      
+      <div class="input-group">
+        <label>Colors (5 recommended)</label>
+        <div class="color-inputs" id="colorInputs">
+          <!-- Dynamically generated -->
+        </div>
+      </div>
+      
+      <button onclick="generatePreview()">🎨 Generate Preview</button>
+      
+      <div id="preview" class="hidden">
+        <h3 style="margin-bottom: 15px; color: #1e293b;">Preview</h3>
+        <div id="svgPreview"></div>
+        
+        <h3 style="margin-bottom: 10px; color: #1e293b;">Caption</h3>
+        <div class="caption-box" id="caption"></div>
+        
+        <button class="download-btn" onclick="downloadSVG()">⬇️ Download SVG</button>
+        <p style="margin-top: 10px; font-size: 12px; color: #64748b; text-align: center;">
+          Convert SVG to PNG at <a href="https://svgtopng.com" target="_blank" style="color: #8b5cf6;">svgtopng.com</a>
+        </p>
+      </div>
+    </div>
+  </div>
+  
+  <script>
+    // Initialize
+    document.getElementById('date').valueAsDate = new Date();
+    
+    // Generate color inputs
+    const colorInputsContainer = document.getElementById('colorInputs');
+    const defaultColors = ['#FF6B6B', '#4ECDC4', '#45B7D1', '#FFA07A', '#98D8C8'];
+    
+    for (let i = 0; i < 5; i++) {
+      const wrapper = document.createElement('div');
+      wrapper.className = 'color-input-wrapper';
+      
+      const input = document.createElement('input');
+      input.type = 'color';
+      input.value = defaultColors[i];
+      input.id = `color${i}`;
+      
+      wrapper.appendChild(input);
+      colorInputsContainer.appendChild(wrapper);
+    }
+    
+    function getColors() {
+      const colors = [];
+      for (let i = 0; i < 5; i++) {
+        const color = document.getElementById(`color${i}`).value;
+        if (color) colors.push(color.toUpperCase());
+      }
+      return colors;
+    }
+    
+    function formatDate(dateStr) {
+      const date = new Date(dateStr);
+      const months = ['January', 'February', 'March', 'April', 'May', 'June', 
+                      'July', 'August', 'September', 'October', 'November', 'December'];
+      return `${months[date.getMonth()]} ${date.getDate()}, ${date.getFullYear()}`;
+    }
+    
+    function generateCaption(paletteName, colors) {
+      const hexCodes = colors.join(' • ');
+      return `✨ Yesterday's ColorChase palette was absolutely stunning!\n\n🎨 ${paletteName}\n${hexCodes}\n\nColorChase is a daily color-matching puzzle that challenges your eye for design. Every day brings a new palette to recreate!\n\n🔥 Test your color skills today at colorchase.app\n\n#ColorChase #ColorPalette #DailyChallenge #DesignGame #ColorTheory`;
+    }
+    
+    function generateSVG(colors, paletteName, dateStr) {
+      const colorCount = colors.length;
+      const colorWidth = 1200 / colorCount;
+      const formattedDate = formatDate(dateStr);
+      
+      const colorRects = colors.map((color, i) => 
+        `<rect x="${i * colorWidth}" y="0" width="${colorWidth}" height="628" fill="${color}" />`
+      ).join('\n  ');
+      
+      const hexTexts = colors.map((color, i) => {
+        const totalWidth = colors.length * 145;
+        const startX = -totalWidth / 2;
+        const x = startX + i * 145 + 72.5;
+        return `
+        <rect x="${x - 60}" y="-25" width="120" height="45" rx="8" fill="rgba(0,0,0,0.3)" />
+        <text x="${x}" y="5" text-anchor="middle" class="hex">${color}</text>`;
+      }).join('\n      ');
+      
+      return `<?xml version="1.0" encoding="UTF-8"?>
+<svg width="1200" height="628" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <style>
+      .title { font-family: 'Arial Black', sans-serif; font-weight: 900; font-size: 48px; fill: white; }
+      .subtitle { font-family: Arial, sans-serif; font-weight: 600; font-size: 24px; fill: rgba(255,255,255,0.95); }
+      .hex { font-family: 'Courier New', monospace; font-weight: 700; font-size: 19px; fill: white; letter-spacing: 1px; }
+      .date { font-family: Arial, sans-serif; font-weight: 700; font-size: 20px; fill: rgba(255,255,255,0.85); }
+    </style>
+  </defs>
+  
+  ${colorRects}
+  
+  <rect x="0" y="0" width="1200" height="628" fill="url(#gradient)" opacity="0.5" />
+  
+  <defs>
+    <linearGradient id="gradient" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:rgb(0,0,0);stop-opacity:0.3" />
+      <stop offset="100%" style="stop-color:rgb(0,0,0);stop-opacity:0.6" />
+    </linearGradient>
+  </defs>
+  
+  <g>
+    <text x="602" y="202" text-anchor="middle" class="title" fill="rgba(0,0,0,0.3)">Yesterday's ColorChase</text>
+    <text x="600" y="200" text-anchor="middle" class="title">Yesterday's ColorChase</text>
+    
+    <text x="600" y="250" text-anchor="middle" class="date">${formattedDate}</text>
+    
+    <text x="600" y="310" text-anchor="middle" class="subtitle">${paletteName}</text>
+    
+    <g transform="translate(600, 370)">
+      ${hexTexts}
+    </g>
+    
+    <text x="600" y="480" text-anchor="middle" class="subtitle" style="font-size: 28px;">Can you match today's colors?</text>
+    
+    <text x="600" y="560" text-anchor="middle" class="title" style="font-size: 40px;">🎨 colorchase.app</text>
+  </g>
+</svg>`;
+    }
+    
+    function generatePreview() {
+      const paletteName = document.getElementById('paletteName').value;
+      const dateStr = document.getElementById('date').value;
+      const colors = getColors();
+      
+      if (colors.length < 3) {
+        alert('Please select at least 3 colors');
+        return;
+      }
+      
+      const svg = generateSVG(colors, paletteName, dateStr);
+      const caption = generateCaption(paletteName, colors);
+      
+      document.getElementById('svgPreview').innerHTML = svg;
+      document.getElementById('caption').textContent = caption;
+      document.getElementById('preview').classList.remove('hidden');
+      
+      // Store SVG for download
+      window.currentSVG = svg;
+    }
+    
+    function downloadSVG() {
+      if (!window.currentSVG) return;
+      
+      const blob = new Blob([window.currentSVG], { type: 'image/svg+xml' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `colorchase-${document.getElementById('date').value}.svg`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }
+    
+    // Generate initial preview
+    generatePreview();
+  </script>
+</body>
+</html>
