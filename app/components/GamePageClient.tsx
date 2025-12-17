@@ -22,7 +22,7 @@ export default function GamePageClient() {
       {/* Temporary preview button for development */}
       <button
         onClick={() => setShowDatePreview(true)}
-        className="fixed bottom-4 right-4 px-3 py-2 bg-gradient-to-r from-orange-400 to-red-500 text-white text-xs font-bold rounded-full shadow-lg hover:shadow-xl transition z-40"
+        className="fixed bottom-4 right-4 px-3 py-2 bg-linear-to-r from-orange-400 to-red-500 text-white text-xs font-bold rounded-full shadow-lg hover:shadow-xl transition z-40"
         title="Click to preview different dates and color palettes"
       >
         🎨 Preview

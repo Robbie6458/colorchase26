@@ -177,7 +177,7 @@ export default function ProfilePage() {
               <button
                 type="submit"
                 disabled={loading || (playerName === profile.username && emailNotifications === profile.email_notifications)}
-                className="bg-gradient-to-r from-purple-600 to-pink-500 text-white font-semibold py-3 px-6 rounded-lg hover:shadow-lg hover:shadow-purple-500/50 transition disabled:opacity-50"
+                className="bg-linear-to-r from-purple-600 to-pink-500 text-white font-semibold py-3 px-6 rounded-lg hover:shadow-lg hover:shadow-purple-500/50 transition disabled:opacity-50"
               >
                 {loading ? 'Updating...' : 'Update Profile'}
               </button>
@@ -244,7 +244,7 @@ export default function ProfilePage() {
                 <button
                   type="submit"
                   disabled={loading}
-                  className="bg-gradient-to-r from-purple-600 to-pink-500 text-white font-semibold py-3 px-6 rounded-lg hover:shadow-lg hover:shadow-purple-500/50 transition disabled:opacity-50"
+                  className="bg-linear-to-r from-purple-600 to-pink-500 text-white font-semibold py-3 px-6 rounded-lg hover:shadow-lg hover:shadow-purple-500/50 transition disabled:opacity-50"
                 >
                   {loading ? 'Updating...' : 'Update Password'}
                 </button>

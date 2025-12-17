@@ -49,7 +49,7 @@ export default function ResetPasswordPage() {
 
   if (success) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-purple-600 to-pink-500 flex items-center justify-center p-4">
+      <div className="min-h-screen bg-linear-to-br from-purple-600 to-pink-500 flex items-center justify-center p-4">
         <div className="bg-white rounded-lg shadow-2xl w-full max-w-md p-8 text-center">
           <div className="text-4xl mb-4">✓</div>
           <h2 className="text-2xl font-bold text-gray-800 mb-2">Password Reset!</h2>
@@ -103,7 +103,7 @@ export default function ResetPasswordPage() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-gradient-to-r from-purple-600 to-pink-500 text-white font-semibold py-2 rounded-lg hover:shadow-lg transition disabled:opacity-50"
+            className="w-full bg-linear-to-r from-purple-600 to-pink-500 text-white font-semibold py-2 rounded-lg hover:shadow-lg transition disabled:opacity-50"
           >
             {loading ? 'Resetting...' : 'Reset Password'}
           </button>
