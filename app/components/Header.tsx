@@ -29,11 +29,16 @@ export default function Header({ game, title, isPlayerPage }: { game?: GameAny, 
     };
 
     if (menuOpen) {
-      document.addEventListener('mousedown', handleClickOutside);
+      // Use a small delay to allow button clicks to register first
+      const timeoutId = setTimeout(() => {
+        document.addEventListener('click', handleClickOutside);
+      }, 0);
+      
+      return () => {
+        clearTimeout(timeoutId);
+        document.removeEventListener('click', handleClickOutside);
+      };
     }
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
   }, [menuOpen]);
 
   // Re-calculate streak when user returns to page (after saving palette)
