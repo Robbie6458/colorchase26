@@ -10,6 +10,7 @@ interface UserProfile {
   username: string;
   created_at: string;
   updated_at: string;
+  email_notifications: boolean;
 }
 
 interface AuthContextType {
