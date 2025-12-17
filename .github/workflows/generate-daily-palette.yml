@@ -2,8 +2,8 @@ name: Generate Daily Palette
 
 on:
   schedule:
-    # Run at 9:00 AM UTC every day
-    - cron: '0 9 * * *'
+    # Run at 5:00 PM UTC (9:00 AM PST) every day
+    - cron: '0 17 * * *'
   workflow_dispatch: # Allow manual triggering
 
 jobs:
