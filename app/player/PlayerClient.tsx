@@ -391,9 +391,9 @@ export default function PlayerClient() {
             </p>
           </div>
         </div>
+      )}
       
       <Footer />
-      )}
     </div>
   );
 }
