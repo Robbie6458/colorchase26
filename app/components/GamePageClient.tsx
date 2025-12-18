@@ -7,6 +7,7 @@ import GameArea from "./GameArea";
 import Overlays from "./Overlays";
 import DailyStats from "./DailyStats";
 import DatePreview from "./DatePreview";
+import Footer from "./Footer";
 
 export default function GamePageClient() {
   const game = useGame();
@@ -18,6 +19,7 @@ export default function GamePageClient() {
       <GameArea game={game} />
       <Overlays game={game} />
       <DailyStats />
+      <Footer />
       
       {/* Preview button - only show in development */}
       {process.env.NODE_ENV === 'development' && (

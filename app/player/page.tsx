@@ -1,19 +1,15 @@
-import React from "react";
+import type { Metadata } from "next";
 import PlayerClient from "./PlayerClient";
 
-export const metadata = {
-  title: "My Collection - Color Chase",
+export const metadata: Metadata = {
+  title: "My Collection - ColorChase | Your Palette Archive",
+  description: "View your ColorChase palette collection. Browse all the color palettes you've successfully guessed and track your color guessing journey.",
+  robots: {
+    index: false,
+    follow: true,
+  },
 };
 
 export default function PlayerPage() {
-  return (
-    <html>
-      <head>
-        <meta name="viewport" content="width=device-width, initial-scale=1" />
-      </head>
-      <body>
-        <PlayerClient />
-      </body>
-    </html>
-  );
+  return <PlayerClient />;
 }

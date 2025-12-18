@@ -1502,6 +1502,13 @@ h1 {
   border-top: 1px solid rgba(255, 255, 255, 0.08);
 }
 
+.footer-links {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
 .footer-copyright {
   margin: 0;
   font-size: 0.85em;
@@ -1513,11 +1520,20 @@ h1 {
   color: #9aa0ff;
   text-decoration: none;
   transition: color 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 6px;
 }
 
 .footer-link:hover {
   color: #fff;
   text-decoration: underline;
+}
+
+.footer-social {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
 }
 
 @media (max-width: 768px) {

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/app/lib/auth-context';
@@ -16,6 +16,17 @@ export default function LoginPage() {
 
   const { signIn, signInWithGoogle, resetPassword } = useAuth();
   const router = useRouter();
+
+  useEffect(() => {
+    // Set noindex for auth pages
+    const metaRobots = document.createElement('meta');
+    metaRobots.name = 'robots';
+    metaRobots.content = 'noindex, nofollow';
+    document.head.appendChild(metaRobots);
+    return () => {
+      document.head.removeChild(metaRobots);
+    };
+  }, []);
 
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();

@@ -4,6 +4,7 @@ import React, { useEffect, useState } from "react";
 import Header from "../components/Header";
 import Overlays from "../components/Overlays";
 import DailyStats from "../components/DailyStats";
+import Footer from "../components/Footer";
 import { useAuth } from "../lib/auth-context";
 import { supabase } from "../lib/supabase";
 
@@ -390,6 +391,8 @@ export default function PlayerClient() {
             </p>
           </div>
         </div>
+      
+      <Footer />
       )}
     </div>
   );

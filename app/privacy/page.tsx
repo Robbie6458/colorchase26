@@ -1,6 +1,16 @@
 "use client";
 
+import { useEffect } from 'react';
+
 export default function Privacy() {
+  useEffect(() => {
+    // Set page metadata
+    document.title = "Privacy Policy - ColorChase";
+    const metaDescription = document.querySelector('meta[name="description"]');
+    if (metaDescription) {
+      metaDescription.setAttribute('content', 'ColorChase privacy policy. Learn how we collect, use, and protect your data when you play our daily color guessing game.');
+    }
+  }, []);
   return (
     <div style={{ minHeight: '100vh', background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f0f23 100%)', color: '#fff', padding: '40px 20px' }}>
       <div style={{ maxWidth: '800px', margin: '0 auto', lineHeight: 1.8 }}>
