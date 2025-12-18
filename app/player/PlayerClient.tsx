@@ -136,9 +136,10 @@ export default function PlayerClient() {
 
   async function sharePalette(p: Palette) {
     const colors = p.colors.join(', ');
+    const [year, month, day] = p.date.split('-');
     const shareData = {
       title: 'Color Chase Palette',
-      text: `Check out this ${p.scheme || ''} color palette from Color Chase (${new Date(p.date).toLocaleDateString()}): ${colors}`,
+      text: `Check out this ${p.scheme || ''} color palette from Color Chase (${month}/${day}/${year}): ${colors}`,
       url: window.location.origin
     };
 
@@ -313,7 +314,7 @@ export default function PlayerClient() {
                 </div>
                 <div className="palette-info">
                   <div>
-                    <div className="palette-date">{new Date(p.date).toLocaleDateString()}</div>
+                    <div className="palette-date">{(() => { const [y, m, d] = p.date.split('-'); return `${m}/${d}/${y}`; })()}</div>
                     {p.scheme && (
                       <button 
                         className="palette-scheme"
