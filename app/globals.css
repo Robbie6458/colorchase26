@@ -202,6 +202,8 @@ body {
     padding: 12px 16px;
     gap: 12px;
     position: relative;
+    margin: 0 -16px 0 -16px;
+    width: calc(100% + 32px);
   }
 
   .header-link {
@@ -1037,6 +1039,16 @@ h1 {
     padding: 10px;
   }
   
+  .site-header {
+    margin: 0 -10px 0 -10px;
+    width: calc(100% + 20px);
+  }
+  
+  .game-footer {
+    margin: 0 -10px 0 -10px;
+    width: calc(100% + 20px);
+  }
+  
   h1 {
     font-size: 1.6em;
   }
@@ -1513,6 +1525,8 @@ h1 {
     padding: 15px 12px;
     gap: 12px;
     min-height: auto;
+    margin: 0 -16px 0 -16px;
+    width: calc(100% + 32px);
   }
 
   .footer-stats {
