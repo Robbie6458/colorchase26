@@ -11,6 +11,27 @@ const geistSans = Geist({
 export const metadata: Metadata = {
   title: "Color Chase",
   description: "Guess the hidden 5-color palette in 5 tries. Collect daily palettes and build your collection.",
+  openGraph: {
+    title: "Color Chase",
+    description: "Guess the hidden 5-color palette in 5 tries. Collect daily palettes and build your collection.",
+    url: "https://colorchase.vercel.app",
+    siteName: "Color Chase",
+    images: [
+      {
+        url: "https://colorchase.vercel.app/og",
+        width: 1200,
+        height: 630,
+        alt: "Color Chase - Daily Color Palette Game",
+      },
+    ],
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Color Chase",
+    description: "Guess the hidden 5-color palette in 5 tries. Collect daily palettes and build your collection.",
+    images: ["https://colorchase.vercel.app/og"],
+  },
 };
 
 export default function RootLayout({
