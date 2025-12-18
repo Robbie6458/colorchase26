@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useEffect } from "react";
+import { useMemo, useEffect, useState } from "react";
 import useGame from "../hooks/useGame";
 import ColorWheel from "./ColorWheel";
 import GameGrid from "./GameGrid";
@@ -8,6 +8,7 @@ import GameGrid from "./GameGrid";
 type GameAny = any;
 
 export default function GameArea({ game }: { game: GameAny }) {
+  const [cursorPos, setCursorPos] = useState({ x: 0, y: 0 });
 
   // auto-evaluate row when it becomes full
   useEffect(() => {
@@ -29,6 +30,15 @@ export default function GameArea({ game }: { game: GameAny }) {
     window.addEventListener('pointerdown', handleFirstInteraction, { once: true });
     return () => window.removeEventListener('pointerdown', handleFirstInteraction);
   }, [game]);
+
+  // track cursor position for duplicate notification
+  useEffect(() => {
+    const handleMouseMove = (e: MouseEvent) => {
+      setCursorPos({ x: e.clientX, y: e.clientY });
+    };
+    window.addEventListener('mousemove', handleMouseMove);
+    return () => window.removeEventListener('mousemove', handleMouseMove);
+  }, []);
 
   const titleColors = useMemo(() => {
     const titleText = "COLOR CHASE";
@@ -67,7 +77,25 @@ export default function GameArea({ game }: { game: GameAny }) {
 
       <div id="confetti-container"></div>
       {game.duplicate && (
-        <div className="duplicate-msg" style={{ position: 'fixed', bottom: 24, left: '50%', transform: 'translateX(-50%)', background: 'rgba(0,0,0,0.8)', color: '#fff', padding: '8px 12px', borderRadius: 6, zIndex: 9999 }}>
+        <div 
+          className="duplicate-msg" 
+          style={{ 
+            position: 'fixed', 
+            left: `${cursorPos.x + 12}px`,
+            top: `${cursorPos.y + 12}px`,
+            background: 'rgba(0, 0, 0, 0.9)',
+            color: '#ffa500',
+            padding: '8px 12px',
+            borderRadius: 6,
+            zIndex: 9999,
+            fontSize: '0.9rem',
+            fontWeight: 600,
+            whiteSpace: 'nowrap',
+            pointerEvents: 'none',
+            boxShadow: '0 4px 12px rgba(255, 165, 0, 0.3)',
+            border: '1px solid rgba(255, 165, 0, 0.3)',
+          }}
+        >
           Already in this guess
         </div>
       )}
