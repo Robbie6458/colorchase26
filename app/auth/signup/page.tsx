@@ -83,7 +83,12 @@ export default function SignupPage() {
     <div className="min-h-screen bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
       <div className="bg-slate-800 rounded-2xl shadow-2xl w-full max-w-md p-8 border border-slate-700">
         <h1 className="text-3xl font-bold text-center mb-2 text-white">Color Chase</h1>
-        <p className="text-center text-slate-300 mb-6 text-sm">Create your account</p>
+        <p className="text-center text-slate-300 mb-2 text-sm">Create your account</p>
+        
+        <p className="text-center text-slate-400 mb-6 text-xs leading-relaxed">
+          Play daily to discover beautiful color palettes. Color Chase is designed to be your daily creative ritual, 
+          evolving into a collection of pleasing palettes for design inspiration and your creative projects.
+        </p>
 
         {error && (
           <div className="mb-4 p-3 bg-red-900/50 text-red-300 rounded-lg border border-red-700">

@@ -35,7 +35,7 @@ export default function Icon() {
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          background: '#1a1a2e',
+          background: 'transparent',
         }}
       >
         <svg width="28" height="28" viewBox="0 0 120 120">
