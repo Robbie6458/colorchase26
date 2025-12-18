@@ -40,11 +40,11 @@ serve(async (req) => {
       );
     }
 
-    // Calculate time until reset (9 AM UTC)
+    // Calculate time until reset (9 AM Pacific = 5 PM UTC)
     const now = new Date();
     const nextReset = new Date(now);
-    nextReset.setUTCHours(9, 0, 0, 0);
-    if (now.getUTCHours() >= 9) {
+    nextReset.setUTCHours(17, 0, 0, 0); // 5 PM UTC = 9 AM PST
+    if (now.getUTCHours() >= 17) {
       nextReset.setUTCDate(nextReset.getUTCDate() + 1);
     }
     const hoursUntilReset = Math.round((nextReset.getTime() - now.getTime()) / (1000 * 60 * 60));
@@ -73,7 +73,7 @@ serve(async (req) => {
                   ⏰ <strong>Only ${hoursUntilReset} hour${hoursUntilReset !== 1 ? 's' : ''} left</strong> to complete today's palette!
                 </p>
                 <p style="color: #cbd5e1; font-size: 14px; line-height: 1.6; margin: 0;">
-                  The daily palette resets at 9 AM UTC. Don't miss your chance to keep your streak alive!
+                  The daily palette resets at 9 AM Pacific. Don't miss your chance to keep your streak alive!
                 </p>
               </div>
               <div style="text-align: center; margin: 32px 0;">
