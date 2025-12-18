@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useEffect, useState } from "react";
+import { useMemo, useEffect } from "react";
 import useGame from "../hooks/useGame";
 import ColorWheel from "./ColorWheel";
 import GameGrid from "./GameGrid";
@@ -8,7 +8,6 @@ import GameGrid from "./GameGrid";
 type GameAny = any;
 
 export default function GameArea({ game }: { game: GameAny }) {
-  const [cursorPos, setCursorPos] = useState({ x: 0, y: 0 });
 
   // auto-evaluate row when it becomes full
   useEffect(() => {
@@ -30,15 +29,6 @@ export default function GameArea({ game }: { game: GameAny }) {
     window.addEventListener('pointerdown', handleFirstInteraction, { once: true });
     return () => window.removeEventListener('pointerdown', handleFirstInteraction);
   }, [game]);
-
-  // track cursor position for duplicate notification
-  useEffect(() => {
-    const handleMouseMove = (e: MouseEvent) => {
-      setCursorPos({ x: e.clientX, y: e.clientY });
-    };
-    window.addEventListener('mousemove', handleMouseMove);
-    return () => window.removeEventListener('mousemove', handleMouseMove);
-  }, []);
 
   const titleColors = useMemo(() => {
     const titleText = "COLOR CHASE";
@@ -81,8 +71,9 @@ export default function GameArea({ game }: { game: GameAny }) {
           className="duplicate-msg" 
           style={{ 
             position: 'fixed', 
-            left: `${cursorPos.x + 12}px`,
-            top: `${cursorPos.y + 12}px`,
+            top: '50%',
+            left: '50%',
+            transform: 'translate(-50%, -50%)',
             background: 'rgba(0, 0, 0, 0.9)',
             color: '#ffa500',
             padding: '8px 12px',
