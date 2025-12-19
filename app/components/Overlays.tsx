@@ -402,33 +402,53 @@ function StatsOverlay({ game, session }: { game: any, session: any }) {
         const winPct = played > 0 ? Math.round((won / played) * 100) : 0;
 
         // Calculate streaks
-        const sorted = [...palettes].sort((a: any, b: any) => +new Date(b.date) - +new Date(a.date));
+        const wonPalettes = palettes.filter((p: any) => p.won);
+        const sorted = [...wonPalettes].sort((a: any, b: any) => +new Date(b.date) - +new Date(a.date));
         let currentStreak = 0;
         let maxStreak = 0;
         let tempStreak = 0;
         const today = new Date();
         today.setHours(0, 0, 0, 0);
 
-        for (let i = 0; i < sorted.length; i++) {
-          const d = new Date(sorted[i].date);
-          d.setHours(0, 0, 0, 0);
-          const daysDiff = Math.floor((+today - +d) / (1000 * 60 * 60 * 24));
+        if (sorted.length > 0) {
+          // Check if most recent win is today or yesterday (grace period)
+          const mostRecentDate = new Date(sorted[0].date);
+          mostRecentDate.setHours(0, 0, 0, 0);
+          const daysSinceMostRecent = Math.floor((+today - +mostRecentDate) / (1000 * 60 * 60 * 24));
           
-          if (i === 0 && daysDiff <= 1) {
-            currentStreak = 1;
-            tempStreak = 1;
-          } else if (i > 0) {
+          if (daysSinceMostRecent <= 1) {
+            // Calculate current streak from most recent backwards
+            let expectedDate = new Date(mostRecentDate);
+            for (let i = 0; i < sorted.length; i++) {
+              const paletteDate = new Date(sorted[i].date);
+              paletteDate.setHours(0, 0, 0, 0);
+              
+              if (+paletteDate === +expectedDate) {
+                currentStreak++;
+                expectedDate.setDate(expectedDate.getDate() - 1);
+              } else {
+                break;
+              }
+            }
+          }
+          
+          // Calculate max streak
+          tempStreak = 1;
+          maxStreak = 1;
+          for (let i = 1; i < sorted.length; i++) {
+            const currentDate = new Date(sorted[i].date);
+            currentDate.setHours(0, 0, 0, 0);
             const prevDate = new Date(sorted[i - 1].date);
             prevDate.setHours(0, 0, 0, 0);
-            const diff = Math.floor((+prevDate - +d) / (1000 * 60 * 60 * 24));
+            const diff = Math.floor((+prevDate - +currentDate) / (1000 * 60 * 60 * 24));
+            
             if (diff === 1) {
               tempStreak++;
-              if (i === currentStreak) currentStreak++;
+              maxStreak = Math.max(maxStreak, tempStreak);
             } else {
               tempStreak = 1;
             }
           }
-          maxStreak = Math.max(maxStreak, tempStreak);
         }
 
         // Guess distribution

@@ -197,29 +197,57 @@ export default function PlayerClient() {
 
   const computeStreaks = () => {
     if (!palettes || palettes.length === 0) return { current: 0, best: 0 };
-    // simple heuristic: current streak = number of consecutive days from latest
-    const sorted = [...palettes].sort((a,b) => +new Date(a.date) - +new Date(b.date));
+    
+    // Filter only won palettes and sort by date descending
+    const wonPalettes = palettes.filter(p => p.won);
+    if (wonPalettes.length === 0) return { current: 0, best: 0 };
+    
+    const sorted = [...wonPalettes].sort((a,b) => +new Date(b.date) - +new Date(a.date));
+    
     let current = 0;
     let best = 0;
-    let temp = 0;
-    for (let i = 0; i < sorted.length; i++) {
-      if (i === 0) temp = 1;
-      else {
-        const curr = new Date(sorted[i].date); curr.setHours(0,0,0,0);
-        const prev = new Date(sorted[i-1].date); prev.setHours(0,0,0,0);
-        const diff = Math.floor((+curr - +prev) / (1000*60*60*24));
-        temp = diff === 1 ? temp + 1 : 1;
+    const today = new Date();
+    today.setHours(0,0,0,0);
+    
+    // Check if most recent win is today or yesterday (grace period)
+    const mostRecentDate = new Date(sorted[0].date);
+    mostRecentDate.setHours(0,0,0,0);
+    const daysSinceMostRecent = Math.floor((+today - +mostRecentDate) / (1000*60*60*24));
+    
+    if (daysSinceMostRecent <= 1) {
+      // Calculate current streak from most recent backwards
+      let expectedDate = new Date(mostRecentDate);
+      for (let i = 0; i < sorted.length; i++) {
+        const paletteDate = new Date(sorted[i].date);
+        paletteDate.setHours(0,0,0,0);
+        
+        if (+paletteDate === +expectedDate) {
+          current++;
+          expectedDate.setDate(expectedDate.getDate() - 1);
+        } else {
+          break;
+        }
       }
-      best = Math.max(best, temp);
     }
-    // current: walk from end
-    const today = new Date(); today.setHours(0,0,0,0);
-    for (let i = sorted.length - 1; i >= 0; i--) {
-      const d = new Date(sorted[i].date); d.setHours(0,0,0,0);
-      const daysDiff = Math.floor((+today - +d) / (1000*60*60*24));
-      if (daysDiff <= 1) current++; else break;
-      today.setDate(today.getDate() - 1);
+    
+    // Calculate max streak
+    let temp = 1;
+    best = 1;
+    for (let i = 1; i < sorted.length; i++) {
+      const currentDate = new Date(sorted[i].date);
+      currentDate.setHours(0,0,0,0);
+      const prevDate = new Date(sorted[i-1].date);
+      prevDate.setHours(0,0,0,0);
+      const diff = Math.floor((+prevDate - +currentDate) / (1000*60*60*24));
+      
+      if (diff === 1) {
+        temp++;
+        best = Math.max(best, temp);
+      } else {
+        temp = 1;
+      }
     }
+    
     return { current, best };
   };
 

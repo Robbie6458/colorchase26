@@ -71,26 +71,25 @@ export default function Header({ game, title, isPlayerPage }: { game?: GameAny, 
         return;
       }
 
-      let streak = 0;
       const today = new Date();
       today.setHours(0, 0, 0, 0);
       
-      // Check if the most recent palette is today or yesterday
+      // Check if the most recent palette is today or yesterday (grace period)
       const mostRecentDate = new Date(palettes[0].date);
       mostRecentDate.setHours(0, 0, 0, 0);
       
-      const yesterday = new Date(today);
-      yesterday.setDate(yesterday.getDate() - 1);
+      const daysSinceMostRecent = Math.floor((+today - +mostRecentDate) / (1000 * 60 * 60 * 24));
       
       // If most recent is not today or yesterday, streak is broken
-      if (mostRecentDate.getTime() < yesterday.getTime()) {
+      if (daysSinceMostRecent > 1) {
         console.log('Streak broken - most recent palette is too old');
         setCurrentStreak(0);
         return;
       }
       
       // Calculate streak from most recent palette backwards
-      let checkDate = new Date(mostRecentDate);
+      let streak = 0;
+      let expectedDate = new Date(mostRecentDate);
       
       for (let i = 0; i < palettes.length; i++) {
         const paletteDate = new Date(palettes[i].date);
@@ -98,13 +97,13 @@ export default function Header({ game, title, isPlayerPage }: { game?: GameAny, 
         
         console.log(`Checking palette ${i}:`, {
           paletteDate: paletteDate.toISOString().split('T')[0],
-          expectedDate: checkDate.toISOString().split('T')[0],
-          match: paletteDate.getTime() === checkDate.getTime()
+          expectedDate: expectedDate.toISOString().split('T')[0],
+          match: +paletteDate === +expectedDate
         });
 
-        if (paletteDate.getTime() === checkDate.getTime()) {
+        if (+paletteDate === +expectedDate) {
           streak++;
-          checkDate.setDate(checkDate.getDate() - 1);
+          expectedDate.setDate(expectedDate.getDate() - 1);
         } else {
           break;
         }
