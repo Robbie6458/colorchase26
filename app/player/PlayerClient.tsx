@@ -210,7 +210,7 @@ export default function PlayerClient() {
     today.setHours(0,0,0,0);
     
     // Check if most recent win is today or yesterday (grace period)
-    const mostRecentDate = new Date(sorted[0].date);
+    const mostRecentDate = new Date(sorted[0].date + 'T00:00:00');
     mostRecentDate.setHours(0,0,0,0);
     const daysSinceMostRecent = Math.floor((+today - +mostRecentDate) / (1000*60*60*24));
     
@@ -218,7 +218,7 @@ export default function PlayerClient() {
       // Calculate current streak from most recent backwards
       let expectedDate = new Date(mostRecentDate);
       for (let i = 0; i < sorted.length; i++) {
-        const paletteDate = new Date(sorted[i].date);
+        const paletteDate = new Date(sorted[i].date + 'T00:00:00');
         paletteDate.setHours(0,0,0,0);
         
         if (+paletteDate === +expectedDate) {
@@ -234,9 +234,9 @@ export default function PlayerClient() {
     let temp = 1;
     best = 1;
     for (let i = 1; i < sorted.length; i++) {
-      const currentDate = new Date(sorted[i].date);
+      const currentDate = new Date(sorted[i].date + 'T00:00:00');
       currentDate.setHours(0,0,0,0);
-      const prevDate = new Date(sorted[i-1].date);
+      const prevDate = new Date(sorted[i-1].date + 'T00:00:00');
       prevDate.setHours(0,0,0,0);
       const diff = Math.floor((+prevDate - +currentDate) / (1000*60*60*24));
       

@@ -64,25 +64,30 @@ export default function Header({ game, title, isPlayerPage }: { game?: GameAny, 
         .eq('won', true)
         .order('date', { ascending: false });
 
-      console.log('Palettes for streak calculation:', palettes);
+      console.log('=== STREAK CALCULATION DEBUG ===');
+      console.log('Raw palettes from DB:', palettes);
 
       if (!palettes || palettes.length === 0) {
+        console.log('No won palettes found, streak = 0');
         setCurrentStreak(0);
         return;
       }
 
       const today = new Date();
       today.setHours(0, 0, 0, 0);
+      console.log('Today (normalized):', today.toISOString().split('T')[0], 'timestamp:', +today);
       
       // Check if the most recent palette is today or yesterday (grace period)
-      const mostRecentDate = new Date(palettes[0].date);
-      mostRecentDate.setHours(0, 0, 0, 0);
+      const mostRecentDate = new Date(palettes[0].date + 'T00:00:00');
+      console.log('Most recent palette date string:', palettes[0].date);
+      console.log('Most recent (parsed):', mostRecentDate.toISOString().split('T')[0], 'timestamp:', +mostRecentDate);
       
       const daysSinceMostRecent = Math.floor((+today - +mostRecentDate) / (1000 * 60 * 60 * 24));
+      console.log('Days since most recent:', daysSinceMostRecent);
       
       // If most recent is not today or yesterday, streak is broken
       if (daysSinceMostRecent > 1) {
-        console.log('Streak broken - most recent palette is too old');
+        console.log('Streak broken - most recent palette is too old (>1 day ago)');
         setCurrentStreak(0);
         return;
       }
@@ -92,12 +97,14 @@ export default function Header({ game, title, isPlayerPage }: { game?: GameAny, 
       let expectedDate = new Date(mostRecentDate);
       
       for (let i = 0; i < palettes.length; i++) {
-        const paletteDate = new Date(palettes[i].date);
-        paletteDate.setHours(0, 0, 0, 0);
+        const paletteDate = new Date(palettes[i].date + 'T00:00:00');
         
-        console.log(`Checking palette ${i}:`, {
+        console.log(`Palette ${i}:`, {
+          rawDate: palettes[i].date,
           paletteDate: paletteDate.toISOString().split('T')[0],
+          paletteTimestamp: +paletteDate,
           expectedDate: expectedDate.toISOString().split('T')[0],
+          expectedTimestamp: +expectedDate,
           match: +paletteDate === +expectedDate
         });
 
@@ -105,11 +112,12 @@ export default function Header({ game, title, isPlayerPage }: { game?: GameAny, 
           streak++;
           expectedDate.setDate(expectedDate.getDate() - 1);
         } else {
+          console.log('Streak broken at palette', i);
           break;
         }
       }
 
-      console.log('Calculated streak:', streak);
+      console.log('=== FINAL STREAK:', streak, '===');
       setCurrentStreak(streak);
     } catch (error) {
       console.error('Error calculating streak:', error);
