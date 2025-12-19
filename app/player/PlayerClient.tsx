@@ -144,53 +144,75 @@ export default function PlayerClient() {
         return;
       }
 
-      // Set canvas size (optimized for social media - 1200x630)
-      canvas.width = 1200;
-      canvas.height = 630;
+      // Instagram Story size: 1080x1920
+      canvas.width = 1080;
+      canvas.height = 1920;
 
-      // Background
-      ctx.fillStyle = '#1a1a1a';
+      // Background - dark gradient
+      const bgGradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
+      bgGradient.addColorStop(0, '#1a1a1a');
+      bgGradient.addColorStop(1, '#0a0a0a');
+      ctx.fillStyle = bgGradient;
       ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-      // Draw color blocks (5 colors side by side)
-      const blockWidth = canvas.width / 5;
+      // Top section - Color blocks stacked vertically
+      const colorBlockHeight = 220;
+      const topMargin = 180;
       p.colors.forEach((color, i) => {
         ctx.fillStyle = color;
-        ctx.fillRect(i * blockWidth, 0, blockWidth, canvas.height * 0.6);
+        ctx.fillRect(0, topMargin + (i * colorBlockHeight), canvas.width, colorBlockHeight);
       });
 
-      // Add text overlay at bottom
-      const textAreaY = canvas.height * 0.6;
-      const textAreaHeight = canvas.height * 0.4;
+      // Add subtle shadow below color blocks
+      const shadowGradient = ctx.createLinearGradient(0, topMargin + (5 * colorBlockHeight), 0, topMargin + (5 * colorBlockHeight) + 100);
+      shadowGradient.addColorStop(0, 'rgba(0,0,0,0.5)');
+      shadowGradient.addColorStop(1, 'rgba(0,0,0,0)');
+      ctx.fillStyle = shadowGradient;
+      ctx.fillRect(0, topMargin + (5 * colorBlockHeight), canvas.width, 100);
 
-      // Date and scheme
-      ctx.fillStyle = '#ffffff';
-      ctx.font = 'bold 48px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
+      // Bottom section - Text content
+      const textStartY = topMargin + (5 * colorBlockHeight) + 120;
       ctx.textAlign = 'center';
-      
+
+      // Date
+      ctx.fillStyle = '#ffffff';
+      ctx.font = 'bold 72px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
       const [year, month, day] = p.date.split('-');
       const dateText = `${month}/${day}/${year}`;
-      ctx.fillText(dateText, canvas.width / 2, textAreaY + 70);
+      ctx.fillText(dateText, canvas.width / 2, textStartY);
 
+      // Scheme name
       if (p.scheme) {
-        ctx.font = '36px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
+        ctx.font = '48px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
         ctx.fillStyle = '#a0a0a0';
         const schemeText = p.scheme.charAt(0).toUpperCase() + p.scheme.slice(1) + ' Palette';
-        ctx.fillText(schemeText, canvas.width / 2, textAreaY + 120);
+        ctx.fillText(schemeText, canvas.width / 2, textStartY + 80);
       }
 
-      // Branding
-      ctx.font = 'bold 40px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
+      // Hex codes
+      ctx.font = '38px "Courier New", monospace';
       ctx.fillStyle = '#ffffff';
-      ctx.fillText('Color Chase', canvas.width / 2, textAreaY + 190);
+      p.colors.forEach((color, i) => {
+        ctx.fillText(color, canvas.width / 2, textStartY + 160 + (i * 55));
+      });
 
-      // Status badge (Won/Lost) if available
+      // Status badge if available
       if (p.won !== undefined) {
         const badge = p.won ? '✅ Won' : '❌ Lost';
-        ctx.font = '32px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
+        ctx.font = '52px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
         ctx.fillStyle = p.won ? '#4ade80' : '#f87171';
-        ctx.fillText(badge, canvas.width / 2, textAreaY + 235);
+        ctx.fillText(badge, canvas.width / 2, textStartY + 450);
       }
+
+      // Branding at bottom
+      ctx.font = 'bold 64px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
+      ctx.fillStyle = '#ffffff';
+      ctx.fillText('Color Chase', canvas.width / 2, canvas.height - 180);
+
+      // URL
+      ctx.font = '42px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
+      ctx.fillStyle = '#888888';
+      ctx.fillText('colorchasegame.com', canvas.width / 2, canvas.height - 100);
 
       // Convert canvas to blob
       canvas.toBlob((blob) => {
@@ -205,55 +227,23 @@ export default function PlayerClient() {
 
   async function sharePalette(p: Palette) {
     try {
-      // Generate the palette image
+      // Generate Instagram Story sized image
       const imageBlob = await generatePaletteImage(p);
       
-      const [year, month, day] = p.date.split('-');
-      const dateText = `${month}/${day}/${year}`;
-      const schemeText = p.scheme ? `${p.scheme} ` : '';
-      const shareText = `Check out this ${schemeText}color palette from Color Chase (${dateText})!\n\nPlay at ${window.location.origin}`;
-      
-      // Try Web Share API with file support (mobile)
-      if (navigator.share && navigator.canShare) {
-        const file = new File([imageBlob], `color-chase-${p.date}.png`, { type: 'image/png' });
-        
-        const shareData = {
-          title: 'Color Chase Palette',
-          text: shareText,
-          files: [file]
-        };
-
-        if (navigator.canShare(shareData)) {
-          try {
-            await navigator.share(shareData);
-            return; // Successfully shared via native share
-          } catch (err) {
-            console.log('Share cancelled or failed:', err);
-            // Fall through to fallback
-          }
-        }
-      }
-
-      // Fallback: Download image and copy text to clipboard
+      // Download the image
       const url = URL.createObjectURL(imageBlob);
       const link = document.createElement('a');
       link.href = url;
-      link.download = `color-chase-${p.date}.png`;
+      link.download = `color-chase-story-${p.date}.png`;
       link.click();
       URL.revokeObjectURL(url);
 
-      // Copy text to clipboard
-      if (navigator.clipboard) {
-        await navigator.clipboard.writeText(shareText);
-        setToastMessage('🎨 Image downloaded and text copied to clipboard!');
-      } else {
-        setToastMessage('🎨 Image downloaded!');
-      }
-      setTimeout(() => setToastMessage(null), 3000);
+      setToastMessage('🎨 Story image downloaded!');
+      setTimeout(() => setToastMessage(null), 2000);
       
     } catch (err) {
-      console.error('Error sharing palette:', err);
-      setToastMessage('❌ Failed to share palette');
+      console.error('Error generating story:', err);
+      setToastMessage('❌ Failed to generate image');
       setTimeout(() => setToastMessage(null), 2000);
     }
   }
