@@ -135,30 +135,126 @@ export default function PlayerClient() {
     URL.revokeObjectURL(url);
   }
 
-  async function sharePalette(p: Palette) {
-    const colors = p.colors.join(', ');
-    const [year, month, day] = p.date.split('-');
-    const shareData = {
-      title: 'Color Chase Palette',
-      text: `Check out this ${p.scheme || ''} color palette from Color Chase (${month}/${day}/${year}): ${colors}`,
-      url: window.location.origin
-    };
-
-    // Use Web Share API if available (mobile)
-    if (navigator.share) {
-      try {
-        await navigator.share(shareData);
-      } catch (err) {
-        // User cancelled or error
-        console.log('Share cancelled');
+  async function generatePaletteImage(p: Palette): Promise<Blob> {
+    return new Promise((resolve, reject) => {
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+      if (!ctx) {
+        reject(new Error('Could not get canvas context'));
+        return;
       }
-    } else {
-      // Fallback: copy to clipboard
-      const shareText = `${shareData.text}\n${shareData.url}`;
-      navigator.clipboard?.writeText(shareText).then(() => {
-        setToastMessage('Share text copied to clipboard!');
-        setTimeout(() => setToastMessage(null), 2000);
+
+      // Set canvas size (optimized for social media - 1200x630)
+      canvas.width = 1200;
+      canvas.height = 630;
+
+      // Background
+      ctx.fillStyle = '#1a1a1a';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      // Draw color blocks (5 colors side by side)
+      const blockWidth = canvas.width / 5;
+      p.colors.forEach((color, i) => {
+        ctx.fillStyle = color;
+        ctx.fillRect(i * blockWidth, 0, blockWidth, canvas.height * 0.6);
       });
+
+      // Add text overlay at bottom
+      const textAreaY = canvas.height * 0.6;
+      const textAreaHeight = canvas.height * 0.4;
+
+      // Date and scheme
+      ctx.fillStyle = '#ffffff';
+      ctx.font = 'bold 48px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
+      ctx.textAlign = 'center';
+      
+      const [year, month, day] = p.date.split('-');
+      const dateText = `${month}/${day}/${year}`;
+      ctx.fillText(dateText, canvas.width / 2, textAreaY + 70);
+
+      if (p.scheme) {
+        ctx.font = '36px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
+        ctx.fillStyle = '#a0a0a0';
+        const schemeText = p.scheme.charAt(0).toUpperCase() + p.scheme.slice(1) + ' Palette';
+        ctx.fillText(schemeText, canvas.width / 2, textAreaY + 120);
+      }
+
+      // Branding
+      ctx.font = 'bold 40px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
+      ctx.fillStyle = '#ffffff';
+      ctx.fillText('Color Chase', canvas.width / 2, textAreaY + 190);
+
+      // Status badge (Won/Lost) if available
+      if (p.won !== undefined) {
+        const badge = p.won ? '✅ Won' : '❌ Lost';
+        ctx.font = '32px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
+        ctx.fillStyle = p.won ? '#4ade80' : '#f87171';
+        ctx.fillText(badge, canvas.width / 2, textAreaY + 235);
+      }
+
+      // Convert canvas to blob
+      canvas.toBlob((blob) => {
+        if (blob) {
+          resolve(blob);
+        } else {
+          reject(new Error('Failed to generate image'));
+        }
+      }, 'image/png');
+    });
+  }
+
+  async function sharePalette(p: Palette) {
+    try {
+      // Generate the palette image
+      const imageBlob = await generatePaletteImage(p);
+      
+      const [year, month, day] = p.date.split('-');
+      const dateText = `${month}/${day}/${year}`;
+      const schemeText = p.scheme ? `${p.scheme} ` : '';
+      const shareText = `Check out this ${schemeText}color palette from Color Chase (${dateText})!\n\nPlay at ${window.location.origin}`;
+      
+      // Try Web Share API with file support (mobile)
+      if (navigator.share && navigator.canShare) {
+        const file = new File([imageBlob], `color-chase-${p.date}.png`, { type: 'image/png' });
+        
+        const shareData = {
+          title: 'Color Chase Palette',
+          text: shareText,
+          files: [file]
+        };
+
+        if (navigator.canShare(shareData)) {
+          try {
+            await navigator.share(shareData);
+            return; // Successfully shared via native share
+          } catch (err) {
+            console.log('Share cancelled or failed:', err);
+            // Fall through to fallback
+          }
+        }
+      }
+
+      // Fallback: Download image and copy text to clipboard
+      const url = URL.createObjectURL(imageBlob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `color-chase-${p.date}.png`;
+      link.click();
+      URL.revokeObjectURL(url);
+
+      // Copy text to clipboard
+      if (navigator.clipboard) {
+        await navigator.clipboard.writeText(shareText);
+        setToastMessage('🎨 Image downloaded and text copied to clipboard!');
+      } else {
+        setToastMessage('🎨 Image downloaded!');
+      }
+      setTimeout(() => setToastMessage(null), 3000);
+      
+    } catch (err) {
+      console.error('Error sharing palette:', err);
+      setToastMessage('❌ Failed to share palette');
+      setTimeout(() => setToastMessage(null), 2000);
     }
   }
 
