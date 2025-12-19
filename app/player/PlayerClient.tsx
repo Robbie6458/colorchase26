@@ -184,6 +184,29 @@ export default function PlayerClient() {
         ctx.fillText(color, 20, blockY + colorBlockHeight - 25);
       });
 
+      // Status badge in top-right corner if available
+      if (p.won !== undefined) {
+        const badge = p.won ? '✅ Won' : '❌ Lost';
+        ctx.textAlign = 'right';
+        ctx.font = 'bold 48px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
+        
+        // Background for badge
+        const badgeText = badge;
+        ctx.font = 'bold 48px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
+        const badgeWidth = ctx.measureText(badgeText).width;
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.6)';
+        ctx.fillRect(
+          canvas.width - badgeWidth - 50,
+          20,
+          badgeWidth + 40,
+          70
+        );
+        
+        // Badge text
+        ctx.fillStyle = p.won ? '#4ade80' : '#f87171';
+        ctx.fillText(badgeText, canvas.width - 30, 70);
+      }
+
       // Add subtle shadow below color blocks
       const colorsEndY = 5 * colorBlockHeight;
       const shadowGradient = ctx.createLinearGradient(0, colorsEndY, 0, colorsEndY + 80);
@@ -211,14 +234,6 @@ export default function PlayerClient() {
         const schemeText = p.scheme.charAt(0).toUpperCase() + p.scheme.slice(1) + ' Palette';
         ctx.fillText(schemeText, canvas.width / 2, currentY);
         currentY += 100;
-      }
-
-      // Status badge if available
-      if (p.won !== undefined) {
-        const badge = p.won ? '✅ Won' : '❌ Lost';
-        ctx.font = '56px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
-        ctx.fillStyle = p.won ? '#4ade80' : '#f87171';
-        ctx.fillText(badge, canvas.width / 2, currentY);
       }
 
       // Branding at bottom (fixed position)
