@@ -500,14 +500,13 @@ export default function PlayerClient() {
                   ))}
                 </div>
                 <div className="palette-info">
-                  <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: '0.125rem' }}>
                     {/* Palette Name */}
                     {p.palette_name && (
                       <div style={{
-                        fontSize: '0.875rem',
+                        fontSize: '0.75rem',
                         fontWeight: '600',
                         color: 'var(--text-color)',
-                        marginBottom: '0.25rem',
                         overflow: 'hidden',
                         textOverflow: 'ellipsis',
                         whiteSpace: 'nowrap',
@@ -515,49 +514,23 @@ export default function PlayerClient() {
                         {p.palette_name}
                       </div>
                     )}
-                    {/* Date and Scheme */}
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
-                      <div className="palette-date">{(() => { const [y, m, d] = p.date.split('-'); return `${m}/${d}/${y}`; })()}</div>
-                      {p.scheme && (
-                        <>
-                          <span style={{ color: 'var(--text-muted, #999)', fontSize: '0.75rem' }}>•</span>
-                          <button 
-                            className="palette-scheme"
-                            onClick={() => openSchemeModal(p.scheme!)}
-                            title="Learn about this color scheme"
-                            style={{
-                              background: 'none',
-                              border: 'none',
-                              padding: 0,
-                              fontSize: '0.75rem',
-                              color: 'var(--text-muted)',
-                              cursor: 'pointer',
-                              textTransform: 'capitalize',
-                            }}
-                          >
-                            {p.scheme}
-                          </button>
-                        </>
-                      )}
+                    {/* Date */}
+                    <div style={{ fontSize: '0.7rem', color: 'var(--text-muted, #999)' }}>
+                      {(() => { const [y, m, d] = p.date.split('-'); return `${m}/${d}/${y}`; })()}
                     </div>
+                    {/* Scheme */}
+                    {p.scheme && (
+                      <div style={{ fontSize: '0.7rem', color: 'var(--text-muted, #999)', textTransform: 'capitalize' }}>
+                        {p.scheme.replace('-', ' ')}
+                      </div>
+                    )}
                   </div>
-                  <div className="palette-actions">
+                  <div className="palette-actions" style={{ display: 'flex', gap: '0.25rem' }}>
                     {/* Info Button */}
                     <button 
                       className="action-btn info" 
                       title="Palette details" 
                       onClick={() => openPaletteInfo(p)}
-                      style={{
-                        background: 'none',
-                        border: 'none',
-                        padding: '0.375rem',
-                        cursor: 'pointer',
-                        borderRadius: '0.375rem',
-                        transition: 'background-color 0.2s',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                      }}
                     >
                       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                         <circle cx="12" cy="12" r="10"/>

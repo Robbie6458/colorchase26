@@ -44,7 +44,7 @@ export default function PaletteInfoModal({
         className="scheme-modal-content" 
         onClick={(e) => e.stopPropagation()}
         style={{
-          backgroundColor: 'var(--bg-color, #ffffff)',
+          backgroundColor: '#ffffff',
           borderRadius: '12px',
           maxWidth: '500px',
           width: '100%',
@@ -57,9 +57,9 @@ export default function PaletteInfoModal({
         <div style={{
           position: 'sticky',
           top: 0,
-          backgroundColor: 'var(--bg-color, #ffffff)',
-          borderBottom: '1px solid var(--border-color, #e5e7eb)',
-          padding: '1rem 1.5rem',
+          backgroundColor: '#ffffff',
+          borderBottom: '1px solid #e5e7eb',
+          padding: '1.25rem 1.5rem',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
@@ -68,14 +68,14 @@ export default function PaletteInfoModal({
             <h2 style={{
               fontSize: '1.25rem',
               fontWeight: 'bold',
-              color: 'var(--text-color, #111827)',
+              color: '#111827',
               margin: 0,
             }}>
               {paletteName || 'Color Palette'}
             </h2>
             <p style={{
               fontSize: '0.875rem',
-              color: 'var(--text-muted, #6b7280)',
+              color: '#6b7280',
               margin: '0.25rem 0 0 0',
             }}>
               {new Date(date).toLocaleDateString('en-US', { 
@@ -94,11 +94,12 @@ export default function PaletteInfoModal({
               border: 'none',
               background: 'transparent',
               cursor: 'pointer',
-              fontSize: '1.25rem',
-              color: 'var(--text-muted, #6b7280)',
+              fontSize: '1.5rem',
+              lineHeight: 1,
+              color: '#6b7280',
               transition: 'background-color 0.2s',
             }}
-            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'var(--hover-bg, #f3f4f6)'}
+            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f3f4f6'}
             onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
           >
             ✕
@@ -106,7 +107,7 @@ export default function PaletteInfoModal({
         </div>
 
         {/* Content */}
-        <div style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+        <div style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '2rem' }}>
           {/* Description */}
           {description && (
             <div style={{ display: 'flex', gap: '0.75rem' }}>
@@ -123,17 +124,17 @@ export default function PaletteInfoModal({
               <div>
                 <h3 style={{
                   fontWeight: '600',
-                  color: 'var(--text-color, #111827)',
+                  color: '#111827',
                   marginBottom: '0.25rem',
-                  fontSize: '0.875rem',
+                  fontSize: '0.9375rem',
                 }}>
                   About This Palette
                 </h3>
                 <p style={{
-                  fontSize: '0.875rem',
-                  color: 'var(--text-secondary, #4b5563)',
+                  fontSize: '0.9375rem',
+                  color: '#374151',
                   margin: 0,
-                  lineHeight: '1.5',
+                  lineHeight: '1.6',
                 }}>
                   {description}
                 </p>
@@ -159,26 +160,26 @@ export default function PaletteInfoModal({
               <div>
                 <h3 style={{
                   fontWeight: '600',
-                  color: 'var(--text-color, #111827)',
+                  color: '#111827',
                   marginBottom: '0.25rem',
-                  fontSize: '0.875rem',
+                  fontSize: '0.9375rem',
                 }}>
                   Color Theory: {schemeInfo.title}
                 </h3>
                 <p style={{
-                  fontSize: '0.875rem',
-                  color: 'var(--text-secondary, #4b5563)',
+                  fontSize: '0.9375rem',
+                  color: '#374151',
                   margin: '0 0 0.5rem 0',
-                  lineHeight: '1.5',
+                  lineHeight: '1.6',
                   fontStyle: 'italic',
                 }}>
                   {schemeInfo.description}
                 </p>
                 <p style={{
-                  fontSize: '0.875rem',
-                  color: 'var(--text-secondary, #4b5563)',
+                  fontSize: '0.9375rem',
+                  color: '#374151',
                   margin: 0,
-                  lineHeight: '1.5',
+                  lineHeight: '1.6',
                 }}>
                   {schemeInfo.colorTheory}
                 </p>
@@ -204,9 +205,9 @@ export default function PaletteInfoModal({
               <div style={{ flex: 1 }}>
                 <h3 style={{
                   fontWeight: '600',
-                  color: 'var(--text-color, #111827)',
+                  color: '#111827',
                   marginBottom: '0.5rem',
-                  fontSize: '0.875rem',
+                  fontSize: '0.9375rem',
                 }}>
                   Best Used For
                 </h3>
@@ -222,8 +223,8 @@ export default function PaletteInfoModal({
                     <li
                       key={index}
                       style={{
-                        fontSize: '0.875rem',
-                        color: 'var(--text-secondary, #4b5563)',
+                        fontSize: '0.9375rem',
+                        color: '#374151',
                         display: 'flex',
                         alignItems: 'center',
                         gap: '0.5rem',
