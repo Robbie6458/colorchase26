@@ -49,15 +49,7 @@ export default function GameArea({ game }: { game: GameAny }) {
       </h1>
       <div id="hint" style={{ textAlign: "center", marginBottom: "1rem", fontSize: "0.9rem", color: "#666" }}>
         {game.currentScheme && game.colors.length > 0
-          ? `${game.colors.length > 0 ? "Puzzle ready" : ""} • ${
-              {
-                complementary: "Opposites attract.",
-                triadic: "Three anchors form the base.",
-                analogous: "Neighbors in harmony.",
-                "split-complementary": "Split the difference.",
-                tetradic: "Four corners unite.",
-              }[game.currentScheme as keyof typeof SCHEME_HINTS] || "Find today's palette!"
-            }`
+          ? `Puzzle ready • ${SCHEME_HINTS[game.currentScheme as keyof typeof SCHEME_HINTS] || "Find today's palette!"}`
           : "Loading..."}
       </div>
       <div className="game-container">
@@ -100,4 +92,7 @@ const SCHEME_HINTS = {
   analogous: "Neighbors in harmony.",
   "split-complementary": "Split the difference.",
   tetradic: "Four corners unite.",
+  square: "Perfect balance in four.",
+  rectangular: "Double pairs create harmony.",
+  accent: "One color stands out.",
 };
