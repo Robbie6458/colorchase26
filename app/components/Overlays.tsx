@@ -395,7 +395,8 @@ function StatsOverlay({ game, session }: { game: any, session: any }) {
           headers: { 'Authorization': `Bearer ${session.access_token}` }
         });
         if (!res.ok) throw new Error('Failed to fetch palettes');
-        const palettes = await res.json();
+        const data = await res.json();
+        const palettes = data.palettes || data; // Handle both v2.0 format and legacy format
 
         const played = palettes.length;
         const won = palettes.filter((p: any) => p.won).length;
