@@ -55,17 +55,22 @@ export default function PlayerClient() {
         try {
           const { data: { session: currentSession } } = await supabase.auth.getSession();
           if (currentSession?.access_token) {
+            console.log('Fetching palettes with auth token...');
             const res = await fetch("/api/palettes", {
               headers: {
                 "Authorization": `Bearer ${currentSession.access_token}`
               }
             });
+            console.log('API response status:', res.status);
             if (res.ok) {
               const data = await res.json();
+              console.log('API version:', data.version);
+              const palettesArray = data.palettes || data; // Support both old and new format
+              console.log('Palettes received:', palettesArray.length);
               // Wait for both the fetch and minimum load time to complete
               await minLoadTime;
               if (mounted) {
-                setPalettes(data);
+                setPalettes(palettesArray);
                 // Clear localStorage after successful database fetch
                 localStorage.removeItem("colorChasePalettes");
                 localStorage.removeItem("palettes");
@@ -74,7 +79,8 @@ export default function PlayerClient() {
               }
               return;
             } else {
-              console.error('Failed to fetch palettes:', await res.text());
+              const errorText = await res.text();
+              console.error('Failed to fetch palettes:', res.status, errorText);
               await minLoadTime;
               if (mounted) {
                 setIsLoading(false);
@@ -82,6 +88,8 @@ export default function PlayerClient() {
               }
               return;
             }
+          } else {
+            console.log('No access token found');
           }
         } catch (e) {
           console.error('Error loading palettes:', e);
