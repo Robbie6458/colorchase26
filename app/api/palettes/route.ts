@@ -23,9 +23,17 @@ export async function GET(request: NextRequest) {
     }
 
     // Fetch user's palettes from database using UUID from auth
+    // Join with daily_palettes to get metadata
     const { data, error } = await supabase
       .from('palettes')
-      .select('*')
+      .select(`
+        *,
+        daily_palettes (
+          palette_name,
+          palette_description,
+          best_used_for
+        )
+      `)
       .eq('user_id', user.id)  // user.id is the UUID from auth
       .order('date', { ascending: false });
 
@@ -42,7 +50,10 @@ export async function GET(request: NextRequest) {
       scheme: p.scheme,
       isFavorite: p.is_favorite,
       won: p.won,
-      guessCount: p.guess_count
+      guessCount: p.guess_count,
+      palette_name: p.daily_palettes?.palette_name,
+      palette_description: p.daily_palettes?.palette_description,
+      best_used_for: p.daily_palettes?.best_used_for,
     })) || [];
 
     return NextResponse.json(palettes);

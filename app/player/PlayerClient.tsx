@@ -5,6 +5,7 @@ import Header from "../components/Header";
 import Overlays from "../components/Overlays";
 import DailyStats from "../components/DailyStats";
 import Footer from "../components/Footer";
+import PaletteInfoModal from "../components/PaletteInfoModal";
 import { useAuth } from "../lib/auth-context";
 import { supabase } from "../lib/supabase";
 
@@ -14,6 +15,9 @@ type Palette = {
   scheme?: string;
   isFavorite?: boolean;
   won?: boolean;
+  palette_name?: string;
+  palette_description?: string;
+  best_used_for?: string[];
 };
 
 const SCHEME_DEFINITIONS: Record<string, string> = {
@@ -33,6 +37,7 @@ export default function PlayerClient() {
   const [showStats, setShowStats] = useState(false);
   const [showSchemeModal, setShowSchemeModal] = useState(false);
   const [selectedScheme, setSelectedScheme] = useState<string>("");
+  const [selectedPalette, setSelectedPalette] = useState<Palette | null>(null);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [loadedOnce, setLoadedOnce] = useState(false);
@@ -308,6 +313,10 @@ export default function PlayerClient() {
     setShowSchemeModal(true);
   }
 
+  function openPaletteInfo(palette: Palette) {
+    setSelectedPalette(palette);
+  }
+
   async function toggleFavorite(date: string, btn: HTMLButtonElement) {
     // optimistic UI
     setPalettes(prev => prev.map(p => p.date === date ? { ...p, isFavorite: !p.isFavorite } : p));
@@ -483,19 +492,71 @@ export default function PlayerClient() {
                   ))}
                 </div>
                 <div className="palette-info">
-                  <div>
-                    <div className="palette-date">{(() => { const [y, m, d] = p.date.split('-'); return `${m}/${d}/${y}`; })()}</div>
-                    {p.scheme && (
-                      <button 
-                        className="palette-scheme"
-                        onClick={() => openSchemeModal(p.scheme!)}
-                        title="Learn about this color scheme"
-                      >
-                        {p.scheme}
-                      </button>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    {/* Palette Name */}
+                    {p.palette_name && (
+                      <div style={{
+                        fontSize: '0.875rem',
+                        fontWeight: '600',
+                        color: 'var(--text-color)',
+                        marginBottom: '0.25rem',
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        whiteSpace: 'nowrap',
+                      }}>
+                        {p.palette_name}
+                      </div>
                     )}
+                    {/* Date and Scheme */}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
+                      <div className="palette-date">{(() => { const [y, m, d] = p.date.split('-'); return `${m}/${d}/${y}`; })()}</div>
+                      {p.scheme && (
+                        <>
+                          <span style={{ color: 'var(--text-muted, #999)', fontSize: '0.75rem' }}>•</span>
+                          <button 
+                            className="palette-scheme"
+                            onClick={() => openSchemeModal(p.scheme!)}
+                            title="Learn about this color scheme"
+                            style={{
+                              background: 'none',
+                              border: 'none',
+                              padding: 0,
+                              fontSize: '0.75rem',
+                              color: 'var(--text-muted)',
+                              cursor: 'pointer',
+                              textTransform: 'capitalize',
+                            }}
+                          >
+                            {p.scheme}
+                          </button>
+                        </>
+                      )}
+                    </div>
                   </div>
                   <div className="palette-actions">
+                    {/* Info Button */}
+                    <button 
+                      className="action-btn info" 
+                      title="Palette details" 
+                      onClick={() => openPaletteInfo(p)}
+                      style={{
+                        background: 'none',
+                        border: 'none',
+                        padding: '0.375rem',
+                        cursor: 'pointer',
+                        borderRadius: '0.375rem',
+                        transition: 'background-color 0.2s',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                      }}
+                    >
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <circle cx="12" cy="12" r="10"/>
+                        <line x1="12" y1="16" x2="12" y2="12"/>
+                        <line x1="12" y1="8" x2="12.01" y2="8"/>
+                      </svg>
+                    </button>
                     <button 
                       className="action-btn share" 
                       title="Share palette" 
@@ -560,6 +621,19 @@ export default function PlayerClient() {
             </p>
           </div>
         </div>
+      )}
+
+      {/* Palette Info Modal */}
+      {selectedPalette && (
+        <PaletteInfoModal
+          isOpen={!!selectedPalette}
+          onClose={() => setSelectedPalette(null)}
+          paletteName={selectedPalette.palette_name}
+          scheme={selectedPalette.scheme || ''}
+          date={selectedPalette.date}
+          description={selectedPalette.palette_description}
+          bestUsedFor={selectedPalette.best_used_for}
+        />
       )}
       
       <Footer />
