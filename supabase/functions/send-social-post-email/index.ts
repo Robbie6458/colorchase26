@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { createCanvas } from "https://deno.land/x/canvas@1.4.1/mod.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -15,8 +16,6 @@ serve(async (req) => {
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const resendApiKey = Deno.env.get("RESEND_API_KEY")!;
-    const cloudinaryCloudName = Deno.env.get("CLOUDINARY_CLOUD_NAME");
-    const cloudinaryUploadPreset = Deno.env.get("CLOUDINARY_UPLOAD_PRESET");
     
     if (!resendApiKey) {
       throw new Error("RESEND_API_KEY not configured");
@@ -40,30 +39,36 @@ serve(async (req) => {
     }
 
     const colors = palette.colors || [];
-    const caption = generateCaption(palette, colors, yesterday);
-    const svg = generateInstagramSVG(colors, palette, yesterday);
-
-    // Convert SVG to PNG via Cloudinary
-    let pngBase64 = null;
-    let attachmentFilename = `colorchase-palette-${dateStr}.svg`;
-    let attachmentContent = svg;
-
-    if (cloudinaryCloudName && cloudinaryUploadPreset) {
-      try {
-        pngBase64 = await convertSvgToPngCloudinary(svg, cloudinaryCloudName, cloudinaryUploadPreset, dateStr);
-        if (pngBase64) {
-          attachmentFilename = `colorchase-palette-${dateStr}.png`;
-          attachmentContent = pngBase64;
-        }
-      } catch (err) {
-        console.warn('Cloudinary conversion failed, falling back to SVG:', err);
+    
+    // Generate PNG image using canvas (same method as share button)
+    const pngBuffer = await generatePaletteImagePNG(
+      colors,
+      palette.scheme,
+      dateStr,
+      undefined, // won status - not available for daily palettes
+      {
+        palette_name: palette.palette_name,
+        palette_description: palette.palette_description,
+        best_used_for: palette.best_used_for
       }
-    }
+    );
 
-    // Get the email to send to (you can customize this)
+    // Convert buffer to base64 for email attachment
+    const pngBase64 = arrayBufferToBase64(pngBuffer);
+
+    // Generate caption with metadata
+    const caption = generateCaption(
+      colors,
+      dateStr,
+      palette.palette_name,
+      palette.palette_description,
+      palette.best_used_for
+    );
+
+    // Get the email to send to
     const toEmail = Deno.env.get("SOCIAL_POST_EMAIL") || "colorchase@example.com";
 
-    // Create email HTML with embedded SVG
+    // Create email HTML
     const emailHtml = `
       <!DOCTYPE html>
       <html>
@@ -78,17 +83,10 @@ serve(async (req) => {
             <h1 style="color: #ffffff; font-size: 24px; margin: 0 0 10px 0; text-align: center;">🎨 Today's ColorChase Post</h1>
             <p style="color: #cbd5e1; font-size: 14px; text-align: center; margin: 0 0 20px 0;">Yesterday's palette formatted for Instagram</p>
             
-            <!-- SVG Preview -->
+            <!-- PNG Attachment Notice -->
             <div style="background: #0f172a; border-radius: 12px; padding: 20px; margin-bottom: 25px; border: 1px solid #334155;">
-              <p style="color: #cbd5e1; font-size: 14px; margin: 0 0 12px 0; text-align: center;">
-                📎 Your palette image is attached as SVG
-              </p>
-              <p style="color: #94a3b8; font-size: 12px; margin: 0; text-align: center;">
-                <strong>Quick convert to PNG:</strong><br>
-                1. Open the attachment<br>
-                2. Right-click → Save As<br>
-                3. Upload to <a href="https://ezgif.com/image-to-data" style="color: #a78bfa;">ezgif.com</a> (drag & drop converter)<br>
-                4. Download as PNG
+              <p style="color: #cbd5e1; font-size: 14px; margin: 0; text-align: center;">
+                📎 Your palette image is attached as PNG
               </p>
             </div>
 
@@ -106,7 +104,7 @@ serve(async (req) => {
                 <strong>📱 How to post:</strong>
               </p>
               <ol style="color: #94a3b8; font-size: 13px; line-height: 1.8; margin: 0; padding-left: 20px;">
-                <li>Right-click the image above and save it</li>
+                <li>Download the attached PNG image</li>
                 <li>Post to Instagram with the caption provided</li>
                 <li>Or use Zapier/n8n to automate posting</li>
               </ol>
@@ -123,7 +121,7 @@ serve(async (req) => {
       </html>
     `;
 
-    // Send email via Resend with SVG attachment
+    // Send email via Resend with PNG attachment
     const response = await fetch('https://api.resend.com/emails', {
       method: 'POST',
       headers: {
@@ -137,8 +135,8 @@ serve(async (req) => {
         html: emailHtml,
         attachments: [
           {
-            filename: attachmentFilename,
-            content: attachmentContent,
+            filename: `colorchase-palette-${dateStr}.png`,
+            content: pngBase64,
           }
         ]
       }),
@@ -188,155 +186,184 @@ function formatDate(date: Date): string {
   return `${months[date.getUTCMonth()]} ${date.getUTCDate()}, ${date.getUTCFullYear()}`;
 }
 
-function generateCaption(palette: any, colors: string[], date: Date): string {
+function generateCaption(
+  colors: string[],
+  dateStr: string,
+  paletteName?: string,
+  paletteDescription?: string,
+  bestUsedFor?: string[]
+): string {
   const hexCodes = colors.map((c: string) => c.toUpperCase()).join(' • ');
+  const date = new Date(dateStr);
   const formattedDate = formatDate(date);
   
-  return `✨ Yesterday's ColorChase palette was absolutely stunning!
-
-🎨 ${palette.name || 'Palette of the Day'}
-${hexCodes}
-
-ColorChase is a daily color-matching puzzle that challenges your eye for design. Every day brings a new palette to recreate!
-
-🔥 Test your color skills today at colorchase.app
-
-#ColorChase #ColorPalette #DailyChallenge #DesignGame #ColorTheory #${formattedDate.split(' ')[0].toLowerCase()}`;
-}
-
-function generateInstagramSVG(colors: string[], palette: any, date: Date): string {
-  // Instagram portrait: 1080x1440, optimized for high-quality PNG
-  const width = 1080;
-  const height = 1440;
-  const formattedDate = formatDate(date);
-
-  // Create large color blocks for the swatches
-  const blockHeight = 280;
-  const blockWidth = width / colors.length;
-
-  const colorBlocks = colors.map((color: string, i: number) => `
-    <rect x="${i * blockWidth}" y="0" width="${blockWidth}" height="${blockHeight}" fill="${color}"/>
-  `).join('\n');
-
-  // Hex codes overlay on each color
-  const hexTexts = colors.map((color: string, i: number) => `
-    <text x="${i * blockWidth + blockWidth / 2}" y="${blockHeight / 2 + 20}" 
-          text-anchor="middle" font-family="'Courier New', monospace" font-size="36" font-weight="900" 
-          fill="white" letter-spacing="3" text-shadow="0 2px 4px rgba(0,0,0,0.5)"
-          style="filter: drop-shadow(0 2px 8px rgba(0,0,0,0.6))">
-      ${color.toUpperCase()}
-    </text>
-  `).join('\n');
-
-  return `<svg width="${width}" height="${height}" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${width} ${height}">
-    <defs>
-      <style>
-        .title { font-family: 'Arial Black', sans-serif; font-weight: 900; font-size: 56px; fill: white; letter-spacing: 2px; }
-        .date { font-family: Arial, sans-serif; font-weight: 700; font-size: 24px; fill: rgba(255,255,255,0.95); }
-        .cta { font-family: Arial, sans-serif; font-weight: 700; font-size: 28px; fill: white; }
-      </style>
-      <linearGradient id="bgGradient" x1="0%" y1="0%" x2="0%" y2="100%">
-        <stop offset="0%" style="stop-color:#0a0e27;stop-opacity:1" />
-        <stop offset="100%" style="stop-color:#1a1f3a;stop-opacity:1" />
-      </linearGradient>
-    </defs>
-
-    <!-- Background -->
-    <rect width="${width}" height="${height}" fill="url(#bgGradient)"/>
-
-    <!-- Color Blocks Section -->
-    ${colorBlocks}
-
-    <!-- Hex Code Overlays -->
-    ${hexTexts}
-
-    <!-- Info Section -->
-    <g>
-      <!-- Background for info -->
-      <rect x="0" y="${blockHeight}" width="${width}" height="${height - blockHeight}" fill="url(#bgGradient)" opacity="0.95"/>
-      
-      <!-- Title -->
-      <text x="${width / 2}" y="${blockHeight + 120}" text-anchor="middle" class="title">Yesterday's</text>
-      <text x="${width / 2}" y="${blockHeight + 180}" text-anchor="middle" class="title">Palette</text>
-      
-      <!-- Date -->
-      <text x="${width / 2}" y="${blockHeight + 240}" text-anchor="middle" class="date">${formattedDate}</text>
-      
-      <!-- Challenge Text -->
-      <text x="${width / 2}" y="${blockHeight + 640}" text-anchor="middle" class="cta">Can you match</text>
-      <text x="${width / 2}" y="${blockHeight + 680}" text-anchor="middle" class="cta">these colors?</text>
-      
-      <!-- CTA -->
-      <rect x="120" y="${blockHeight + 750}" width="${width - 240}" height="80" fill="rgba(139, 92, 246, 0.25)" rx="20" stroke="rgba(139, 92, 246, 0.8)" stroke-width="3"/>
-      <text x="${width / 2}" y="${blockHeight + 810}" text-anchor="middle" style="font-family: Arial, sans-serif; font-weight: 900; font-size: 32px; fill: #a78bfa;">🔥 colorchase.app</text>
-    </g>
-  </svg>`;
-}
-
-async function convertSvgToPngCloudinary(svgContent: string, cloudName: string, uploadPreset: string, dateStr: string): Promise<string | null> {
-  try {
-    console.log('Converting SVG to PNG via Cloudinary...');
-
-    // Step 1: Upload SVG to Cloudinary with timestamp to avoid caching
-    const timestamp = Date.now();
-    const filename = `colorchase-${dateStr}-${timestamp}.svg`;
-    const formData = new FormData();
-    const encoder = new TextEncoder();
-    const svgBlob = new Blob([svgContent], { type: 'image/svg+xml' });
-    
-    formData.append('file', svgBlob, filename);
-    formData.append('upload_preset', uploadPreset);
-    formData.append('resource_type', 'image');
-    formData.append('public_id', `colorchase-palette-${dateStr}-${timestamp}`);
-    formData.append('tags', 'social-post,colorchase');
-
-    const uploadResponse = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/image/upload`, {
-      method: 'POST',
-      body: formData,
-    });
-
-    if (!uploadResponse.ok) {
-      const error = await uploadResponse.text();
-      console.error('Cloudinary upload failed:', error);
-      throw new Error(`Upload failed: ${uploadResponse.status}`);
-    }
-
-    const uploadData = await uploadResponse.json();
-    console.log('Upload successful, public_id:', uploadData.public_id);
-
-    // Step 2: Transform SVG to PNG using Cloudinary URL with high quality settings
-    const publicId = uploadData.public_id;
-    const pngUrl = `https://res.cloudinary.com/${cloudName}/image/upload/f_png,q_92,w_1080,h_1440,c_fill,dpr_auto/${publicId}.png`;
-    
-    console.log('Fetching PNG from:', pngUrl);
-
-    // Step 3: Download the PNG
-    const pngResponse = await fetch(pngUrl);
-    if (!pngResponse.ok) {
-      throw new Error(`Failed to fetch PNG: ${pngResponse.status}`);
-    }
-
-    // Step 4: Convert to base64
-    const buffer = await pngResponse.arrayBuffer();
-    const bytes = new Uint8Array(buffer);
-    
-    // Manual base64 encoding for Deno
-    let base64 = '';
-    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
-    for (let i = 0; i < bytes.length; i += 3) {
-      const b1 = bytes[i];
-      const b2 = bytes[i + 1];
-      const b3 = bytes[i + 2];
-      base64 += chars[b1 >> 2];
-      base64 += chars[((b1 & 3) << 4) | (b2 >> 4)];
-      base64 += b2 === undefined ? '==' : chars[((b2 & 15) << 2) | (b3 >> 6)];
-      base64 += b3 === undefined ? '=' : chars[b3 & 63];
-    }
-
-    console.log('PNG conversion successful, base64 length:', base64.length);
-    return base64;
-  } catch (err) {
-    console.error('SVG to PNG conversion error:', err);
-    return null;
+  let caption = '';
+  
+  // Opening with palette name if available
+  if (paletteName) {
+    caption += `✨ ${paletteName}\n\n`;
+  } else {
+    caption += `✨ Yesterday's ColorChase palette was absolutely stunning!\n\n`;
   }
+  
+  // Palette description if available
+  if (paletteDescription) {
+    caption += `${paletteDescription}\n\n`;
+  }
+  
+  // Color codes
+  caption += `🎨 ${hexCodes}\n\n`;
+  
+  // Best used for section
+  if (bestUsedFor && bestUsedFor.length > 0) {
+    caption += `🎨 Perfect for:\n`;
+    bestUsedFor.forEach(use => {
+      caption += `• ${use}\n`;
+    });
+    caption += `\n`;
+  }
+  
+  // Standard ColorChase description
+  caption += `ColorChase is a daily color-matching puzzle that challenges your eye for design. Every day brings a new palette to recreate!\n\n`;
+  caption += `🔥 Test your color skills today at colorchase.app\n\n`;
+  caption += `#ColorChase #ColorPalette #DailyChallenge #DesignGame #ColorTheory #${formattedDate.split(' ')[0]}`;
+  
+  return caption;
+}
+
+async function generatePaletteImagePNG(
+  colors: string[],
+  scheme: string,
+  dateStr: string,
+  won?: boolean,
+  metadata?: {
+    palette_name?: string;
+    palette_description?: string;
+    best_used_for?: string[];
+  }
+): Promise<ArrayBuffer> {
+  // Instagram Story size: 1080x1920
+  const canvas = createCanvas(1080, 1920);
+  const ctx = canvas.getContext('2d');
+
+  // Background - dark gradient
+  const bgGradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
+  bgGradient.addColorStop(0, '#1a1a1a');
+  bgGradient.addColorStop(1, '#0a0a0a');
+  ctx.fillStyle = bgGradient;
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  // Color blocks stacked vertically with hex codes on each
+  const colorBlockHeight = 280;
+  colors.forEach((color, i) => {
+    const blockY = i * colorBlockHeight;
+    
+    // Draw color block
+    ctx.fillStyle = color;
+    ctx.fillRect(0, blockY, canvas.width, colorBlockHeight);
+    
+    // Draw hex code on the color block (bottom-left aligned)
+    ctx.textAlign = 'left';
+    ctx.font = 'bold 42px "Courier New", monospace';
+    
+    // Add semi-transparent background behind text for readability
+    const textPadding = 15;
+    const textMetrics = ctx.measureText(color);
+    const textWidth = textMetrics.width;
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.4)';
+    ctx.fillRect(
+      20 - textPadding, 
+      blockY + colorBlockHeight - 60 - textPadding, 
+      textWidth + (textPadding * 2), 
+      50 + (textPadding * 2)
+    );
+    
+    // Draw the hex code text
+    ctx.fillStyle = '#ffffff';
+    ctx.fillText(color, 20, blockY + colorBlockHeight - 25);
+  });
+
+  // Status badge in top-right corner if available
+  if (won !== undefined) {
+    const badge = won ? '✅ Won' : '❌ Lost';
+    ctx.textAlign = 'right';
+    ctx.font = 'bold 48px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
+    
+    // Background for badge
+    const badgeText = badge;
+    ctx.font = 'bold 48px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
+    const badgeMetrics = ctx.measureText(badgeText);
+    const badgeWidth = badgeMetrics.width;
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.6)';
+    ctx.fillRect(
+      canvas.width - badgeWidth - 50,
+      20,
+      badgeWidth + 40,
+      70
+    );
+    
+    // Badge text
+    ctx.fillStyle = won ? '#4ade80' : '#f87171';
+    ctx.fillText(badgeText, canvas.width - 30, 70);
+  }
+
+  // Add subtle shadow below color blocks
+  const colorsEndY = 5 * colorBlockHeight;
+  const shadowGradient = ctx.createLinearGradient(0, colorsEndY, 0, colorsEndY + 80);
+  shadowGradient.addColorStop(0, 'rgba(0,0,0,0.5)');
+  shadowGradient.addColorStop(1, 'rgba(0,0,0,0)');
+  ctx.fillStyle = shadowGradient;
+  ctx.fillRect(0, colorsEndY, canvas.width, 80);
+
+  // Text section - now with more room
+  ctx.textAlign = 'center';
+  let currentY = colorsEndY + 150;
+
+  // Date
+  ctx.fillStyle = '#ffffff';
+  ctx.font = 'bold 72px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
+  const [year, month, day] = dateStr.split('-');
+  const dateText = `${month}/${day}/${year}`;
+  ctx.fillText(dateText, canvas.width / 2, currentY);
+  currentY += 100;
+
+  // Scheme name
+  if (scheme) {
+    ctx.font = '48px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
+    ctx.fillStyle = '#a0a0a0';
+    const schemeText = scheme.charAt(0).toUpperCase() + scheme.slice(1) + ' Palette';
+    ctx.fillText(schemeText, canvas.width / 2, currentY);
+    currentY += 100;
+  }
+
+  // Branding at bottom (fixed position)
+  ctx.font = 'bold 64px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
+  ctx.fillStyle = '#ffffff';
+  ctx.fillText('Color Chase', canvas.width / 2, canvas.height - 160);
+
+  // URL
+  ctx.font = '40px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
+  ctx.fillStyle = '#888888';
+  ctx.fillText('colorchasegame.com', canvas.width / 2, canvas.height - 90);
+
+  // Convert canvas to PNG buffer
+  return canvas.toBuffer('image/png');
+}
+
+function arrayBufferToBase64(buffer: ArrayBuffer): string {
+  const bytes = new Uint8Array(buffer);
+  let base64 = '';
+  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
+  
+  for (let i = 0; i < bytes.length; i += 3) {
+    const b1 = bytes[i];
+    const b2 = bytes[i + 1];
+    const b3 = bytes[i + 2];
+    base64 += chars[b1 >> 2];
+    base64 += chars[((b1 & 3) << 4) | (b2 >> 4)];
+    base64 += b2 === undefined ? '==' : chars[((b2 & 15) << 2) | (b3 >> 6)];
+    base64 += b3 === undefined ? '=' : chars[b3 & 63];
+  }
+  
+  return base64;
 }
