@@ -500,30 +500,34 @@ export default function PlayerClient() {
                   ))}
                 </div>
                 <div className="palette-info">
-                  <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: '0.125rem' }}>
+                  <div style={{ 
+                    flex: 1, 
+                    minWidth: 0, 
+                    display: 'flex', 
+                    flexDirection: 'column', 
+                    gap: '0.25rem',
+                    textAlign: 'left',
+                    paddingLeft: '0.5rem'
+                  }}>
                     {/* Palette Name */}
-                    {p.palette_name && (
-                      <div style={{
-                        fontSize: '0.75rem',
-                        fontWeight: '600',
-                        color: 'var(--text-color)',
-                        overflow: 'hidden',
-                        textOverflow: 'ellipsis',
-                        whiteSpace: 'nowrap',
-                      }}>
-                        {p.palette_name}
-                      </div>
-                    )}
+                    <div style={{
+                      fontSize: '0.8rem',
+                      fontWeight: '600',
+                      color: '#fff',
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      whiteSpace: 'nowrap',
+                    }}>
+                      {p.palette_name || 'Untitled Palette'}
+                    </div>
                     {/* Date */}
-                    <div style={{ fontSize: '0.7rem', color: 'var(--text-muted, #999)' }}>
+                    <div style={{ fontSize: '0.7rem', color: 'rgba(255, 255, 255, 0.7)' }}>
                       {(() => { const [y, m, d] = p.date.split('-'); return `${m}/${d}/${y}`; })()}
                     </div>
                     {/* Scheme */}
-                    {p.scheme && (
-                      <div style={{ fontSize: '0.7rem', color: 'var(--text-muted, #999)', textTransform: 'capitalize' }}>
-                        {p.scheme.replace('-', ' ')}
-                      </div>
-                    )}
+                    <div style={{ fontSize: '0.7rem', color: 'rgba(255, 255, 255, 0.7)', textTransform: 'capitalize' }}>
+                      {p.scheme ? p.scheme.replace('-', ' ') : 'Unknown'}
+                    </div>
                   </div>
                   <div className="palette-actions" style={{ display: 'flex', gap: '0.25rem' }}>
                     {/* Info Button */}

@@ -44,38 +44,39 @@ export default function PaletteInfoModal({
         className="scheme-modal-content" 
         onClick={(e) => e.stopPropagation()}
         style={{
-          backgroundColor: '#ffffff',
+          backgroundColor: '#1a1a2e',
           borderRadius: '12px',
           maxWidth: '500px',
           width: '100%',
           maxHeight: '90vh',
           overflow: 'auto',
-          boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
+          boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.5), 0 10px 10px -5px rgba(0, 0, 0, 0.3)',
+          border: '1px solid rgba(255, 255, 255, 0.1)',
         }}
       >
         {/* Header */}
         <div style={{
           position: 'sticky',
           top: 0,
-          backgroundColor: '#ffffff',
-          borderBottom: '1px solid #e5e7eb',
+          backgroundColor: '#1a1a2e',
+          borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
           padding: '1.25rem 1.5rem',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
         }}>
-          <div>
+          <div style={{ textAlign: 'left' }}>
             <h2 style={{
               fontSize: '1.25rem',
               fontWeight: 'bold',
-              color: '#111827',
+              color: '#ffffff',
               margin: 0,
             }}>
               {paletteName || 'Color Palette'}
             </h2>
             <p style={{
               fontSize: '0.875rem',
-              color: '#6b7280',
+              color: 'rgba(255, 255, 255, 0.6)',
               margin: '0.25rem 0 0 0',
             }}>
               {new Date(date).toLocaleDateString('en-US', { 
@@ -96,10 +97,10 @@ export default function PaletteInfoModal({
               cursor: 'pointer',
               fontSize: '1.5rem',
               lineHeight: 1,
-              color: '#6b7280',
+              color: 'rgba(255, 255, 255, 0.6)',
               transition: 'background-color 0.2s',
             }}
-            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f3f4f6'}
+            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.1)'}
             onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
           >
             ✕
@@ -121,18 +122,18 @@ export default function PaletteInfoModal({
                   <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/>
                 </svg>
               </div>
-              <div>
+              <div style={{ textAlign: 'left' }}>
                 <h3 style={{
                   fontWeight: '600',
-                  color: '#111827',
-                  marginBottom: '0.25rem',
-                  fontSize: '0.9375rem',
+                  color: '#ffffff',
+                  marginBottom: '0.5rem',
+                  fontSize: '1rem',
                 }}>
                   About This Palette
                 </h3>
                 <p style={{
                   fontSize: '0.9375rem',
-                  color: '#374151',
+                  color: 'rgba(255, 255, 255, 0.8)',
                   margin: 0,
                   lineHeight: '1.6',
                 }}>
@@ -157,19 +158,19 @@ export default function PaletteInfoModal({
                   <path d="M10 22h4"/>
                 </svg>
               </div>
-              <div>
+              <div style={{ textAlign: 'left' }}>
                 <h3 style={{
                   fontWeight: '600',
-                  color: '#111827',
-                  marginBottom: '0.25rem',
-                  fontSize: '0.9375rem',
+                  color: '#ffffff',
+                  marginBottom: '0.5rem',
+                  fontSize: '1rem',
                 }}>
                   Color Theory: {schemeInfo.title}
                 </h3>
                 <p style={{
                   fontSize: '0.9375rem',
-                  color: '#374151',
-                  margin: '0 0 0.5rem 0',
+                  color: 'rgba(255, 255, 255, 0.7)',
+                  margin: '0 0 0.75rem 0',
                   lineHeight: '1.6',
                   fontStyle: 'italic',
                 }}>
@@ -177,7 +178,7 @@ export default function PaletteInfoModal({
                 </p>
                 <p style={{
                   fontSize: '0.9375rem',
-                  color: '#374151',
+                  color: 'rgba(255, 255, 255, 0.8)',
                   margin: 0,
                   lineHeight: '1.6',
                 }}>
@@ -202,12 +203,12 @@ export default function PaletteInfoModal({
                   <circle cx="12" cy="12" r="2"/>
                 </svg>
               </div>
-              <div style={{ flex: 1 }}>
+              <div style={{ flex: 1, textAlign: 'left' }}>
                 <h3 style={{
                   fontWeight: '600',
-                  color: '#111827',
-                  marginBottom: '0.5rem',
-                  fontSize: '0.9375rem',
+                  color: '#ffffff',
+                  marginBottom: '0.75rem',
+                  fontSize: '1rem',
                 }}>
                   Best Used For
                 </h3>
@@ -217,14 +218,14 @@ export default function PaletteInfoModal({
                   listStyle: 'none',
                   display: 'flex',
                   flexDirection: 'column',
-                  gap: '0.375rem',
+                  gap: '0.5rem',
                 }}>
                   {bestUsedFor.map((use, index) => (
                     <li
                       key={index}
                       style={{
                         fontSize: '0.9375rem',
-                        color: '#374151',
+                        color: 'rgba(255, 255, 255, 0.8)',
                         display: 'flex',
                         alignItems: 'center',
                         gap: '0.5rem',
