@@ -1,5 +1,9 @@
 # Quick Start Guide: Email & Social Media Automation
 
+> Historical guide: the fixed UTC schedules below predate the 9 AM Pacific
+> daylight-saving-aware reset. Use the GitHub generation workflow and the
+> current manual-review Instagram draft task instead.
+
 ## ⚡ Fast Track Implementation (30 minutes)
 
 ### Step 1: Database Setup (2 minutes)

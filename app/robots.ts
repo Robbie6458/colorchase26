@@ -9,6 +9,6 @@ export default function robots(): MetadataRoute.Robots {
         disallow: ['/api/', '/auth/'],
       },
     ],
-    sitemap: 'https://colorchase.vercel.app/sitemap.xml',
+    sitemap: 'https://www.colorchasegame.com/sitemap.xml',
   }
 }

@@ -1,7 +1,6 @@
 "use client";
 
 import { useAuth } from "../lib/auth-context";
-import { getTodaySeed } from "../lib/palette";
 import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import React from "react";
@@ -106,7 +105,7 @@ export default function Overlays({ game }: { game: GameAny }) {
     // If not logged in, open login dialog
     if (!session || !user) {
       // Store the game data for later using localStorage
-      const today = getTodaySeed();
+      const today = game.puzzleDate;
       const guessCount = game.currentRow + 1;
       const data = {
         date: today,
@@ -128,7 +127,7 @@ export default function Overlays({ game }: { game: GameAny }) {
       }
       
       // Create palette data from current game state
-      const today = getTodaySeed();
+      const today = game.puzzleDate;
       const guessCount = game.currentRow + 1;
       const paletteData = {
         date: today,
@@ -167,7 +166,7 @@ export default function Overlays({ game }: { game: GameAny }) {
 
     const result = won ? '✅ Won!' : '❌ Lost';
     const guesses = game.currentRow + 1;
-    const date = getTodaySeed();
+    const date = game.puzzleDate;
     const url = window.location.origin;
     const shareText = `Color Chase ${date}\n${result} in ${guesses}/5\n\n${grid.join('\n')}\n\nPlay at ${url}`;
     
@@ -306,9 +305,6 @@ export default function Overlays({ game }: { game: GameAny }) {
               <button className="share-button" onClick={handleShareResults}>
                 Share Results
               </button>
-              <button className="secondary-button" onClick={() => game.resetGameForReplay()}>
-                Play Again
-              </button>
             </div>
           </div>
         </div>
@@ -352,9 +348,6 @@ export default function Overlays({ game }: { game: GameAny }) {
             <div className="action-buttons">
               <button className="share-button" onClick={handleShareResults}>
                 Share Results
-              </button>
-              <button className="secondary-button" onClick={() => game.resetGameForReplay()}>
-                Play Again
               </button>
             </div>
           </div>

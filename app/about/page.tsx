@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 
 export const metadata: Metadata = {
+  alternates: { canonical: '/about' },
   title: "About ColorChase | Daily Color Theory Puzzle Game",
   description: "ColorChase is a free daily color guessing game like Wordle. Learn color theory while playing! Guess color palettes, improve your design eye, and compete with players worldwide.",
   keywords: [
@@ -17,7 +18,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "About ColorChase | Daily Color Theory Puzzle Game",
     description: "Learn about ColorChase, the free daily color guessing game that helps you improve your design eye while having fun.",
-    url: "https://colorchase.vercel.app/about",
+    url: "https://www.colorchasegame.com/about",
     type: "website",
   },
 };
@@ -32,7 +33,7 @@ export default function AboutPage() {
         name: "What is ColorChase?",
         acceptedAnswer: {
           "@type": "Answer",
-          text: "ColorChase is a free daily color palette guessing game where players try to guess a hidden 5-color palette in 6 attempts. Each day features a new palette, and all players worldwide get the same palette, making it a shared daily challenge.",
+          text: "ColorChase is a free daily color palette guessing game where players try to guess a hidden 5-color palette in 5 attempts. Each day features a new palette, and all players worldwide get the same palette, making it a shared daily challenge.",
         },
       },
       {
@@ -269,7 +270,7 @@ export default function AboutPage() {
                   </h3>
                   <p className="text-gray-200 leading-relaxed">
                     ColorChase is a free daily color palette guessing game where
-                    players try to guess a hidden 5-color palette in 6 attempts.
+                    players try to guess a hidden 5-color palette in 5 attempts.
                     Each day features a new palette, and all players worldwide get
                     the same palette, making it a shared daily challenge.
                   </p>
@@ -329,7 +330,7 @@ export default function AboutPage() {
                     What happens if I don't guess the palette?
                   </h3>
                   <p className="text-gray-200 leading-relaxed">
-                    If you use all 6 attempts without guessing correctly, the
+                    If you use all 5 attempts without guessing correctly, the
                     palette is revealed and you can try again tomorrow! Your stats
                     track both wins and attempts, so you can see your improvement
                     over time.

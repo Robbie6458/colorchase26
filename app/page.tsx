@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import GamePageClient from "./components/GamePageClient";
 
 export const metadata: Metadata = {
+  alternates: { canonical: '/' },
   title: "ColorChase - Daily Color Palette Guessing Game | Free Color Wordle",
   description: "Play ColorChase, the daily color guessing game! Test your color perception with a new palette puzzle every day. Like Wordle, but for colors. 100% free to play online.",
   keywords: [
@@ -18,7 +19,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "ColorChase - Daily Color Palette Guessing Game",
     description: "Test your color perception with a new palette puzzle every day. Like Wordle, but for colors. Free to play!",
-    url: "https://colorchase.vercel.app",
+    url: "https://www.colorchasegame.com",
     type: "website",
   },
   twitter: {

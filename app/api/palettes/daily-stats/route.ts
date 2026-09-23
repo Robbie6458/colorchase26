@@ -1,5 +1,5 @@
 import { createServerClient } from "@/app/lib/supabase";
-import { getTodaySeed } from "@/app/lib/palette";
+import { getTodaySeed, getNextReset } from "@/app/lib/palette";
 
 export async function GET(request: Request) {
   try {
@@ -7,15 +7,7 @@ export async function GET(request: Request) {
 
     // Get today's date
     const now = new Date();
-    // 9am PST = 17:00 UTC (PST is UTC-8, so 9 + 8 = 17)
-    const resetHour = 17;
-    let seedDate = new Date(now);
-    if (now.getUTCHours() < resetHour) {
-      seedDate.setUTCDate(seedDate.getUTCDate() - 1);
-    }
-    const today = `${seedDate.getUTCFullYear()}-${String(
-      seedDate.getUTCMonth() + 1
-    ).padStart(2, "0")}-${String(seedDate.getUTCDate()).padStart(2, "0")}`;
+    const today = getTodaySeed(now);
 
     // Fetch daily palette from database (now always exists!)
     const { data: dailyPalette, error: fetchError } = await supabase
@@ -63,20 +55,17 @@ export async function GET(request: Request) {
     }
 
     // Calculate countdown to next reset
-    const nextReset = new Date(seedDate);
-    nextReset.setUTCDate(nextReset.getUTCDate() + 1);
-    nextReset.setUTCHours(resetHour, 0, 0, 0);
+    const nextReset = getNextReset(now);
     const timeToNextReset = Math.max(0, Math.floor((nextReset.getTime() - now.getTime()) / 1000));
 
     return Response.json({
       date: today,
-      palette: dailyPalette.hidden_palette,
       scheme: dailyPalette.scheme,
       collectionCount: uniquePlayers,
       bestGuessCount: lowestGuess,
       bestPlayerNames,
       timeToNextReset,
-      resetHour
+      resetHour: 9
     });
   } catch (error: any) {
     console.error("Error in daily-stats endpoint:", error);

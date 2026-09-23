@@ -27,8 +27,8 @@ Color Chase is inspired by Wordle, but with color instead of words. Each day you
 
 ## ✨ Features
 
-- **Daily Challenge** - New palette every day at 9 AM (resets at that time)
-- **Seeded RNG** - Same palette for all players on the same day
+- **Daily Challenge** - New palette every day at 9 AM Pacific (including daylight saving time)
+- **Server-generated puzzle** - Same stored palette for all players, with a private generation seed
 - **Color Wheel Selector** - Beautiful, intuitive color picker with Material Symbols icons
 - **Collection Tracking** - Save and view all palettes you've guessed
 - **Palette Themes** - Palettes come from various color families:
@@ -129,12 +129,17 @@ colorchase26/
 
 Palettes are generated using seeded randomization to ensure consistency across all players:
 
-- **Seed Format**: `YYYY-MM-DD` (reset at 9 AM daily)
+- **Date Format**: `YYYY-MM-DD` in Pacific time (reset at 9 AM)
 - **Palette Families**: 12 themed color categories with HSL-based generation
-- **Randomization**: Seeded LCG (Linear Congruential Generator) for deterministic results
+- **Generation**: The server salts the date with its private service key and stores the result in Supabase
 - **Variations**: Each palette uses tone treatments (tint, tone, shade, vivid) for visual diversity
 
-See `app/lib/palette.ts` for the palette generation algorithm.
+The browser receives the wheel and saved guesses. A signed, HttpOnly cookie tracks
+the round; `/api/guess` checks rows on the server and reveals the ordered answer
+after the fifth guess or a win. `/api/social-palette` exposes the five colors in
+alphabetical order after 10 AM Pacific for the Instagram workflow. Apply
+`supabase/migrations/protect_daily_answers.sql` before deploying the app so the
+Supabase REST API cannot reveal the answer directly.
 
 ## 📱 Game States
 

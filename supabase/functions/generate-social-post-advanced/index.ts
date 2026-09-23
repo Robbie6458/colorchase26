@@ -39,7 +39,8 @@ serve(async (req) => {
       throw new Error(`Palette not found for ${dateStr}`);
     }
 
-    const colors = palette.colors || [];
+    const colors = palette.hidden_palette || [];
+    if (colors.length !== 5) throw new Error(`Invalid hidden palette for ${dateStr}`);
     const caption = generateCaption(palette, colors, yesterday);
     const svg = generateSVG(colors, palette, yesterday);
 

@@ -1,10 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServerClient } from '@/app/lib/supabase';
 import { getTodaySeed } from '@/app/lib/palette';
+import { gameCookieName, gameProgress, readSession } from '@/app/lib/game-session';
 
 /**
  * GET /api/today-palette
- * Returns today's color wheel and hidden palette from the database
+ * Returns the wheel and the current player's saved progress. The ordered answer
+ * is only returned once this player has finished the puzzle.
  */
 export async function GET(request: NextRequest) {
   try {
@@ -27,15 +29,21 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // Return the palette
+    const session = readSession(request.cookies.get(gameCookieName())?.value, today);
+    const progress = gameProgress(session, dailyPalette.hidden_palette);
     return NextResponse.json({
       date: today,
       wheelColors: dailyPalette.wheel_colors,
-      hiddenPalette: dailyPalette.hidden_palette,
       family: dailyPalette.family_name,
       treatment: dailyPalette.treatment_name,
       scheme: dailyPalette.scheme,
-    });
+      guesses: session.guesses,
+      rowResults: progress.rowResults,
+      eliminatedColors: session.guesses.flat().filter((color: string) => !dailyPalette.hidden_palette.includes(color)),
+      complete: progress.complete,
+      won: progress.won,
+      ...(progress.complete ? { revealedPalette: dailyPalette.hidden_palette } : {}),
+    }, { headers: { 'Cache-Control': 'private, no-store' } });
   } catch (error) {
     console.error('Error fetching palette:', error);
     return NextResponse.json(

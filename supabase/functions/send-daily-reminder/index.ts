@@ -40,13 +40,20 @@ serve(async (req) => {
       );
     }
 
-    // Calculate time until reset (9 AM Pacific = 5 PM UTC)
+    // Calculate the next 9 AM Pacific reset, including daylight saving time.
     const now = new Date();
-    const nextReset = new Date(now);
-    nextReset.setUTCHours(17, 0, 0, 0); // 5 PM UTC = 9 AM PST
-    if (now.getUTCHours() >= 17) {
-      nextReset.setUTCDate(nextReset.getUTCDate() + 1);
-    }
+    const parts = new Intl.DateTimeFormat('en-US', {
+      timeZone: 'America/Los_Angeles', year: 'numeric', month: '2-digit',
+      day: '2-digit', hour: '2-digit', hourCycle: 'h23',
+    }).formatToParts(now);
+    const part = (type: string) => Number(parts.find(p => p.type === type)?.value);
+    const target = new Date(Date.UTC(part('year'), part('month') - 1, part('day') + (part('hour') >= 9 ? 1 : 0)));
+    const noon = new Date(Date.UTC(target.getUTCFullYear(), target.getUTCMonth(), target.getUTCDate(), 20));
+    const zone = new Intl.DateTimeFormat('en-US', {
+      timeZone: 'America/Los_Angeles', timeZoneName: 'shortOffset',
+    }).formatToParts(noon).find(p => p.type === 'timeZoneName')?.value ?? 'GMT-8';
+    const offset = Number(zone.match(/^GMT([+-]\d+)/)?.[1] ?? '-8');
+    const nextReset = new Date(Date.UTC(target.getUTCFullYear(), target.getUTCMonth(), target.getUTCDate(), 9 - offset));
     const hoursUntilReset = Math.round((nextReset.getTime() - now.getTime()) / (1000 * 60 * 60));
 
     // Send emails via Resend

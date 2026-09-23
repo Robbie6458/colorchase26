@@ -1,5 +1,10 @@
 # 📧 Email & Social Media Automation
 
+> Historical setup notes: the live palette now resets at 9 AM Pacific with
+> daylight saving time. Fixed UTC schedules below are examples from the earlier
+> implementation. The current Instagram draft task reads `/api/social-palette`
+> after 10 AM Pacific and leaves publishing to the owner.
+
 This folder contains everything you need to set up automated marketing for ColorChase.
 
 ## 🎯 What's Included

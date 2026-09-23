@@ -85,7 +85,7 @@ export default function DailyStats() {
   const currentBestPlayer = stats?.bestPlayerNames[currentPlayerIndex];
 
   return (
-    <footer className="game-footer">
+    <section className="game-footer" aria-label="Today's game statistics">
       <div className="footer-stats">
         <div className="stat-item">
           <span className="stat-icon">🎨</span>
@@ -102,10 +102,6 @@ export default function DailyStats() {
           <span className="stat-text">New palette in <span>{countdown}</span></span>
         </div>
       </div>
-      <div className="footer-bottom">
-        <p className="footer-copyright">© 2026 Color Chase. All rights reserved.</p>
-        <a href="/privacy" className="footer-link">Privacy Policy</a>
-      </div>
-    </footer>
+    </section>
   );
 }

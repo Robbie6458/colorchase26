@@ -11,7 +11,7 @@ const geistSans = Geist({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://colorchase.vercel.app"),
+  metadataBase: new URL("https://www.colorchasegame.com"),
   title: "Color Chase",
   description: "Guess the hidden 5-color palette in 5 tries. Collect daily palettes and build your collection.",
   keywords: [
@@ -30,11 +30,11 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Color Chase",
     description: "Guess the hidden 5-color palette in 5 tries. Collect daily palettes and build your collection.",
-    url: "https://colorchase.vercel.app",
+    url: "https://www.colorchasegame.com",
     siteName: "Color Chase",
     images: [
       {
-        url: "https://colorchase.vercel.app/og",
+        url: "https://www.colorchasegame.com/og",
         width: 1200,
         height: 630,
         alt: "Color Chase - Daily Color Palette Game",
@@ -47,7 +47,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Color Chase",
     description: "Guess the hidden 5-color palette in 5 tries. Collect daily palettes and build your collection.",
-    images: ["https://colorchase.vercel.app/og"],
+    images: ["https://www.colorchasegame.com/og"],
   },
   robots: {
     index: true,
@@ -77,20 +77,13 @@ export default function RootLayout({
     name: "Color Chase",
     applicationCategory: "Game",
     description: "A daily color palette guessing game. Test your color perception skills by guessing the hidden 5-color palette in 5 tries.",
-    url: "https://colorchase.vercel.app",
+    url: "https://www.colorchasegame.com",
     operatingSystem: "Any",
     browserRequirements: "Requires JavaScript. Requires HTML5.",
     offers: {
       "@type": "Offer",
       price: "0",
       priceCurrency: "USD",
-    },
-    aggregateRating: {
-      "@type": "AggregateRating",
-      ratingValue: "4.8",
-      ratingCount: "150",
-      bestRating: "5",
-      worstRating: "1",
     },
     author: {
       "@type": "Organization",
@@ -117,7 +110,6 @@ export default function RootLayout({
       <head>
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <meta name="theme-color" content="#1a1a1a" />
-        <link rel="canonical" href="https://colorchase.vercel.app" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <script
           type="application/ld+json"

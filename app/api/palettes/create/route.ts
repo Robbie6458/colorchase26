@@ -1,5 +1,6 @@
 import { createClient } from '@supabase/supabase-js';
 import { NextRequest, NextResponse } from 'next/server';
+import { gameCookieName, gameProgress, readSession } from '@/app/lib/game-session';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
@@ -30,15 +31,22 @@ export async function POST(request: NextRequest) {
     }
 
     const body: SavePaletteBody = await request.json();
-    const { date, colors, scheme, guessCount, won } = body;
+    const { date } = body;
 
     // Validate input
-    if (!date || !colors || !scheme) {
+    if (!date || !/^\d{4}-\d{2}-\d{2}$/.test(date)) {
       return NextResponse.json(
-        { error: 'Missing required fields: date, colors, scheme' },
+        { error: 'Invalid puzzle date' },
         { status: 400 }
       );
     }
+
+    const { data: daily, error: dailyError } = await supabase.from('daily_palettes')
+      .select('hidden_palette, scheme').eq('date', date).single();
+    if (dailyError || !daily) return NextResponse.json({ error: 'Puzzle not found' }, { status: 404 });
+    const game = readSession(request.cookies.get(gameCookieName())?.value, date);
+    const result = gameProgress(game, daily.hidden_palette);
+    if (!result.complete) return NextResponse.json({ error: 'Finish the puzzle before saving' }, { status: 400 });
 
     // Check if palette for this date already exists
     const { data: existing } = await supabase
@@ -65,10 +73,10 @@ export async function POST(request: NextRequest) {
     const { error: insertError } = await supabase.from('palettes').insert({
       user_id: user.id,
       date,
-      colors,
-      scheme,
-      guess_count: guessCount,
-      won,
+      colors: daily.hidden_palette,
+      scheme: daily.scheme,
+      guess_count: game.guesses.length,
+      won: result.won,
       saved_at: new Date().toISOString(),
     });
 
