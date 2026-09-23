@@ -1,14 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createServerClient } from '@/app/lib/supabase';
+import { getDailyPuzzle } from '@/app/lib/daily-puzzle';
 import { getTodaySeed } from '@/app/lib/palette';
 import { gameCookieName, gameCookieOptions, gameProgress, readSession, signSession } from '@/app/lib/game-session';
 
 export async function POST(request: NextRequest) {
   try {
     const date = getTodaySeed();
-    const { data: palette, error } = await createServerClient()
-      .from('daily_palettes').select('wheel_colors, hidden_palette').eq('date', date).single();
-    if (error || !palette) return NextResponse.json({ error: 'Puzzle unavailable' }, { status: 503 });
+    const palette = await getDailyPuzzle(date);
 
     const body = await request.json();
     const guess = body?.guess;
@@ -34,6 +32,7 @@ export async function POST(request: NextRequest) {
       ...(result.complete ? { revealedPalette: palette.hidden_palette } : {}),
     });
     response.cookies.set(gameCookieName(), signSession(session), gameCookieOptions);
+    response.headers.set('Cache-Control', 'private, no-store');
     return response;
   } catch (error) {
     console.error('Error scoring guess:', error);

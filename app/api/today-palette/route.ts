@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createServerClient } from '@/app/lib/supabase';
+import { getDailyPuzzle } from '@/app/lib/daily-puzzle';
 import { getTodaySeed } from '@/app/lib/palette';
 import { gameCookieName, gameProgress, readSession } from '@/app/lib/game-session';
 
@@ -10,24 +10,9 @@ import { gameCookieName, gameProgress, readSession } from '@/app/lib/game-sessio
  */
 export async function GET(request: NextRequest) {
   try {
-    const supabase = createServerClient();
-
     // Get today's date
     const today = getTodaySeed();
-
-    // Fetch from database instead of generating
-    const { data: dailyPalette, error } = await supabase
-      .from('daily_palettes')
-      .select('*')
-      .eq('date', today)
-      .single();
-
-    if (error || !dailyPalette) {
-      return NextResponse.json(
-        { error: 'Palette not found for today' },
-        { status: 404 }
-      );
-    }
+    const dailyPalette = await getDailyPuzzle(today);
 
     const session = readSession(request.cookies.get(gameCookieName())?.value, today);
     const progress = gameProgress(session, dailyPalette.hidden_palette);
