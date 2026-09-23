@@ -4,6 +4,7 @@ import { useAuth } from "../lib/auth-context";
 import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import React from "react";
+import NextPaletteCountdown from "./NextPaletteCountdown";
 
 type GameAny = any;
 
@@ -279,6 +280,7 @@ export default function Overlays({ game }: { game: GameAny }) {
           <div className="overlay-card">
             <h2 className="victory-title">You Won!</h2>
             <p className="overlay-subtitle">Today's palette is yours to collect</p>
+            <NextPaletteCountdown puzzleDate={game.puzzleDate} />
             
             <div className="color-reveal">
               {game.hiddenPattern.map((c: string, i: number) => (
@@ -323,6 +325,7 @@ export default function Overlays({ game }: { game: GameAny }) {
           <div className="overlay-card">
             <h2 className="defeat-title">Better Luck Tomorrow!</h2>
             <p className="overlay-subtitle">Here was today's palette</p>
+            <NextPaletteCountdown puzzleDate={game.puzzleDate} />
             
             <div className="color-reveal">
               {game.hiddenPattern.map((c: string, i: number) => (

@@ -54,6 +54,7 @@ export default function GameArea({ game }: { game: ReturnType<typeof useGame> })
         <ColorWheel colors={game.colors} onSelect={game.addColorToRow} eliminated={game.eliminated} />
         <GameGrid rows={game.rows} rowResults={game.rowResults} currentRow={game.currentRow} onClearTile={game.clearTile} />
       </div>
+      {game.checkingGuess && <p className="guess-pending" role="status">Checking your guess…</p>}
       {game.gameError && <p role="alert" className="error-message" style={{ textAlign: 'center' }}>{game.gameError}</p>}
       <div className="sr-only" aria-live="polite">
         {game.gameComplete ? 'Puzzle complete' : `Guess ${game.currentRow + 1} of 5`}

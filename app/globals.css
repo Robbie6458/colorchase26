@@ -513,6 +513,20 @@ h1 {
   margin: 0 0 24px 0;
 }
 
+.next-palette-countdown {
+  color: #dedeea;
+  font-size: 0.95rem;
+  font-variant-numeric: tabular-nums;
+  margin: -10px 0 20px;
+}
+
+.guess-pending {
+  text-align: center;
+  color: #dedeea;
+  font-size: 0.9rem;
+  margin: 12px 0;
+}
+
 /* Color reveal section */
 .color-reveal {
   display: flex;
@@ -1614,4 +1628,3 @@ h1 {
     transform: translateX(-50%) translateY(0);
   }
 }
-
