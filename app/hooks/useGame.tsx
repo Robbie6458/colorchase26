@@ -10,6 +10,7 @@ export default function useGame() {
   const [hiddenPattern, setHiddenPattern] = useState<string[]>([]);
   const [puzzleDate, setPuzzleDate] = useState("");
   const [gameError, setGameError] = useState<string | null>(null);
+  const [checkingGuess, setCheckingGuess] = useState(false);
   const submittingRef = useRef(false);
   const [rows, setRows] = useState<Tile[][]>(() => Array.from({ length: 5 }, () => Array(5).fill(null)));
   const [rowResults, setRowResults] = useState<TileResult[][]>(() => Array.from({ length: 5 }, () => Array(5).fill(null)));
@@ -185,6 +186,7 @@ export default function useGame() {
     const row = rows[currentRow];
     if (gameComplete || submittingRef.current || !row || row.some(c => !c)) return;
     submittingRef.current = true;
+    setCheckingGuess(true);
     try {
       const response = await fetch('/api/guess', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
@@ -207,6 +209,7 @@ export default function useGame() {
       setGameError(error instanceof Error ? error.message : 'Could not check your guess');
     } finally {
       submittingRef.current = false;
+      setCheckingGuess(false);
     }
   }, [currentRow, rows, gameComplete, playAddSound, launchConfetti]);
 
@@ -234,6 +237,7 @@ export default function useGame() {
     hiddenPattern,
     puzzleDate,
     gameError,
+    checkingGuess,
     rows,
     rowResults,
     currentRow,
