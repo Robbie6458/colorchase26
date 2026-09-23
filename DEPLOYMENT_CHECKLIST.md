@@ -118,3 +118,33 @@ See [SEO_IMPLEMENTATION_SUMMARY.md](SEO_IMPLEMENTATION_SUMMARY.md) for full deta
 See [GA4_SETUP.md](GA4_SETUP.md) for analytics setup
 
 **Ready to launch! 🎨🚀**
+# Color Chase answer-protection rollout
+
+The app, database policies, and palette generator must be rolled out together.
+The currently stored puzzle is preserved; the private seed applies to newly
+generated puzzles only.
+
+1. Apply `supabase/migrations/protect_daily_answers.sql`. The existing app and
+   edge functions use the service role, so they continue to read the palette.
+   Check that an anonymous Supabase REST request cannot select `daily_palettes`
+   or insert into `palettes`.
+2. Deploy `generate-daily-palette` and, if in use, `send-daily-reminder`,
+   `generate-social-post`, and `generate-social-post-advanced` from this branch.
+   The generator uses `SUPABASE_SERVICE_ROLE_KEY` as a private salt. Its public
+   response no longer contains the answer.
+3. Deploy the Next.js app and the updated GitHub workflow. Ensure the workflow
+   still has `SUPABASE_ANON_KEY` configured. Apply
+   `supabase/migrations/retire_legacy_palette_cron.sql` if the old database cron
+   was installed, to avoid duplicate generator calls.
+4. Check `/api/today-palette` before play (wheel, no answer), submit a row via
+   `/api/guess`, refresh to verify progress returns, and finish a round to see
+   the ordered reveal. Check `/api/social-palette` after 10 AM Pacific for five
+   unordered colors. Check the collection save after sign-in.
+5. At the next 9 AM Pacific reset, verify the stored date, countdown, and
+   generation workflow. The workflow runs at 16:00 and 17:00 UTC; the function
+   skips the earlier winter invocation.
+
+An anonymous visitor can clear browser cookies and start a new round. The
+signed cookie prevents changing or refreshing *one browser's* stored result;
+it is not an account-wide anti-cheat system. The social endpoint deliberately
+reveals the unordered five-color set after 10 AM, as required for the daily art.

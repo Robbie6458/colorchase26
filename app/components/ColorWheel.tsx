@@ -29,12 +29,14 @@ export default function ColorWheel({ colors = [], eliminated = new Set(), onSele
           transform: `rotate(${angle}deg) skewY(-60deg)`,
         };
         return (
-          <div
+          <button
+            type="button"
             key={color + index}
             className="wedge"
+            aria-label={`Select color ${index + 1}, ${color}`}
             style={style}
             onClick={() => {
-              onSelect && onSelect(color);
+              onSelect?.(color);
             }}
           />
         );

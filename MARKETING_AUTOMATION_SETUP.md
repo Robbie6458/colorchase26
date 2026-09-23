@@ -1,5 +1,10 @@
 # ColorChase Marketing Automation Setup Guide
 
+> Historical guide: do not use the fixed UTC cron examples for the current
+> Pacific-time reset. The current daily Instagram draft task uses the unordered
+> five-color set from `/api/social-palette` after 10 AM Pacific; it does not
+> publish automatically.
+
 This guide will help you set up email notifications and automated social media posts for ColorChase.
 
 ## 📧 Email Notifications Setup

@@ -1,7 +1,6 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { getTodaySeed, generateDailyColorWheel, generatePaletteByScheme } from "../lib/palette";
 
 export type Tile = string | null;
 export type TileResult = "correct" | "misplaced" | "wrong" | null;
@@ -9,6 +8,9 @@ export type TileResult = "correct" | "misplaced" | "wrong" | null;
 export default function useGame() {
   const [colors, setColors] = useState<string[]>([]);
   const [hiddenPattern, setHiddenPattern] = useState<string[]>([]);
+  const [puzzleDate, setPuzzleDate] = useState("");
+  const [gameError, setGameError] = useState<string | null>(null);
+  const submittingRef = useRef(false);
   const [rows, setRows] = useState<Tile[][]>(() => Array.from({ length: 5 }, () => Array(5).fill(null)));
   const [rowResults, setRowResults] = useState<TileResult[][]>(() => Array.from({ length: 5 }, () => Array(5).fill(null)));
   const [currentRow, setCurrentRow] = useState(0);
@@ -32,18 +34,20 @@ export default function useGame() {
       const data = await response.json();
       
       setColors(data.wheelColors);
+      setPuzzleDate(data.date);
       setCurrentScheme(data.scheme);
-      setHiddenPattern(data.hiddenPalette);
-      setRows(Array.from({ length: 5 }, () => Array(5).fill(null)));
-      setRowResults(Array.from({ length: 5 }, () => Array(5).fill(null)));
-      setCurrentRow(0);
-      setEliminated(new Set());
-      setGameComplete(false);
+      setHiddenPattern(data.revealedPalette || []);
+      setRows([...data.guesses.map((guess: string[]) => [...guess]), ...Array.from({ length: 5 - data.guesses.length }, () => Array(5).fill(null))]);
+      setRowResults([...data.rowResults, ...Array.from({ length: 5 - data.rowResults.length }, () => Array(5).fill(null))]);
+      setCurrentRow(Math.min(data.guesses.length, 4));
+      setEliminated(new Set(data.eliminatedColors));
+      setGameComplete(data.complete);
+      setGameError(null);
     } catch (error) {
       console.error('Error loading puzzle:', error);
       // DO NOT fallback to client-side generation - all players must get the same palette
       // Show error to user instead
-      alert('Today\'s puzzle is not available yet. Please check back after 9am PST when the daily palette is generated.');
+      setGameError('Today\'s puzzle is not available yet. Please try again shortly.');
     }
   }, []);
 
@@ -55,8 +59,9 @@ export default function useGame() {
   const audioRef = useRef<AudioContext | null>(null);
   useEffect(() => {
     try {
-      audioRef.current = new (window.AudioContext || (window as any).webkitAudioContext)();
-    } catch (e) {
+      const AudioConstructor = window.AudioContext || (window as Window & { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
+      if (AudioConstructor) audioRef.current = new AudioConstructor();
+    } catch {
       audioRef.current = null;
     }
     return () => {
@@ -120,7 +125,7 @@ export default function useGame() {
     osc2.stop(t + 0.08);
   }, []);
   const addColorToRow = useCallback((color: string) => {
-    if (gameComplete) return;
+    if (gameComplete || submittingRef.current) return;
 
     setRows(prev => {
       const next = prev.map(r => [...r]);
@@ -138,10 +143,10 @@ export default function useGame() {
       }
       return next;
     });
-  }, [currentRow, gameComplete]);
+  }, [currentRow, gameComplete, playAddSound]);
 
   const clearTile = useCallback((rowIndex: number, colIndex: number) => {
-    if (gameComplete) return;
+    if (gameComplete || submittingRef.current) return;
     if (rowIndex !== currentRow) return;
       setRows(prev => {
         const next = prev.map(r => [...r]);
@@ -149,78 +154,15 @@ export default function useGame() {
         try { playRemoveSound(); } catch (e) {}
         return next;
       });
-  }, [currentRow, gameComplete]);
+  }, [currentRow, gameComplete, playRemoveSound]);
 
-  const checkRow = useCallback(() => {
-    const row = rows[currentRow];
-    if (row.some(c => !c)) return; // not full
-
-    const patternCopy = [...hiddenPattern];
-    const results: TileResult[] = new Array(5).fill("wrong");
-    let correctCount = 0;
-
-    row.forEach((color, index) => {
-      if (color === patternCopy[index]) {
-        results[index] = "correct";
-        patternCopy[index] = null as any;
-        correctCount++;
-      }
-    });
-
-    row.forEach((color, index) => {
-      if (results[index] !== "wrong") return;
-      const colorIndex = patternCopy.indexOf(color as string);
-      if (colorIndex !== -1) {
-        results[index] = "misplaced";
-        patternCopy[colorIndex] = null as any;
-      } else {
-        results[index] = "wrong";
-        // Only mark eliminated if the color is not part of the hidden pattern
-        if (!hiddenPattern.includes(color as string)) {
-          setEliminated(prev => new Set([...prev, color as string]));
-        }
-      }
-    });
-
-    setRowResults(prev => {
-      const next = prev.map(r => [...r]);
-      next[currentRow] = results;
-      return next;
-    });
-
-    if (correctCount === 5) {
-      try { playAddSound(); } catch (e) {}
-      try { launchConfetti(); } catch (e) {}
-      setGameComplete(true);
-      return { result: "win", results };
-    }
-
-    if (currentRow === 4) {
-      try { playAddSound(); } catch (e) {}
-      setGameComplete(true);
-      return { result: "lose", results };
-    }
-
-    // move to next row
-    setCurrentRow(r => r + 1);
-    try { playAddSound(); } catch (e) {}
-    return { result: "continue", results };
-  }, [currentRow, rows, hiddenPattern, playAddSound]);
-
-  const resumeAudio = useCallback(() => {
-    try {
-      const ctx = audioRef.current;
-      if (ctx && ctx.state === 'suspended') ctx.resume();
-    } catch (e) {}
-  }, []);
-
-  const launchConfetti = useCallback(() => {
+  const launchConfetti = useCallback((revealedColors?: string[]) => {
     try {
       const confettiContainer = document.getElementById('confetti-container');
       if (!confettiContainer) return;
       confettiContainer.innerHTML = '';
 
-      const paletteColors = hiddenPattern.length > 0 ? hiddenPattern : colors.slice(0, 5);
+      const paletteColors = revealedColors?.length ? revealedColors : (hiddenPattern.length > 0 ? hiddenPattern : colors.slice(0, 5));
       for (let i = 0; i < 100; i++) {
         const confetti = document.createElement('div');
         confetti.className = 'confetti';
@@ -239,6 +181,42 @@ export default function useGame() {
     }
   }, [hiddenPattern, colors]);
 
+  const checkRow = useCallback(async () => {
+    const row = rows[currentRow];
+    if (gameComplete || submittingRef.current || !row || row.some(c => !c)) return;
+    submittingRef.current = true;
+    try {
+      const response = await fetch('/api/guess', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ guess: row }),
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || 'Could not check your guess');
+      setGameError(null);
+      setRowResults(prev => prev.map((result, index) => index === currentRow ? data.result : result));
+      if (data.revealedPalette) setHiddenPattern(data.revealedPalette);
+      if (data.complete) {
+        setGameComplete(true);
+        if (data.won) try { launchConfetti(data.revealedPalette); } catch (e) {}
+      } else {
+        setEliminated(prev => new Set([...prev, ...row.filter((color, index) => data.result[index] === 'wrong' && color)] as string[]));
+        setCurrentRow(currentRow + 1);
+      }
+      try { playAddSound(); } catch (e) {}
+    } catch (error) {
+      setGameError(error instanceof Error ? error.message : 'Could not check your guess');
+    } finally {
+      submittingRef.current = false;
+    }
+  }, [currentRow, rows, gameComplete, playAddSound, launchConfetti]);
+
+  const resumeAudio = useCallback(() => {
+    try {
+      const ctx = audioRef.current;
+      if (ctx && ctx.state === 'suspended') ctx.resume();
+    } catch (e) {}
+  }, []);
+
   const openInfo = useCallback(() => setShowInfo(true), []);
   const closeInfo = useCallback(() => setShowInfo(false), []);
   const openLogin = useCallback(() => {
@@ -251,13 +229,11 @@ export default function useGame() {
   const openStats = useCallback(() => setShowStats(true), []);
   const closeStats = useCallback(() => setShowStats(false), []);
 
-  function resetGameForReplay() {
-    generatePuzzle();
-  }
-
   return {
     colors,
     hiddenPattern,
+    puzzleDate,
+    gameError,
     rows,
     rowResults,
     currentRow,
@@ -267,7 +243,6 @@ export default function useGame() {
     addColorToRow,
     clearTile,
     checkRow,
-    resetGameForReplay,
     generatePuzzle,
     duplicate,
     resumeAudio,

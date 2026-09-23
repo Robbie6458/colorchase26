@@ -1,16 +1,34 @@
 // Utility palette generation functions extracted from the original script.js
 
-export function getTodaySeed(): string {
-  const now = new Date();
-  // 9am PST = 17:00 UTC (PST is UTC-8, so 9 + 8 = 17)
-  // During PDT (daylight saving), 9am PDT = 16:00 UTC
-  // Using 17 to match standard time schedule
-  const resetHour = 17;
-  let seedDate = new Date(now);
-  if (now.getUTCHours() < resetHour) {
-    seedDate.setUTCDate(seedDate.getUTCDate() - 1);
-  }
-  return `${seedDate.getUTCFullYear()}-${String(seedDate.getUTCMonth() + 1).padStart(2, '0')}-${String(seedDate.getUTCDate()).padStart(2, '0')}`;
+const PACIFIC_ZONE = 'America/Los_Angeles';
+
+function pacificParts(now: Date) {
+  const parts = new Intl.DateTimeFormat('en-US', {
+    timeZone: PACIFIC_ZONE, year: 'numeric', month: '2-digit', day: '2-digit',
+    hour: '2-digit', hourCycle: 'h23',
+  }).formatToParts(now);
+  const part = (type: string) => Number(parts.find(p => p.type === type)?.value);
+  return { year: part('year'), month: part('month'), day: part('day'), hour: part('hour') };
+}
+
+export function pacificHour(now = new Date()): number { return pacificParts(now).hour; }
+
+export function getTodaySeed(now = new Date()): string {
+  const { year, month, day, hour } = pacificParts(now);
+  const date = new Date(Date.UTC(year, month - 1, day));
+  if (hour < 9) date.setUTCDate(date.getUTCDate() - 1);
+  return date.toISOString().slice(0, 10);
+}
+
+export function getNextReset(now = new Date()): Date {
+  const { year, month, day, hour } = pacificParts(now);
+  const localDate = new Date(Date.UTC(year, month - 1, day + (hour >= 9 ? 1 : 0)));
+  // Noon UTC is after the daylight saving transition for this Pacific date.
+  const noon = new Date(Date.UTC(localDate.getUTCFullYear(), localDate.getUTCMonth(), localDate.getUTCDate(), 20));
+  const offsetName = new Intl.DateTimeFormat('en-US', { timeZone: PACIFIC_ZONE, timeZoneName: 'shortOffset' })
+    .formatToParts(noon).find(p => p.type === 'timeZoneName')?.value ?? 'GMT-8';
+  const offset = Number(offsetName.match(/^GMT([+-]\d+)/)?.[1] ?? '-8');
+  return new Date(Date.UTC(localDate.getUTCFullYear(), localDate.getUTCMonth(), localDate.getUTCDate(), 9 - offset));
 }
 
 export function createSeededRNG(seed: string) {
@@ -31,7 +49,10 @@ export function seededRandom(seed: string) {
   return rng();
 }
 
-export const PALETTE_FAMILIES: Record<string, any> = {
+type PaletteFamily = { hueRange: [number, number]; satRange: [number, number]; lightRange: [number, number]; name: string };
+type ToneTreatment = { satMod: number; lightMod: number; name: string };
+
+export const PALETTE_FAMILIES: Record<string, PaletteFamily> = {
   warm: { hueRange: [0, 60], satRange: [65, 85], lightRange: [45, 60], name: "Warm Sunset" },
   cool: { hueRange: [180, 270], satRange: [50, 75], lightRange: [40, 60], name: "Cool Ocean" },
   pastel: { hueRange: [0, 360], satRange: [40, 60], lightRange: [70, 85], name: "Soft Pastel" },
@@ -46,7 +67,7 @@ export const PALETTE_FAMILIES: Record<string, any> = {
   citrus: { hueRange: [30, 90], satRange: [75, 95], lightRange: [55, 70], name: "Citrus Burst" }
 };
 
-export const TONE_TREATMENTS: Record<string, any> = {
+export const TONE_TREATMENTS: Record<string, ToneTreatment> = {
   tint: { satMod: -15, lightMod: 20, name: "Light & Airy" },
   tone: { satMod: -20, lightMod: 0, name: "Muted & Balanced" },
   shade: { satMod: 5, lightMod: -15, name: "Deep & Rich" },
@@ -72,12 +93,13 @@ export function hslToHex(h: number, s: number, l: number) {
 }
 
 export function hexToHsl(hex: string) {
-  let r = parseInt(hex.slice(1, 3), 16) / 255;
-  let g = parseInt(hex.slice(3, 5), 16) / 255;
-  let b = parseInt(hex.slice(5, 7), 16) / 255;
+  const r = parseInt(hex.slice(1, 3), 16) / 255;
+  const g = parseInt(hex.slice(3, 5), 16) / 255;
+  const b = parseInt(hex.slice(5, 7), 16) / 255;
   const max = Math.max(r, g, b);
   const min = Math.min(r, g, b);
-  let h = 0, s = 0, l = (max + min) / 2;
+  let h = 0, s = 0;
+  const l = (max + min) / 2;
   if (max !== min) {
     const d = max - min;
     s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
@@ -155,8 +177,8 @@ export function generateDailyColorWheel(seed: string) {
       wheelColors.push(color);
     }
   } else {
-    let hueStart = family.hueRange[0];
-    let hueEnd = family.hueRange[1];
+    const hueStart = family.hueRange[0];
+    const hueEnd = family.hueRange[1];
     let hueRange: number;
     if (hueStart > hueEnd) hueRange = (360 - hueStart) + hueEnd; else hueRange = hueEnd - hueStart;
     const isNarrowRange = hueRange < 100;

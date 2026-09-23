@@ -5,9 +5,7 @@ import useGame from "../hooks/useGame";
 import ColorWheel from "./ColorWheel";
 import GameGrid from "./GameGrid";
 
-type GameAny = any;
-
-export default function GameArea({ game }: { game: GameAny }) {
+export default function GameArea({ game }: { game: ReturnType<typeof useGame> }) {
 
   // auto-evaluate row when it becomes full
   useEffect(() => {
@@ -22,13 +20,13 @@ export default function GameArea({ game }: { game: GameAny }) {
   useEffect(() => {
     function handleFirstInteraction() {
       try {
-        if ((game as any).resumeAudio) (game as any).resumeAudio();
-      } catch (e) {}
+        game.resumeAudio();
+      } catch {}
       window.removeEventListener('pointerdown', handleFirstInteraction);
     }
     window.addEventListener('pointerdown', handleFirstInteraction, { once: true });
     return () => window.removeEventListener('pointerdown', handleFirstInteraction);
-  }, [game]);
+  }, [game.resumeAudio]);
 
   const titleColors = useMemo(() => {
     const titleText = "COLOR CHASE";
@@ -55,6 +53,10 @@ export default function GameArea({ game }: { game: GameAny }) {
       <div className="game-container">
         <ColorWheel colors={game.colors} onSelect={game.addColorToRow} eliminated={game.eliminated} />
         <GameGrid rows={game.rows} rowResults={game.rowResults} currentRow={game.currentRow} onClearTile={game.clearTile} />
+      </div>
+      {game.gameError && <p role="alert" className="error-message" style={{ textAlign: 'center' }}>{game.gameError}</p>}
+      <div className="sr-only" aria-live="polite">
+        {game.gameComplete ? 'Puzzle complete' : `Guess ${game.currentRow + 1} of 5`}
       </div>
 
       <div id="confetti-container"></div>

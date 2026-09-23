@@ -34,7 +34,8 @@ serve(async (req) => {
     }
 
     // Generate SVG image (1200x628 for social media optimal size)
-    const colors = palette.colors || [];
+    const colors = palette.hidden_palette || [];
+    if (colors.length !== 5) throw new Error(`Invalid hidden palette for ${dateStr}`);
     const colorCount = colors.length;
     const colorWidth = 1200 / colorCount;
 

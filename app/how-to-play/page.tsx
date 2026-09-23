@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 
 export const metadata: Metadata = {
+  alternates: { canonical: '/how-to-play' },
   title: "How to Play ColorChase | Color Guessing Game Rules & Strategy",
   description: "Learn how to play ColorChase! Master the daily color palette puzzle with tips on color theory, guessing strategies, and improving your chromatic perception. Perfect for designers and gamers.",
   keywords: [
@@ -17,7 +18,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "How to Play ColorChase | Color Guessing Game Rules & Strategy",
     description: "Master ColorChase with our complete guide to rules, strategies, and color theory tips.",
-    url: "https://colorchase.vercel.app/how-to-play",
+    url: "https://www.colorchasegame.com/how-to-play",
     type: "website",
   },
 };

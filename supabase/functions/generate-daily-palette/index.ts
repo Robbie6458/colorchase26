@@ -13,27 +13,24 @@ serve(async (req) => {
   }
 
   try {
-    // Note: This function is intentionally publicly accessible
-    // It only generates daily palettes and doesn't expose sensitive data
     // Create a connection to Supabase
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-    // Get today's date (same format as the client: YYYY-MM-DD)
+    // GitHub calls at both possible UTC hours. Only the 9 AM Pacific call
+    // generates a new puzzle; the earlier winter call is a harmless no-op.
     const now = new Date();
-    const resetHour = 9;
-    let seedDate = new Date(now);
-    
-    // If it's before 9 AM, we actually want yesterday's date
-    if (now.getUTCHours() < resetHour) {
-      seedDate.setUTCDate(seedDate.getUTCDate() - 1);
+    const parts = new Intl.DateTimeFormat('en-US', {
+      timeZone: 'America/Los_Angeles', year: 'numeric', month: '2-digit',
+      day: '2-digit', hour: '2-digit', hourCycle: 'h23',
+    }).formatToParts(now);
+    const part = (type: string) => parts.find(p => p.type === type)?.value ?? '';
+    if (Number(part('hour')) < 9) {
+      return new Response(JSON.stringify({ success: true, skipped: 'Before 9 AM Pacific' }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
     }
-
-    const today =
-      `${seedDate.getUTCFullYear()}-${String(
-        seedDate.getUTCMonth() + 1
-      ).padStart(2, "0")}-${String(seedDate.getUTCDate()).padStart(2, "0")}`;
+    const today = `${part('year')}-${part('month')}-${part('day')}`;
 
     console.log(`Generating palette for date: ${today}`);
 
@@ -591,7 +588,10 @@ serve(async (req) => {
     // ============================================
     // Generate today's palette
     // ============================================
-    const wheelData = generateDailyColorWheel(today);
+    // Add a server-only salt: the public date and source code must not make
+    // tomorrow's answer predictable. Existing stored palettes are unchanged.
+    const privateSeed = `${today}:${supabaseServiceKey}`;
+    const wheelData = generateDailyColorWheel(privateSeed);
     const schemeNames = [
       "complementary",
       "triadic",
@@ -607,7 +607,7 @@ serve(async (req) => {
     const schemeIndex = parseInt(today.replace(/-/g, "")) % schemeNames.length;
     const scheme = schemeNames[schemeIndex];
 
-    const hiddenPalette = generatePaletteByScheme(scheme, wheelData.colors, today);
+    const hiddenPalette = generatePaletteByScheme(scheme, wheelData.colors, privateSeed);
 
     // ============================================
     // Generate palette metadata
@@ -655,7 +655,7 @@ serve(async (req) => {
         date: today,
         scheme: scheme,
         wheelColors: wheelData.colors,
-        hiddenPalette: hiddenPalette,
+        // Never return the ordered answer from a public function.
       }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
