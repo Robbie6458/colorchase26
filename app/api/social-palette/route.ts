@@ -3,9 +3,11 @@ import { createServerClient } from '@/app/lib/supabase';
 import { getTodaySeed, pacificHour } from '@/app/lib/palette';
 
 // The daily Instagram illustration deliberately uses the five answer colors.
-// Disclose only the unordered set, and only after players have had an hour.
+// Disclose only the unordered set. Before the 9 AM reset this is yesterday's
+// completed puzzle; hold the new puzzle back until 10 AM.
 export async function GET() {
-  if (pacificHour() < 10) return NextResponse.json({ error: 'Palette available at 10 AM Pacific' }, { status: 404 });
+  const hour = pacificHour();
+  if (hour >= 9 && hour < 10) return NextResponse.json({ error: 'New palette available at 10 AM Pacific' }, { status: 404 });
   try {
     const date = getTodaySeed();
     const { data, error } = await createServerClient()
