@@ -132,17 +132,18 @@ generated puzzles only.
    `generate-social-post`, and `generate-social-post-advanced` from this branch.
    The generator uses `SUPABASE_SERVICE_ROLE_KEY` as a private salt. Its public
    response no longer contains the answer.
-3. Deploy the Next.js app and the updated GitHub workflow. Ensure the workflow
-   still has `SUPABASE_ANON_KEY` configured. Apply
-   `supabase/migrations/retire_legacy_palette_cron.sql` if the old database cron
-   was installed, to avoid duplicate generator calls.
+3. Deploy the Next.js app and the Edge Function. Store the project's legacy
+   anon key in Supabase Vault as `colorchase_palette_anon_key` and apply
+   `supabase/migrations/setup_daily_cron.sql`. Check that
+   `generate-daily-palette` is active in `cron.job`. GitHub Actions may also
+   call the idempotent generator, but the game does not depend on that schedule.
 4. Check `/api/today-palette` before play (wheel, no answer), submit a row via
    `/api/guess`, refresh to verify progress returns, and finish a round to see
    the ordered reveal. Check `/api/social-palette` after 10 AM Pacific for five
    unordered colors. Check the collection save after sign-in.
-5. At the next 9 AM Pacific reset, verify the stored date, countdown, and
-   generation workflow. The workflow runs at 16:00 and 17:00 UTC; the function
-   skips the earlier winter invocation.
+5. At the next 9 AM Pacific reset, verify the stored date and countdown. The
+   database cron runs at 16:00 and 17:00 UTC; the Edge Function skips the
+   earlier winter invocation and ignores a duplicate later call.
 
 An anonymous visitor can clear browser cookies and start a new round. The
 signed cookie prevents changing or refreshing *one browser's* stored result;
